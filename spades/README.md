@@ -1,42 +1,33 @@
-# Sacchi e Picche — segnapunti per Spades
+# Sacchi e Picche
 
-Pagina singola e autonoma (`spades/index.html`): nessun server, nessuna installazione, nessun
-account. Si apre con un doppio clic e funziona anche offline. Tutti i dati restano nella memoria
-del browser di chi la apre.
+Segnapunti standalone per Spades — pagina singola (`index.html`), nessun server, nessuna
+installazione. Tutti i dati restano nel browser di chi la apre.
 
-## Come si usa
+## Uso
 
-1. Apri `spades/index.html` nel browser.
-2. Alla prima apertura scegli **modalità**, **nomi**, punteggio obiettivo e prese per mano.
-3. Per ogni mano inserisci, per ciascun giocatore, la **dichiarazione** e le **prese fatte**
-   (tasti +/−, oppure digita il numero; frecce su/giù e Invio per passare al campo successivo).
-   Il Nil si segna con i pulsanti `Nil` e `Buio`.
-4. Quando la somma delle prese arriva al totale della mano il pulsante **Registra mano** si sblocca.
-   L'anteprima mostra il punteggio prima di confermare.
+1. Apri `index.html` nel browser.
+2. Alla prima apertura scegli **nomi, modalità, punteggio obiettivo e prese per mano**.
+3. Per ogni mano inserisci **dichiarazioni** e **prese fatte** (tasti +/− o digita; frecce su/giù per passare
+   al campo dopo).
+4. Quando il totale prese arriva al numero della mano, **Registra mano**.
 
-Ogni mano registrata resta nel **Registro** e si può modificare o eliminare: punteggi, sacchi e
-penalità vengono ricalcolati da capo sull'intera partita.
+Nel **Registro** ogni mano si può modificare o eliminare (l'intera partita viene ricalcolata).
+
+## Modalità
+
+- **A coppie** (1° + 3° contro 2° + 4°)
+- **Individuale** con 3, 4 o 5 giocatori
 
 ## Punteggio
 
-Regole standard, tutte modificabili dal pannello **Regole**:
+Regole standard, modificabili in **Regole**:
 
-| Voce | Predefinito |
+| Voce | Default |
 | --- | --- |
-| Presa dichiarata | 10 punti (in negativo se il contratto non si chiude) |
-| Presa in più (sacco) | 1 punto |
-| Sacchi accumulati | penalità di 100 punti ogni 10 sacchi, il contatore riparte dal resto |
-| Nil | +100 se riuscito, −100 se fallito |
-| Nil al buio | +200 / −200 |
-| Nil fallito | le prese diventano sacchi della squadra e non contano per il contratto del compagno |
+| Contratto | ±10 pt/presa |
+| Sacco | 1 pt (−100 ogni 10) |
+| Nil | ±100 (±200 al buio) |
 
-Modalità disponibili: **a coppie** (1° con 3° giocatore, 2° con 4°) e **individuale** con 3, 4 o 5
-giocatori, ognuno con contratto e sacchi propri.
+## Backup
 
-## Salvare e spostare una partita
-
-La sessione si salva da sola nel browser. Il pulsante **Backup** mostra il testo completo della
-partita: si copia per conservarla, oppure si incolla un backup precedente e si preme **Carica**
-per riprenderla su un altro dispositivo o browser.
-
-**Azzera** cancella solo le mani giocate: nomi, squadre e regole restano.
+Il pulsante **Backup** copia/carica la partita come testo, utile per spostarla su un altro dispositivo.

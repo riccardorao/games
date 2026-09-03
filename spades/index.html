@@ -263,21 +263,20 @@ textarea{font-family:"IBM Plex Mono",monospace; font-size:12px; min-height:170px
           <tbody id="ledgerBody"></tbody>
         </table>
       </div>
-      <p class="empty" id="ledgerEmpty" hidden>Nessuna mano registrata. Inserisci dichiarazioni e prese, poi premi <strong>Registra mano</strong>.</p>
+      <p class="empty" id="ledgerEmpty" hidden>Nessuna mano ancora.</p>
     </section>
   </main>
 
   <details class="help">
-    <summary>Come vengono calcolati i punti</summary>
+    <summary>Punteggio</summary>
     <div class="help-body">
-      <div><h3>Contratto</h3><p>Le dichiarazioni dei compagni si sommano. Se la squadra fa <strong>almeno</strong> le prese dichiarate prende <strong>10 punti per presa dichiarata</strong>; se ne fa meno perde lo stesso importo.</p></div>
-      <div><h3>Sacchi</h3><p>Ogni presa in pi&ugrave; del contratto vale <strong>1 punto</strong> ma resta come sacco. Al <strong>decimo sacco</strong> scattano <strong>&minus;100</strong> e il contatore riparte da quello che avanza.</p></div>
-      <div><h3>Nil</h3><p>Chi dichiara Nil promette <strong>zero prese</strong>: riuscito vale <strong>+100</strong>, fallito <strong>&minus;100</strong> (al buio, il doppio). Le prese di un Nil fallito diventano sacchi della squadra e non aiutano il contratto del compagno.</p></div>
-      <div><h3>Correzioni</h3><p>Ogni mano del registro si pu&ograve; modificare o eliminare: punteggi, sacchi e penalit&agrave; vengono ricalcolati da capo su tutta la partita. Le regole sono modificabili in <strong>Regole</strong>.</p></div>
+      <div><strong>Contratto:</strong> 10 pt/presa (&minus;10 se non chiude)</div>
+      <div><strong>Sacchi:</strong> 1 pt cad.; &minus;100 ogni 10</div>
+      <div><strong>Nil:</strong> &plusmn;100 (&plusmn;200 al buio)</div>
     </div>
   </details>
 </div>
-<p class="foot">I dati restano su questo dispositivo (memoria del browser). Usa <strong>Backup</strong> per copiarli o spostarli altrove.</p>
+<p class="foot">I dati restano nel browser. Usa <strong>Backup</strong> per copiare o ricaricare.</p>
 
 <dialog id="dlgSetup">
   <form method="dialog">
