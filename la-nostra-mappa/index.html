@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La nostra mappa</title>
+<style>
+/* Layout: una colonna centrata da "tavolo da gioco"; carte con bordo pieno e ombra netta, pallini come gettoni. */
+:root {
+  --bg: #f4ecdd;
+  --surface: #fffaf0;
+  --ink: #241d19;
+  --ink-2: #6a5d52;
+  --line: #ded0b8;
+  --line-2: #cdbb9c;
+  --p1: #8a3642;        /* bordeaux/terracotta */
+  --p1-soft: #f0d8d4;
+  --p2: #275f6d;        /* blu petrolio */
+  --p2-soft: #d2e3e6;
+  --ok: #5f8f68;
+  --ok-soft: #dcebdc;
+  --mid: #cf9a2e;
+  --mid-soft: #f6e7bd;
+  --talk: #c5563c;
+  --talk-soft: #f7ddd3;
+  --me: var(--ink);
+  --me-soft: var(--line);
+  --display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --radius: 20px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.5 var(--body);
+  padding-inline: 16px;
+  padding-block: 0;
+  min-height: 100vh;
+}
+#app[data-who="p1"] { --me: var(--p1); --me-soft: var(--p1-soft); }
+#app[data-who="p2"] { --me: var(--p2); --me-soft: var(--p2-soft); }
+
+.wrap { max-width: 760px; margin: 0 auto; }
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--me); outline-offset: 2px; }
+main:focus { outline: none; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- header ---------- */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 14px; min-height: 64px; }
+.brand { font-family: var(--display); font-weight: 700; font-size: 17px; letter-spacing: .01em; white-space: nowrap; flex: none; }
+.top-r { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.who { flex: 0 1 auto; display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 99px; background: var(--me-soft); font-size: 14px; font-weight: 600; min-width: 0; }
+.who i { width: 10px; height: 10px; border-radius: 50%; background: var(--me); flex: none; }
+.who span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 22vw; }
+.link { background: none; border: 0; min-height: 44px; padding: 0 6px; color: var(--ink-2); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
+.link:hover { color: var(--ink); }
+
+/* ---------- screens ---------- */
+.screen { animation: rise .35s ease both; padding-bottom: 40px; }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.center { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 20px; padding-top: 6vh; }
+.center > * { max-width: 30rem; }
+h1, h2, h3 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.12; }
+h1 { font-size: clamp(34px, 8vw, 52px); }
+h2 { font-size: clamp(26px, 5.5vw, 34px); }
+.lead { font-size: 18px; color: var(--ink-2); margin: 0; text-wrap: pretty; }
+.small { font-size: 14px; color: var(--ink-2); margin: 0; }
+.big-emoji { font-size: 44px; line-height: 1; }
+.eyebrow { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); font-weight: 600; }
+
+.btn { border: 0; border-radius: 99px; min-height: 52px; padding: 0 28px; background: var(--ink); color: var(--bg); font-weight: 600; font-size: 17px; box-shadow: 0 3px 0 rgba(0,0,0,.28); transition: transform .12s, box-shadow .12s, opacity .2s; }
+.btn:hover:not(:disabled) { transform: translateY(-1px); }
+.btn:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,.28); }
+.btn:disabled { opacity: .35; cursor: not-allowed; box-shadow: none; }
+.btn.me { background: var(--me); color: #fff; }
+.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 2px var(--line-2); }
+.btn.danger { background: var(--talk); color: #fff; }
+
+.names { display: grid; gap: 12px; width: 100%; text-align: left; }
+.field { display: grid; gap: 6px; }
+.field label { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.field input, .field textarea { width: 100%; min-height: 48px; padding: 10px 14px; border-radius: 14px; border: 2px solid var(--line); background: var(--surface); }
+.field input::placeholder, .field textarea::placeholder { color: #a99a87; }
+.field.p1 input { border-color: var(--p1-soft); }
+.field.p2 input { border-color: var(--p2-soft); }
+
+.hero-dots { display: flex; gap: 8px; }
+
+/* ---------- pallini ---------- */
+.dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--me); box-shadow: inset 0 -2px 0 rgba(0,0,0,.2), 0 1px 1px rgba(0,0,0,.18); flex: none; }
+.dot.p1 { background: var(--p1); }
+.dot.p2 { background: var(--p2); }
+.dot.lg { width: 22px; height: 22px; }
+.dot.pop { animation: pop .25s ease; }
+@keyframes pop { 0% { transform: scale(.2); } 70% { transform: scale(1.25); } 100% { transform: scale(1); } }
+
+/* ---------- round ---------- */
+.pips { display: flex; justify-content: space-between; gap: 6px; padding-bottom: 12px; }
+.pip { flex: 1; display: grid; place-items: center; height: 38px; border-radius: 12px; font-size: 18px; background: transparent; border: 1.5px dashed var(--line-2); filter: grayscale(1); opacity: .55; }
+.pip.done { background: var(--me-soft); border: 1.5px solid transparent; filter: none; opacity: .9; }
+.pip.now { background: var(--surface); border: 2px solid var(--me); filter: none; opacity: 1; box-shadow: 0 2px 0 var(--me); }
+
+.tray-wrap { position: sticky; top: 0; z-index: 5; margin-inline: -16px; padding: 10px 16px 12px; background: linear-gradient(var(--bg) 82%, transparent); }
+.tray-card { background: var(--surface); border: 2px solid var(--line-2); border-radius: var(--radius); box-shadow: 0 3px 0 var(--line-2); padding: 12px 16px; display: flex; align-items: center; gap: 16px; }
+.tray-card.bump { animation: bump .3s; }
+@keyframes bump { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+.tray-count { display: grid; min-width: 78px; }
+.tray-count b { font-family: var(--display); font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums; }
+.tray-count span { font-size: 13px; color: var(--ink-2); }
+.tray-count small { font-size: 11px; color: var(--ink-2); letter-spacing: .04em; }
+.tray { flex: 1; display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; max-width: 340px; margin-left: auto; }
+.tray i { aspect-ratio: 1; border-radius: 50%; background: var(--me); box-shadow: inset 0 -2px 0 rgba(0,0,0,.2), 0 1px 1px rgba(0,0,0,.18); transition: background .2s, box-shadow .2s, transform .2s; max-width: 26px; }
+.tray i.spent { background: transparent; box-shadow: inset 0 0 0 2px var(--line-2); transform: scale(.78); }
+
+.area-title { display: flex; align-items: center; gap: 14px; padding: 14px 0 16px; }
+.area-title .em { font-size: 38px; line-height: 1; }
+.area-title h2 { letter-spacing: .05em; text-transform: uppercase; font-size: clamp(22px, 5vw, 28px); }
+.area-title p { margin: 2px 0 0; font-size: 13px; color: var(--ink-2); }
+
+.cats { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; grid-template-columns: 1fr; }
+@media (min-width: 640px) { .cats { grid-template-columns: 1fr 1fr; } }
+.cat { display: grid; grid-template-columns: 1fr auto; align-items: stretch; background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); box-shadow: 0 2px 0 var(--line); overflow: hidden; transition: border-color .2s, background .2s; min-width: 0; }
+.cat.has { border-color: var(--me); }
+.cat.bump { animation: bump .3s; }
+.add { text-align: left; background: none; border: 0; padding: 12px 8px 12px 16px; min-height: 76px; display: grid; gap: 8px; align-content: space-between; min-width: 0; user-select: none; -webkit-user-select: none; }
+.add:active { background: var(--me-soft); }
+.add .row { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; }
+.add .label { font-weight: 600; font-size: 16px; line-height: 1.25; }
+.add .badge { flex: none; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 99px; display: grid; place-items: center; font-weight: 700; font-variant-numeric: tabular-nums; background: var(--line); color: var(--ink-2); }
+.cat.has .badge { background: var(--me); color: #fff; }
+.mine { display: flex; flex-wrap: wrap; gap: 3px; min-height: 12px; }
+.sub { width: 56px; border: 0; border-left: 2px solid var(--line); background: none; font-size: 26px; color: var(--ink-2); }
+.sub:hover:not(:disabled) { background: var(--me-soft); color: var(--ink); }
+.sub:disabled { opacity: .25; cursor: default; }
+
+.bar { position: sticky; bottom: 0; z-index: 5; margin: 18px -16px 0; padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(transparent, var(--bg) 30%); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.bar .msg { margin: 0; font-weight: 600; color: var(--ink); min-height: 1.5em; flex: 1 1 160px; }
+.bar .btn { flex: 1 1 220px; }
+
+/* ---------- results ---------- */
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; font-size: 14px; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; }
+.res-head { display: grid; gap: 14px; padding-block: 8px 20px; }
+.areas { display: grid; gap: 18px; }
+.area { background: var(--surface); border: 2px solid var(--line); border-radius: 24px; box-shadow: 0 3px 0 var(--line); padding: 18px 16px 16px; display: grid; gap: 14px; }
+.area-h { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.area-h .em { font-size: 28px; line-height: 1; }
+.area-h h3 { letter-spacing: .06em; text-transform: uppercase; font-size: 20px; margin-right: auto; }
+.chip { display: inline-flex; align-items: center; gap: 7px; padding: 4px 12px; border-radius: 99px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.chip::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.chip.ok { background: var(--ok-soft); color: #3d6a47; }
+.chip.mid { background: var(--mid-soft); color: #7d5a0c; }
+.chip.talk { background: var(--talk-soft); color: #9a3720; }
+.cat-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.rc { display: grid; gap: 7px; padding: 12px 12px 12px 14px; border-radius: 14px; border-left: 5px solid var(--line-2); background: color-mix(in srgb, var(--surface) 60%, var(--bg)); }
+.rc.ok { border-left-color: var(--ok); }
+.rc.mid { border-left-color: var(--mid); }
+.rc.talk { border-left-color: var(--talk); }
+.rc.none { opacity: .55; }
+.rc-h { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.rc-name { font-weight: 600; }
+.rc-tot { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rc-dots { display: flex; flex-wrap: wrap; gap: 3px 14px; align-items: center; min-height: 14px; }
+.rc-dots .g { display: inline-flex; flex-wrap: wrap; gap: 3px; }
+.rc-foot { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.rc-foot .chip { font-size: 12px; padding: 2px 10px; }
+.area-f { display: grid; gap: 4px; font-size: 14px; color: var(--ink-2); border-top: 1.5px dashed var(--line-2); padding-top: 12px; }
+.area-f b { color: var(--ink); }
+
+.sec { display: grid; gap: 12px; margin-top: 36px; }
+.sec h2 { font-size: clamp(22px, 5vw, 28px); }
+.sec > p { margin: 0; color: var(--ink-2); }
+.notes { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.note { background: var(--surface); border: 2px solid var(--line); border-radius: 18px; padding: 14px 16px; display: grid; gap: 4px; }
+.note.ok { border-color: var(--ok); }
+.note.mid { border-color: var(--mid); }
+.note.talk { border-color: var(--talk); }
+.note b { font-size: 16px; }
+.note span { font-size: 14px; color: var(--ink-2); }
+.note .where { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+.empty { font-size: 15px; color: var(--ink-2); padding: 14px 16px; border: 2px dashed var(--line-2); border-radius: 18px; }
+
+.city { background: var(--ink); color: var(--bg); border-radius: 28px; padding: 26px 18px; display: grid; gap: 16px; margin-top: 44px; }
+.city h2 { font-size: clamp(26px, 6vw, 36px); }
+.city p { margin: 0; color: #d9ccb8; }
+.city .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.tile { background: rgba(255,250,240,.08); border: 1.5px solid rgba(255,250,240,.2); border-radius: 16px; padding: 12px 14px; display: grid; gap: 4px; min-width: 0; }
+.tile b { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+.tile span { font-size: 13px; color: #d9ccb8; }
+.city .q { font-family: var(--display); font-size: 20px; color: var(--bg); }
+.city .field label { color: #d9ccb8; }
+.city .field input { background: var(--surface); border-color: transparent; color: var(--ink); }
+
+/* ---------- modale ---------- */
+.scrim { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; background: rgba(36,29,25,.55); animation: fade .2s both; }
+@keyframes fade { from { opacity: 0; } }
+.dialog { background: var(--surface); border-radius: 24px; padding: 24px; max-width: 26rem; width: 100%; display: grid; gap: 20px; box-shadow: 0 10px 0 rgba(0,0,0,.15); animation: rise .25s both; }
+.dialog p { margin: 0; font-family: var(--display); font-size: 21px; line-height: 1.3; }
+.dialog .row { display: flex; gap: 10px; flex-wrap: wrap; }
+.dialog .row .btn { flex: 1 1 120px; padding: 0 16px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+@media (max-width: 420px) {
+  .tray-card { gap: 10px; padding: 10px 12px; }
+  .tray-count { min-width: 64px; }
+  .tray-count b { font-size: 34px; }
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+
+/* =====================================================================
+   CONFIGURAZIONE — modifica qui aree, categorie e numero di pallini.
+   ===================================================================== */
+const POINTS = 20;
+const AREAS = [
+  { id: "family", emoji: "👨‍👩‍👧", name: "Famiglia", items: [
+    "Presenza e tempo insieme", "Vicinanza alle famiglie", "Tradizioni familiari", "Aiutare i genitori",
+    "Rapporto con i suoceri", "Famiglia allargata", "Autonomia della nostra coppia", "Casa nostra / nostro nucleo" ] },
+  { id: "children", emoji: "👶", name: "Figli", items: [
+    "Avere figli", "Numero di figli", "Tempo con i figli", "Educazione e valori",
+    "Proteggere entrambe le carriere", "Aiuto esterno / nonni", "Sicurezza economica", "Tempo di coppia dopo i figli" ] },
+  { id: "friends", emoji: "🫂", name: "Amici", items: [
+    "Amici storici", "Nuove amicizie", "Vita sociale", "Weekend e viaggi con amici",
+    "Restare vicini agli amici di sempre", "Creare una nuova comunità", "Tempo individuale con gli amici", "Casa aperta / convivialità" ] },
+  { id: "money", emoji: "💰", name: "Soldi", items: [
+    "Sicurezza finanziaria", "Reddito elevato", "Risparmio", "Investimenti",
+    "Casa", "Stile di vita", "Libertà finanziaria", "Risorse per i figli" ] },
+  { id: "career", emoji: "💼", name: "Carriera", items: [
+    "Crescita professionale", "Reddito", "Equilibrio vita/lavoro", "Doppia carriera",
+    "Mobilità geografica", "Stabilità", "Lavoro significativo", "Disponibilità a sacrificare carriera per famiglia" ] },
+  { id: "freeTime", emoji: "🌿", name: "Tempo libero", items: [
+    "Viaggi", "Weekend", "Sport e hobby", "Natura",
+    "Cultura ed eventi", "Tempo di coppia", "Tempo personale", "Vita tranquilla" ] }
+];
+const DEFAULT_NAMES = { player1: "Giocatore 1", player2: "Giocatore 2" };
+/* Soglie di lettura dei risultati (differenza in pallini tra i due giocatori per una categoria) */
+const T = { aligned: 2, different: 3, farApart: 5, veryLow: 2, veryFar: 7 };
+
+/* =====================================================================
+   STATO — unico oggetto, solo in memoria (nessun localStorage, nessuna rete).
+   I dati dei due giocatori sono separati e la UI di un turno legge SOLO
+   i dati del giocatore di turno.
+   phase: setup | player1 | handoff | player2 | ready | results
+   step (dentro player1/player2): intro | round
+   ===================================================================== */
+function freshState() {
+  return {
+    phase: "setup",
+    step: "intro",
+    currentRound: 0,
+    draft: null,               // pallini della sola area in corso (non ancora confermata)
+    cityNote: "",
+    players: {
+      player1: { name: "", rounds: {} },   // rounds[areaId] = [n, n, ...] (congelato alla conferma)
+      player2: { name: "", rounds: {} }
+    }
+  };
+}
+let state = freshState();
+
+const $app = document.getElementById("app");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pl = (n, one, many) => n === 1 ? one : many;
+const sum = a => a.reduce((x, y) => x + y, 0);
+const nameOf = k => (state.players[k].name || "").trim() || DEFAULT_NAMES[k];
+const turnKey = () => state.phase === "player1" ? "player1" : state.phase === "player2" ? "player2" : null;
+const dots = (n, cls = "") => Array.from({ length: n }, () => `<i class="dot ${cls}"></i>`).join("");
+
+/* =====================================================================
+   RENDER
+   ===================================================================== */
+function render() {
+  const who = turnKey();
+  $app.dataset.who = who === "player1" ? "p1" : who === "player2" ? "p2" : "";
+  let body;
+  switch (state.phase) {
+    case "setup":   body = viewSetup(); break;
+    case "player1":
+    case "player2": body = state.step === "intro" ? viewTurnIntro(who) : viewRound(who); break;
+    case "handoff": body = viewHandoff(); break;
+    case "ready":   body = viewReady(); break;
+    case "results": body = viewResults(); break;
+  }
+  $app.innerHTML = `<div class="wrap">${header(who)}<main id="main" tabindex="-1">${body}</main></div>`;
+  if (state.phase === "player1" || state.phase === "player2") if (state.step === "round") updateRound();
+  window.scrollTo(0, 0);
+  const m = document.getElementById("main");
+  if (m && state.phase !== "setup") m.focus({ preventScroll: true });
+}
+
+function header(who) {
+  const chip = who ? `<span class="who"><i></i><span>${esc(nameOf(who))}</span></span>` : "";
+  return `<header class="top"><div class="brand">La nostra mappa</div>
+    <div class="top-r">${chip}<button class="link" data-action="ask-reset">Ricomincia</button></div></header>`;
+}
+
+function viewSetup() {
+  return `<section class="screen center">
+    <div class="hero-dots" aria-hidden="true">${dots(3, "p1 lg")}${dots(3, "p2 lg")}</div>
+    <h1>La nostra mappa</h1>
+    <p class="lead">Sei aree della vita che costruite insieme. In ognuna, ciascuno di voi distribuisce ${POINTS} pallini, da solo e in segreto. Alla fine si scopre la mappa.</p>
+    <div class="names">
+      <div class="field p1"><label for="name1">Chi comincia (facoltativo)</label>
+        <input id="name1" maxlength="20" autocomplete="off" placeholder="${DEFAULT_NAMES.player1}" value="${esc(state.players.player1.name)}"></div>
+      <div class="field p2"><label for="name2">Chi gioca dopo (facoltativo)</label>
+        <input id="name2" maxlength="20" autocomplete="off" placeholder="${DEFAULT_NAMES.player2}" value="${esc(state.players.player2.name)}"></div>
+    </div>
+    <button class="btn" data-action="start">Inizia →</button>
+    <p class="small">Un solo dispositivo, due turni. Nulla viene salvato o inviato online.</p>
+  </section>`;
+}
+
+function viewTurnIntro(who) {
+  const first = who === "player1";
+  const other = nameOf(first ? "player2" : "player1");
+  return `<section class="screen center">
+    <div class="big-emoji" aria-hidden="true">${first ? "🎲" : "🤫"}</div>
+    <h1>${first ? "Tocca a te" : `Tocca a ${esc(nameOf("player2"))}`}</h1>
+    <p class="lead">${first
+      ? `Sei aree, ${POINTS} pallini per ciascuna. Mettili dove senti che contano di più.`
+      : `Le scelte di ${esc(other)} sono state nascoste. Fai le tue scelte senza vedere quelle dell'altra persona.`}</p>
+    ${first ? `<p class="small">Le tue scelte restano nascoste fino alla fine.</p>` : ""}
+    <button class="btn me" data-action="begin-turn">Comincia →</button>
+  </section>`;
+}
+
+function viewRound(who) {
+  const area = AREAS[state.currentRound];
+  const pips = AREAS.map((a, i) =>
+    `<span class="pip ${i < state.currentRound ? "done" : i === state.currentRound ? "now" : ""}">${a.emoji}</span>`).join("");
+  const tray = Array.from({ length: POINTS }, () => "<i></i>").join("");
+  const cats = area.items.map((label, i) => `
+    <li class="cat" data-i="${i}">
+      <button class="add" data-action="add" data-i="${i}">
+        <span class="row"><span class="label">${esc(label)}</span><span class="badge">0</span></span>
+        <span class="mine"></span>
+      </button>
+      <button class="sub" data-action="sub" data-i="${i}" aria-label="Togli un pallino: ${esc(label)}">−</button>
+    </li>`).join("");
+  return `<section class="screen" data-area="${area.id}">
+    <div class="pips" aria-hidden="true">${pips}</div>
+    <div class="tray-wrap"><div class="tray-card" id="trayCard">
+      <div class="tray-count"><b id="left">${POINTS}</b><span id="leftLbl">rimasti</span><small>su ${POINTS} pallini</small></div>
+      <div class="tray" id="tray" aria-hidden="true">${tray}</div>
+    </div></div>
+    <div class="area-title"><span class="em" aria-hidden="true">${area.emoji}</span>
+      <div><h2>${esc(area.name)}</h2><p>Area ${state.currentRound + 1} di ${AREAS.length}</p></div></div>
+    <ul class="cats">${cats}</ul>
+    <div class="bar"><p class="msg" id="msg" role="status" aria-live="polite"></p>
+      <button class="btn me" id="confirm" data-action="confirm" disabled>Conferma e continua →</button></div>
+  </section>`;
+}
+
+/* aggiornamento "in place" della schermata di round, senza ricostruirla */
+function updateRound(popIndex = -1) {
+  const d = state.draft, left = POINTS - sum(d);
+  document.getElementById("left").textContent = left;
+  document.getElementById("leftLbl").textContent = pl(left, "rimasto", "rimasti");
+  document.querySelectorAll("#tray i").forEach((el, i) => el.classList.toggle("spent", i >= left));
+  document.querySelectorAll(".cat").forEach(li => {
+    const i = +li.dataset.i, n = d[i];
+    li.classList.toggle("has", n > 0);
+    li.querySelector(".badge").textContent = n;
+    li.querySelector(".sub").disabled = n === 0;
+    const label = AREAS[state.currentRound].items[i];
+    li.querySelector(".add").setAttribute("aria-label", `${label}: ${n} ${pl(n, "pallino", "pallini")}. Aggiungi un pallino`);
+    li.querySelector(".mine").innerHTML = Array.from({ length: n }, (_, k) =>
+      `<i class="dot${i === popIndex && k === n - 1 ? " pop" : ""}"></i>`).join("");
+  });
+  document.getElementById("msg").textContent = left === 0 ? "Hai distribuito tutti i pallini." : "";
+  document.getElementById("confirm").disabled = left !== 0;
+}
+
+function viewHandoff() {
+  return `<section class="screen center">
+    <div class="big-emoji" aria-hidden="true">🤝</div>
+    <h1>Hai finito.</h1>
+    <p class="lead">Ora passa il dispositivo a ${esc(nameOf("player2"))}.</p>
+    <button class="btn" data-action="handoff">Passa il dispositivo →</button>
+  </section>`;
+}
+
+function viewReady() {
+  return `<section class="screen center">
+    <div class="hero-dots" aria-hidden="true">${dots(3, "p1 lg")}${dots(3, "p2 lg")}</div>
+    <h1>Avete entrambi finito.</h1>
+    <p class="lead">Le due mappe si incrociano adesso.</p>
+    <button class="btn" data-action="reveal">Scopri la nostra mappa →</button>
+  </section>`;
+}
+
+/* =====================================================================
+   RISULTATI (l'unica schermata che legge i dati di entrambi)
+   ===================================================================== */
+function catLevel(a, b) {
+  const diff = Math.abs(a - b), lo = Math.min(a, b);
+  if (diff >= T.veryFar || (diff >= T.farApart && lo <= T.veryLow)) return "talk";
+  if (diff >= T.different) return "mid";
+  return "ok";
+}
+const LEVEL_LABEL = { ok: "Allineati", mid: "Sfumature diverse", talk: "Da capire insieme" };
+const AREA_LABEL = { ok: "Molto allineati", mid: "Sfumature diverse", talk: "Da scoprire insieme" };
+
+function analyse() {
+  const r1 = state.players.player1.rounds, r2 = state.players.player2.rounds;
+  const areas = AREAS.map(area => {
+    const cats = area.items.map((label, i) => {
+      const a = r1[area.id][i], b = r2[area.id][i];
+      return { label, i, a, b, total: a + b, diff: Math.abs(a - b), level: catLevel(a, b), area };
+    });
+    const sumDiff = sum(cats.map(c => c.diff));
+    return {
+      ...area,
+      cats: [...cats].sort((x, y) => y.total - x.total || x.i - y.i),
+      byDiff: [...cats].sort((x, y) => y.diff - x.diff || y.total - x.total),
+      level: sumDiff <= 10 ? "ok" : sumDiff <= 20 ? "mid" : "talk"
+    };
+  });
+  const all = areas.flatMap(a => a.cats);
+  const apart = all.filter(c => c.diff >= T.different).sort((x, y) => y.diff - x.diff || y.total - x.total);
+  const discuss = apart.slice(0, 3);
+  const different = apart.slice(3, 6);
+  const aligned = all.filter(c => c.diff <= T.aligned && Math.min(c.a, c.b) >= 2)
+    .sort((x, y) => Math.min(y.a, y.b) - Math.min(x.a, x.b) || x.diff - y.diff || y.total - x.total).slice(0, 3);
+  return { areas, discuss, different, aligned };
+}
+
+function viewResults() {
+  const n1 = esc(nameOf("player1")), n2 = esc(nameOf("player2"));
+  const { areas, discuss, different, aligned } = analyse();
+
+  const areaCards = areas.map(area => {
+    const rows = area.cats.map(c => {
+      const has = c.total > 0;
+      return `<li class="rc ${has ? c.level : "none"}">
+        <div class="rc-h"><span class="rc-name">${esc(c.label)}</span>
+          <span class="rc-tot">${c.total} ${pl(c.total, "pallino totale", "pallini totali")}</span></div>
+        <div class="rc-dots"><span class="g" role="img" aria-label="${n1}: ${c.a}">${dots(c.a, "p1")}</span>
+          <span class="g" role="img" aria-label="${n2}: ${c.b}">${dots(c.b, "p2")}</span></div>
+        <div class="rc-foot"><span>${c.a} · ${c.b}</span>${has ? `<span class="chip ${c.level}">${LEVEL_LABEL[c.level]}</span>` : ""}</div>
+      </li>`;
+    }).join("");
+    const top = area.cats[0], gap = area.byDiff[0];
+    return `<article class="area">
+      <div class="area-h"><span class="em" aria-hidden="true">${area.emoji}</span><h3>${esc(area.name)}</h3>
+        <span class="chip ${area.level}">${AREA_LABEL[area.level]}</span></div>
+      <ul class="cat-list">${rows}</ul>
+      <div class="area-f">
+        <span>Più importante per voi: <b>${esc(top.label)}</b> (${top.total})</span>
+        <span>${gap.diff >= T.different
+          ? `Differenza maggiore: <b>${esc(gap.label)}</b> (${gap.a} contro ${gap.b})`
+          : "Nessuna differenza marcata in quest'area."}</span>
+      </div></article>`;
+  }).join("");
+
+  const noteHtml = (c, kind, text) => `<li class="note ${kind}">
+    <span class="where">${c.area.emoji} ${esc(c.area.name)}</span><b>${esc(c.label)}</b><span>${text}</span></li>`;
+  const hiLo = c => {
+    const aHigher = c.a >= c.b;
+    return { hiName: esc(nameOf(aHigher ? "player1" : "player2")), loName: esc(nameOf(aHigher ? "player2" : "player1")),
+             hi: Math.max(c.a, c.b), lo: Math.min(c.a, c.b) };
+  };
+  const prompts = ["Cosa rappresenta per ciascuno di voi?", "Cosa immaginate, ognuno, quando ci pensate?", "Da dove nasce, per ognuno, questa scelta?"];
+
+  const alignedHtml = aligned.length
+    ? aligned.map(c => noteHtml(c, "ok", `${c.a} e ${c.b} pallini: qui guardate nella stessa direzione.`)).join("")
+    : `<li class="empty">Nessuna coincidenza netta questa volta. Le sfumature sotto sono un buon punto di partenza.</li>`;
+  const differentHtml = different.length
+    ? different.map(c => { const h = hiLo(c);
+        return noteHtml(c, "mid", `${h.hiName} ci ha messo ${h.hi} pallini, ${h.loName} ${h.lo}. Due modi diversi di dare peso alla stessa cosa.`); }).join("")
+    : `<li class="empty">Nessun'altra differenza di rilievo. Le priorità sono vicine.</li>`;
+  const discussHtml = discuss.length
+    ? discuss.map((c, k) => { const h = hiLo(c);
+        return noteHtml(c, "talk", `${h.hiName}: ${h.hi} pallini, ${h.loName}: ${h.lo}. ${prompts[k % prompts.length]}`); }).join("")
+    : `<li class="empty">Non emergono differenze forti: potete usare il tempo per raccontarvi cosa c'è dietro le scelte comuni.</li>`;
+
+  const tiles = areas.map(a => `<div class="tile"><b>${a.emoji} ${esc(a.name)}</b>
+    <span>${esc(a.cats[0].label)}${a.cats[1] && a.cats[1].total > 0 ? " · " + esc(a.cats[1].label) : ""}</span></div>`).join("");
+
+  return `<section class="screen">
+    <div class="res-head">
+      <h1>La vostra mappa</h1>
+      <p class="lead">Nessun vincitore: solo il modo in cui le vostre priorità si incontrano.</p>
+      <div class="legend">
+        <span><i class="dot p1"></i>${n1}</span><span><i class="dot p2"></i>${n2}</span>
+        <span class="chip ok">Allineati</span><span class="chip mid">Sfumature diverse</span><span class="chip talk">Da capire insieme</span>
+      </div>
+    </div>
+    <div class="areas">${areaCards}</div>
+
+    <div class="sec"><h2>🟢 Dove siamo già molto allineati</h2><ul class="notes">${alignedHtml}</ul></div>
+    <div class="sec"><h2>🟡 Dove abbiamo priorità diverse</h2><ul class="notes">${differentHtml}</ul></div>
+    <div class="sec"><h2>💬 Di cosa vale la pena parlare</h2>
+      <p>Sono le differenze più grandi. Potrebbe essere una cosa interessante da capire insieme.</p>
+      <ul class="notes">${discussHtml}</ul></div>
+
+    <div class="city">
+      <h2>🏠 E quindi… dove?</h2>
+      <p>La città non era una scelta del gioco. È una conseguenza delle priorità che avete appena espresso.</p>
+      <div class="tiles">${tiles}</div>
+      <p class="q">Quale tipo di città ci permette di far funzionare meglio questa combinazione?</p>
+      <div class="field"><label for="city">La prima città che ci viene in mente:</label>
+        <input id="city" maxlength="80" autocomplete="off" value="${esc(state.cityNote)}"></div>
+    </div>
+    <div class="center" style="padding-top:36px"><button class="btn ghost" data-action="ask-reset">Ricomincia</button></div>
+  </section>`;
+}
+
+/* =====================================================================
+   AZIONI
+   ===================================================================== */
+function addDot(i) {
+  if (!state.draft) return;
+  if (sum(state.draft) >= POINTS) { bump(document.getElementById("trayCard")); return; }
+  state.draft[i]++;
+  updateRound(i);
+}
+function subDot(i) {
+  if (!state.draft || state.draft[i] <= 0) return;
+  state.draft[i]--;
+  updateRound();
+}
+function bump(el) { if (!el) return; el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump"); }
+
+function confirmRound() {
+  const who = turnKey();
+  if (!who || state.step !== "round" || !state.draft || sum(state.draft) !== POINTS) return;
+  const area = AREAS[state.currentRound];
+  state.players[who].rounds[area.id] = state.draft.slice();   // da qui l'area è congelata
+  state.draft = null;
+  state.currentRound++;
+  if (state.currentRound < AREAS.length) {
+    state.draft = new Array(AREAS[state.currentRound].items.length).fill(0);
+  } else {
+    state.phase = who === "player1" ? "handoff" : "ready";
+    state.step = "intro";
+  }
+  render();
+}
+
+function openResetDialog() {
+  if (document.getElementById("modal")) return;
+  const el = document.createElement("div");
+  el.className = "scrim"; el.id = "modal";
+  el.innerHTML = `<div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="mt">
+    <p id="mt">Vuoi davvero ricominciare? Tutte le scelte verranno cancellate.</p>
+    <div class="row"><button class="btn ghost" data-action="cancel-reset">Annulla</button>
+    <button class="btn danger" data-action="do-reset">Ricomincia</button></div></div>`;
+  document.body.appendChild(el);
+  el.querySelector('[data-action="cancel-reset"]').focus();
+}
+function closeDialog() { const m = document.getElementById("modal"); if (m) m.remove(); }
+
+/* Reset reale: sostituisce l'intero oggetto di stato, poi ridisegna da zero. */
+function resetAll() {
+  state = freshState();
+  closeDialog();
+  render();
+}
+
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-action]");
+  if (!t) return;
+  const i = +t.dataset.i;
+  switch (t.dataset.action) {
+    case "start": {
+      const n1 = document.getElementById("name1"), n2 = document.getElementById("name2");
+      state.players.player1.name = n1 ? n1.value.trim() : "";
+      state.players.player2.name = n2 ? n2.value.trim() : "";
+      state.phase = "player1"; state.step = "intro"; render(); break;
+    }
+    case "begin-turn":
+      state.step = "round"; state.currentRound = 0;
+      state.draft = new Array(AREAS[0].items.length).fill(0); render(); break;
+    case "add": addDot(i); break;
+    case "sub": subDot(i); break;
+    case "confirm": confirmRound(); break;
+    case "handoff": state.phase = "player2"; state.step = "intro"; state.currentRound = 0; render(); break;
+    case "reveal": state.phase = "results"; render(); break;
+    case "ask-reset": openResetDialog(); break;
+    case "cancel-reset": closeDialog(); break;
+    case "do-reset": resetAll(); break;
+  }
+});
+document.addEventListener("input", e => { if (e.target.id === "city") state.cityNote = e.target.value; });
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeDialog();
+  const add = e.target.closest && e.target.closest(".add");
+  if (add && (e.key === "Backspace" || e.key === "-")) { e.preventDefault(); subDot(+add.dataset.i); }
+});
+
+render();
+</script>
+</body>
+</html>
