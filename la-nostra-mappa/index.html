@@ -106,16 +106,6 @@ h2 { font-size: clamp(26px, 5.5vw, 34px); }
 .pip.done { background: var(--me-soft); border-color: transparent; opacity: 1; }
 .pip.now { background: var(--surface); border-color: var(--me); opacity: 1; box-shadow: 0 2px 0 var(--me); }
 
-.tray-wrap { position: sticky; top: 0; z-index: 5; margin-inline: -16px; padding: 4px 16px 8px; background: linear-gradient(var(--bg) 85%, transparent); }
-.tray-card { background: var(--surface); border: 2px solid var(--line-2); border-radius: 16px; box-shadow: 0 2px 0 var(--line-2); padding: 8px 12px; display: flex; align-items: center; gap: 12px; }
-.tray-card.bump { animation: bump .3s; }
-.tray-count { display: flex; align-items: baseline; gap: 5px; flex: none; white-space: nowrap; }
-.tray-count b { font-family: var(--display); font-size: 24px; line-height: 1; font-variant-numeric: tabular-nums; min-width: 1.2ch; text-align: right; }
-.tray-count span { font-size: 13px; color: var(--ink-2); }
-.tray { flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(15, 1fr); gap: 4px 3px; align-items: center; }
-.tray i { width: 100%; max-width: 16px; justify-self: center; aspect-ratio: 1; border-radius: 50%; background: var(--me); box-shadow: inset 0 -2px 0 rgba(0,0,0,.2), 0 1px 1px rgba(0,0,0,.18); transition: background .2s, box-shadow .2s, transform .2s; }
-.tray i.spent { background: transparent; box-shadow: inset 0 0 0 1.5px var(--line-2); transform: scale(.8); }
-
 .area-title { display: flex; align-items: center; gap: 12px; padding: 4px 0 10px; }
 .area-title .em { font-size: 30px; line-height: 1; }
 .area-title h2 { letter-spacing: .05em; text-transform: uppercase; font-size: clamp(20px, 5vw, 26px); }
@@ -198,6 +188,11 @@ h2 { font-size: clamp(26px, 5.5vw, 34px); }
 .note .where { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
 .pair { display: grid; gap: 3px; margin-top: 2px; }
 .lv { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--ink); }
+.where .chip { text-transform: none; letter-spacing: 0; }
+.note .lv b { font-size: inherit; font-weight: 600; }
+.lv { align-items: flex-start; }
+.lv .dot { margin-top: 4px; }
+h3.sub .dot { width: 11px; height: 11px; margin-right: 4px; vertical-align: -1px; }
 .note .extra { font-size: 14px; color: var(--ink-2); }
 .evs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
 .ev { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 99px; background: var(--bg); font-size: 12px; font-variant-numeric: tabular-nums; }
@@ -241,7 +236,6 @@ h3.sub { font-family: var(--body); font-size: 13px; letter-spacing: .1em; text-t
   .pips-s { display: none; }
 }
 @media (max-width: 420px) {
-  .tray-card { gap: 8px; padding: 8px 10px; }
 }
 </style>
 </head>
@@ -253,8 +247,7 @@ h3.sub { font-family: var(--body); font-size: 13px; letter-spacing: .1em; text-t
 /* =====================================================================
    CONFIGURAZIONE — modifica qui aree, categorie e numero di pallini.
    ===================================================================== */
-const POINTS = 30;
-const MAX_PER_ITEM = 10;   // tetto per singola voce (blocco 2×5)
+const MAX_PER_ITEM = 10;   // ogni voce va da 0 a 10 pallini; non c'è un tetto sul totale
 /* Ogni voce ha un titolo (max 3 parole), una definizione e 5 livelli concreti della scala 0–10:
    0 pallini | 1–3 | 4–6 | 7–9 | 10 pallini.   Più pallini = più di quella cosa nella vostra vita.
    crit = tema di fondo: pesa di più quando emerge una differenza. */
@@ -437,7 +430,7 @@ function viewSetup() {
   return `<section class="screen center">
     <div class="hero-dots" aria-hidden="true">${dots(3, "p1 lg")}${dots(3, "p2 lg")}</div>
     <h1>La nostra mappa</h1>
-    <p class="lead">Sei aree della vita che costruite insieme. In ognuna, ciascuno di voi distribuisce ${POINTS} pallini su scale concrete da 0 a 10, da solo e in segreto. Alla fine si scopre la mappa.</p>
+    <p class="lead">Sei aree della vita che costruite insieme. In ognuna, ciascuno di voi risponde da solo e in segreto su scale concrete da 0 a 10 pallini. Alla fine si scopre la mappa.</p>
     <div class="names">
       <div class="field p1"><label for="name1">Chi comincia (facoltativo)</label>
         <input id="name1" maxlength="20" autocomplete="off" placeholder="${DEFAULT_NAMES.player1}" value="${esc(state.players.player1.name)}"></div>
@@ -456,7 +449,7 @@ function viewTurnIntro(who) {
     <div class="big-emoji" aria-hidden="true">${first ? "🎲" : "🤫"}</div>
     <h1>${first ? "Tocca a te" : `Tocca a ${esc(nameOf("player2"))}`}</h1>
     <p class="lead">${first
-      ? `Sei aree, ${POINTS} pallini per ciascuna. Ogni voce ha una scala da 0 a 10 con significati concreti: i pallini che metti dicono quanto ne vuoi nella vostra vita. Non puoi avere tutto al massimo.`
+      ? `Sei aree, otto voci ciascuna. Ogni voce ha una scala da 0 a 10 con significati concreti: metti i pallini dove ti rispecchi. Non c'è un limite.`
       : `Le scelte di ${esc(other)} sono state nascoste. Fai le tue scelte senza vedere quelle dell'altra persona.`}</p>
     ${first ? `<p class="small">Le tue scelte restano nascoste fino alla fine.</p>` : ""}
     <button class="btn me" data-action="begin-turn">Comincia →</button>
@@ -465,7 +458,6 @@ function viewTurnIntro(who) {
 
 function viewRound(who) {
   const area = AREAS[state.currentRound];
-  const tray = Array.from({ length: POINTS }, () => "<i></i>").join("");
   const cats = area.items.map((item, i) => `
     <li class="cat" data-i="${i}">
       <div class="body">
@@ -482,10 +474,6 @@ function viewRound(who) {
     </li>`).join("");
   return `<section class="screen" data-area="${area.id}">
     <div class="pips pips-s" aria-hidden="true">${pipsHtml()}</div>
-    <div class="tray-wrap"><div class="tray-card" id="trayCard">
-      <div class="tray-count"><b id="left">${POINTS}</b><span id="leftLbl">rimasti</span></div>
-      <div class="tray" id="tray" aria-hidden="true">${tray}</div>
-    </div></div>
     <div class="area-title"><span class="em" aria-hidden="true">${area.emoji}</span>
       <h2>${esc(area.name)}</h2><span class="sr">Area ${state.currentRound + 1} di ${AREAS.length}</span></div>
     <ul class="cats">${cats}</ul>
@@ -496,17 +484,14 @@ function viewRound(who) {
 
 /* aggiornamento "in place" della schermata di round, senza ricostruirla */
 function updateRound(popIndex = -1) {
-  const d = state.draft, left = POINTS - sum(d);
-  document.getElementById("left").textContent = left;
-  document.getElementById("leftLbl").textContent = pl(left, "rimasto", "rimasti");
-  document.querySelectorAll("#tray i").forEach((el, i) => el.classList.toggle("spent", i >= left));
+  const d = state.draft, total = sum(d);
   document.querySelectorAll(".cat").forEach(li => {
     const i = +li.dataset.i, n = d[i];
     li.classList.toggle("has", n > 0);
     const item = AREAS[state.currentRound].items[i], lvl = levelText(item, n);
     li.querySelector(".answer").textContent = lvl;
     const plus = li.querySelector(".plus"), minus = li.querySelector(".minus");
-    plus.disabled = n >= MAX_PER_ITEM || left === 0;
+    plus.disabled = n >= MAX_PER_ITEM;
     minus.disabled = n === 0;
     plus.setAttribute("aria-label", `Aggiungi un pallino: ${item.t}. Ora ${n} su ${MAX_PER_ITEM}, ${lvl}`);
     minus.setAttribute("aria-label", `Togli un pallino: ${item.t}. Ora ${n} su ${MAX_PER_ITEM}, ${lvl}`);
@@ -514,8 +499,8 @@ function updateRound(popIndex = -1) {
       dot.className = (k < n ? "on" : "") + (i === popIndex && k === n - 1 ? " pop" : "");
     });
   });
-  document.getElementById("msg").textContent = left === 0 ? "Hai distribuito tutti i pallini." : "";
-  document.getElementById("confirm").disabled = left !== 0;
+  document.getElementById("msg").textContent = total === 0 ? "Muovi almeno un pallino per continuare." : "";
+  document.getElementById("confirm").disabled = total === 0;
 }
 
 function viewHandoff() {
@@ -586,11 +571,139 @@ function analyse() {
     .sort((x, y) => (y.kind === "knot") - (x.kind === "knot") || y.item.crit - x.item.crit || y.diff - x.diff || y.hi - x.hi).slice(0, 3);
   const different = all.filter(c => ["nuance", "negotiate", "knot"].includes(c.kind) && !discuss.includes(c))
     .sort((x, y) => y.diff - x.diff || y.hi - x.hi).slice(0, 3);
-  return { areas, all, get, aligned, discuss, different, ...crossings(get), needs: placeNeeds(get) };
+  return { areas, all, get, aligned, discuss, different, ...crossings(get), internal: internalConflicts(get), needs: placeNeeds(get) };
 }
 
-/* Incroci: combinazioni di voci diverse che insieme producono un esito.
-   Le soglie usano i valori di entrambi (hi = il più alto dei due, lo = il più basso, avg = media). */
+/* Incompatibilità nelle risposte della stessa persona.
+   v(id, i) = pallini che QUESTA persona ha messo sulla voce i dell'area id.
+   contradiction = due risposte che si escludono a vicenda
+   tension       = due risposte possibili, ma difficili da tenere insieme senza scegliere cosa pesa di più */
+const CONFLICTS = [
+  { kind: "contradiction", title: "Figli: risposte che non tornano",
+    when: v => v("children", 0) <= 1 && Math.max(v("children", 1), v("children", 2), v("children", 3)) >= 4,
+    refs: v => [["children", 0], v("children", 2) >= v("children", 1) && v("children", 2) >= v("children", 3) ? ["children", 2] : v("children", 1) >= v("children", 3) ? ["children", 1] : ["children", 3]],
+    why: "Il desiderio di figli è molto basso, ma hai risposto su altri aspetti dei figli come se ci fossero. Qual è la tua posizione?" },
+  { kind: "contradiction", title: "Figli: desiderio e numero",
+    when: v => v("children", 0) >= 4 && v("children", 2) === 0,
+    refs: [["children", 0], ["children", 2]],
+    why: "Desideri dei figli ma hai indicato «nessuno» come numero. Quale delle due risposte rispecchia meglio quello che pensi?" },
+  { kind: "contradiction", title: "Vedersi ogni giorno, ma lontani",
+    when: v => v("family", 1) >= 7 && v("family", 0) <= 3,
+    refs: [["family", 1], ["family", 0]],
+    why: "Vorresti vedere o sentire i genitori quasi ogni giorno, ma a più di due o tre ore di distanza. Le due cose difficilmente stanno insieme." },
+  { kind: "contradiction", title: "Cura costante, ma lontani",
+    when: v => v("family", 2) >= 7 && v("family", 0) <= 3,
+    refs: [["family", 2], ["family", 0]],
+    why: "Immagini un aiuto pratico costante ai genitori, ma vivendo lontano da loro. Come lo renderesti possibile?" },
+  { kind: "contradiction", title: "Presenza con i figli e ore di lavoro",
+    when: v => v("children", 3) >= 7 && v("career", 3) <= 3,
+    refs: [["children", 3], ["career", 3]],
+    why: "Vorresti esserci per i figli gran parte della giornata e insieme lavorare più di 50 ore a settimana. Il tempo è uno solo." },
+  { kind: "tension", title: "Radici e movimento",
+    when: v => v("family", 0) >= 7 && v("career", 5) >= 7,
+    refs: [["family", 0], ["career", 5]],
+    why: "Vivere vicino alle famiglie e poterti trasferire ovunque per lavoro spesso non stanno insieme. Quale pesa di più?" },
+  { kind: "tension", title: "Amici di sempre e trasferimento",
+    when: v => v("friends", 0) >= 7 && v("career", 5) >= 7,
+    refs: [["friends", 0], ["career", 5]],
+    why: "Vedere spesso gli amici di sempre e trasferirti lontano sono due direzioni diverse." },
+  { kind: "tension", title: "Posto sicuro e mobilità",
+    when: v => v("career", 4) >= 7 && v("career", 5) >= 7,
+    refs: [["career", 4], ["career", 5]],
+    why: "Un posto sicuro a lungo e la disponibilità a spostarti ovunque tirano in direzioni opposte." },
+  { kind: "tension", title: "Ruolo alto e orari leggeri",
+    when: v => v("career", 0) >= 7 && v("career", 3) >= 7,
+    refs: [["career", 0], ["career", 3]],
+    why: "Un ruolo di grande responsabilità e orari leggeri raramente convivono. Quale dei due lasceresti andare per primo?" },
+  { kind: "tension", title: "Ambizione e presenza",
+    when: v => v("career", 0) >= 7 && v("children", 3) >= 7,
+    refs: [["career", 0], ["children", 3]],
+    why: "Molta ambizione e molta presenza quotidiana con i figli chiedono di decidere chi copre cosa." },
+  { kind: "tension", title: "Doppia carriera e passo indietro",
+    when: v => v("career", 6) >= 7 && v("career", 7) >= 7,
+    refs: [["career", 6], ["career", 7]],
+    why: "Tenere alla doppia carriera e prevedere un passo indietro importante sono due direzioni diverse." },
+  { kind: "tension", title: "Meno lavoro, più reddito",
+    when: v => v("career", 7) >= 7 && v("career", 1) >= 7,
+    refs: [["career", 7], ["career", 1]],
+    why: "Ridurre molto il lavoro e far crescere molto il reddito insieme richiedono un compromesso." },
+  { kind: "tension", title: "Missione e guadagno",
+    when: v => v("career", 2) >= 7 && v("career", 1) >= 7,
+    refs: [["career", 2], ["career", 1]],
+    why: "Un lavoro con una missione e una forte crescita del reddito non sempre coincidono." },
+  { kind: "tension", title: "Spendere e risparmiare",
+    when: v => v("money", 4) >= 7 && v("money", 1) >= 7,
+    refs: [["money", 4], ["money", 1]],
+    why: "Spendere molto per i piaceri e mettere da parte molto: il budget difficilmente basta a entrambe le cose." },
+  { kind: "tension", title: "Smettere presto, risparmiare poco",
+    when: v => v("money", 5) >= 7 && v("money", 1) <= 3,
+    refs: [["money", 5], ["money", 1]],
+    why: "Smettere di lavorare presto senza mettere da parte molto: come si finanzia quell'obiettivo?" },
+  { kind: "tension", title: "Casa presto, risparmi bassi",
+    when: v => v("money", 3) >= 7 && v("money", 1) <= 3,
+    refs: [["money", 3], ["money", 1]],
+    why: "Comprare casa a breve con poco risparmio: da dove arrivano le risorse?" },
+  { kind: "tension", title: "Cuscinetto senza risparmio",
+    when: v => v("money", 0) >= 7 && v("money", 1) <= 2,
+    refs: [["money", 0], ["money", 1]],
+    why: "Un grande cuscinetto di sicurezza senza un risparmio regolare: come lo si costruisce?" },
+  { kind: "tension", title: "Casa di proprietà e mobilità",
+    when: v => v("money", 3) >= 7 && v("career", 5) >= 7,
+    refs: [["money", 3], ["career", 5]],
+    why: "Una casa di proprietà lega a un luogo, la disponibilità a spostarsi no." },
+  { kind: "tension", title: "Famiglia numerosa, abitudini invariate",
+    when: v => v("children", 2) >= 7 && v("children", 7) <= 3,
+    refs: [["children", 2], ["children", 7]],
+    why: "Immagini una famiglia numerosa ma con poche abitudini che cambiano. Di solito servono scelte concrete." },
+  { kind: "tension", title: "Aiuto atteso, famiglie lontane",
+    when: v => v("children", 6) >= 7 && v("family", 0) <= 3,
+    refs: [["children", 6], ["family", 0]],
+    why: "Ti aspetti un aiuto esterno quasi quotidiano, con le famiglie lontane. Chi sarebbe la rete?" },
+  { kind: "tension", title: "Inviti sempre e ritmi lenti",
+    when: v => v("friends", 5) >= 7 && v("freeTime", 7) >= 7,
+    refs: [["friends", 5], ["freeTime", 7]],
+    why: "Andare quasi a ogni invito e lasciare l'agenda vuota si escludono a vicenda." },
+  { kind: "tension", title: "Amici e coppia: il tempo è uno",
+    when: v => v("friends", 3) >= 7 && v("freeTime", 6) >= 7,
+    refs: [["friends", 3], ["freeTime", 6]],
+    why: "Molte serate con i tuoi amici e molte serate solo in coppia: il tempo è uno solo." },
+  { kind: "tension", title: "Il tempo non basta per tutto",
+    when: v => TIME_ITEMS.filter(([id, i]) => v(id, i) >= 7).length >= 6,
+    refs: v => TIME_ITEMS.map(([id, i]) => [id, i, v(id, i)]).sort((x, y) => y[2] - x[2]).slice(0, 4).map(([id, i]) => [id, i]),
+    why: "Hai indicato tante cose che richiedono tempo, tutte a livelli alti: amici, viaggi, sport, coppia, famiglie. Quali sono davvero le più importanti?" },
+  { kind: "tension", title: "Il budget non basta per tutto",
+    when: v => BUDGET_ITEMS.filter(([id, i]) => v(id, i) >= 7).length >= 4,
+    refs: v => BUDGET_ITEMS.map(([id, i]) => [id, i, v(id, i)]).sort((x, y) => y[2] - x[2]).slice(0, 4).map(([id, i]) => [id, i]),
+    why: "Vorresti risparmiare, investire, spendere, comprare casa e accantonare per i figli, tutto a livelli alti. Le risorse difficilmente coprono ogni voce." }
+];
+/* voci che costano tempo / soldi: servono al controllo "non basta per tutto" */
+const TIME_ITEMS = [["freeTime", 0], ["freeTime", 1], ["freeTime", 2], ["freeTime", 5], ["freeTime", 6],
+                    ["friends", 0], ["friends", 3], ["friends", 4], ["friends", 5], ["children", 3], ["family", 1], ["family", 3]];
+const BUDGET_ITEMS = [["money", 1], ["money", 2], ["money", 3], ["money", 4], ["money", 6]];
+
+function internalConflicts(get) {
+  const out = { a: [], b: [] };
+  for (const who of ["a", "b"]) {
+    const v = (id, i) => get(id, i)[who];
+    for (const r of CONFLICTS) {
+      if (!r.when(v)) continue;
+      const refs = (typeof r.refs === "function" ? r.refs(v) : r.refs).map(([id, i]) => get(id, i));
+      out[who].push({ kind: r.kind, title: r.title, why: r.why, refs, who,
+                      strength: refs.reduce((sum2, c) => sum2 + c[who], 0) });
+    }
+    for (const area of AREAS) {
+      const n = area.items.filter((_, i) => v(area.id, i) >= 8).length;
+      if (n >= 5) out[who].push({ kind: "tension", title: `Molte voci al massimo: ${area.name}`, refs: [], who, strength: n * 8,
+        why: `In quest'area ${n} voci su ${area.items.length} sono a 8 o più. Se dovessi sceglierne tre, quali?` });
+    }
+    out[who].sort((x, y) => (y.kind === "contradiction") - (x.kind === "contradiction") || y.strength - x.strength);
+    out[who] = out[who].slice(0, 6);
+  }
+  return out;
+}
+
+/* Incroci tra voi due: combinazioni di voci diverse che, messe insieme, producono un esito.
+   Le tensioni scattano solo quando le due voci sono di persone DIVERSE (per la stessa persona vale internalConflicts). */
 function crossings(get) {
   const fam = i => get("family", i), chi = i => get("children", i), fri = i => get("friends", i),
         mon = i => get("money", i), car = i => get("career", i), tl = i => get("freeTime", i);
@@ -599,50 +712,45 @@ function crossings(get) {
   const found = [];
   const add = (type, title, text, refs) => found.push({ type, title, text, refs,
     strength: refs.reduce((s, c) => s + c.hi, 0) });
+  const has = (title) => found.some(f => f.title === title);
 
-  /* — Da mettere in relazione — */
+  /* — Tensioni tra persone diverse — */
   for (const [x, y] of [["a", "b"], ["b", "a"]]) {
-    if (Math.max(fam(0)[x], fri(0)[x]) >= 7 && car(5)[y] >= 7 && !found.some(f => f.title === "Radici e movimento"))
+    if (Math.max(fam(0)[x], fri(0)[x]) >= 7 && car(5)[y] >= 7 && !has("Radici e movimento"))
       add("tension", "Radici e movimento",
         `${N[x]} vuole restare vicino a famiglia e amici, ${N[y]} è pronto a spostarsi per lavoro. Un luogo ben collegato può tenere insieme le due cose?`,
         [fam(0), fri(0), car(5)]);
+    if (car(0)[x] >= 7 && chi(3)[y] >= 7 && chi(5).avg <= 6 && !has("Ambizione e presenza"))
+      add("tension", "Ambizione e presenza",
+        `${N[x]} punta a un ruolo di grande responsabilità, ${N[y]} a una forte presenza quotidiana con i figli. La divisione della cura che immaginate (in media ${lv(chi(5), chi(5).avg)}) lascia spazio a entrambe le cose?`,
+        [car(0), chi(3), chi(5)]);
+    if (mon(4)[x] >= 7 && mon(1)[y] >= 7 && !has("Spendere e risparmiare"))
+      add("tension", "Spendere e risparmiare",
+        `${N[x]} vuole godersi i soldi, ${N[y]} vuole metterne da parte molti. Come trovate un equilibrio?`, [mon(4), mon(1)]);
+    if (mon(5)[x] >= 7 && car(1)[y] <= 3 && !has("Libertà dal lavoro e reddito"))
+      add("tension", "Libertà dal lavoro e reddito",
+        `${N[x]} immagina di smettere di lavorare presto (${lv(mon(5), mon(5)[x])}), ${N[y]} non punta a far crescere il reddito. Come si finanzia quell'obiettivo?`,
+        [mon(5), car(1)]);
+    if (car(3)[x] >= 7 && car(0)[y] >= 7 && !has("Orari leggeri e ruolo alto"))
+      add("tension", "Orari leggeri e ruolo alto",
+        `${N[x]} vuole orari leggeri, ${N[y]} un ruolo di grande responsabilità: le due richieste possono pesare l'una sull'altra.`, [car(3), car(0)]);
+    if (chi(1)[x] >= 7 && fam(0)[y] <= 3 && !has("Figli presto, famiglie lontane"))
+      add("tension", "Figli presto, famiglie lontane",
+        `${N[x]} pensa ai figli a breve, mentre ${N[y]} accetta famiglie d'origine lontane (${lv(fam(0), fam(0)[y])}). Chi potrebbe fare da rete?`,
+        [chi(1), fam(0)]);
+    if (chi(0)[x] >= 6 && mon(1)[y] <= 3 && !has("Figli e risparmi"))
+      add("tension", "Figli e risparmi",
+        `${N[x]} desidera dei figli, ${N[y]} mette da parte poco. Cosa dovrebbe cambiare, e da quando?`, [chi(0), mon(1)]);
+    if (car(7)[x] >= 7 && car(6)[y] >= 7 && !has("Passo indietro e doppia carriera"))
+      add("tension", "Passo indietro e doppia carriera",
+        `${N[x]} è pronto a rallentare molto, ${N[y]} tiene alla doppia carriera. Chi, quando e per quanto?`, [car(7), car(6)]);
+    if (mon(3)[x] >= 7 && car(5)[y] >= 7 && !has("Casa e mobilità"))
+      add("tension", "Casa e mobilità",
+        `${N[x]} vuole comprare casa presto, ${N[y]} è pronto a spostarsi per lavoro: una casa di proprietà lega a un luogo.`, [mon(3), car(5)]);
   }
-  if (car(0).hi >= 7 && chi(3).hi >= 7 && chi(5).avg <= 6)
-    add("tension", "Ambizione e presenza",
-      `Un ruolo ambizioso e tanta presenza quotidiana con i figli chiedono una regia chiara. La divisione della cura che immaginate (in media ${lv(chi(5), chi(5).avg)}) lascia spazio a entrambe le cose?`,
-      [car(0), chi(3), chi(5)]);
-  if (mon(4).hi >= 7 && mon(1).hi >= 7)
-    add("tension", "Spendere e risparmiare",
-      `Volete godervi i soldi e metterne da parte molti allo stesso tempo. Il budget può bastare a entrambe le cose, o una delle due va ridimensionata?`,
-      [mon(4), mon(1)]);
-  if (mon(5).hi >= 7 && car(1).hi <= 3)
-    add("tension", "Libertà dal lavoro e reddito",
-      `Smettere di lavorare presto (in media ${lv(mon(5), mon(5).avg)}) senza far crescere il reddito: come ci si arriva?`,
-      [mon(5), car(1)]);
-  if (car(3).avg >= 7 && car(0).hi >= 7)
-    add("tension", "Orari leggeri e ruolo alto",
-      `Orari sostenibili e un ruolo di grande responsabilità raramente convivono. Quale dei due lasciereste andare per primo?`,
-      [car(3), car(0)]);
-  if (chi(1).hi >= 7 && chi(6).avg >= 6 && fam(0).avg <= 3)
-    add("tension", "Figli presto, famiglie lontane",
-      `Pensate ai figli a breve e a un buon aiuto esterno, ma le famiglie d'origine sarebbero lontane (in media ${lv(fam(0), fam(0).avg)}). Chi potrebbe fare da rete?`,
-      [chi(1), chi(6), fam(0)]);
-  if (chi(0).hi >= 6 && mon(6).hi >= 6 && mon(1).avg <= 3)
-    add("tension", "Figli e risparmi",
-      `Un progetto di figli con risorse dedicate, ma poca abitudine a risparmiare. Cosa dovrebbe cambiare, e da quando?`,
-      [chi(0), mon(6), mon(1)]);
   if (car(6).lo >= 6 && car(5).hi >= 7)
     add("tension", "Due carriere, un trasferimento",
-      `Entrambe le carriere contano e almeno uno è pronto a spostarsi. Serve un luogo dove ci sia lavoro per tutti e due.`,
-      [car(6), car(5)]);
-  if (car(7).hi >= 7 && car(6).lo >= 6)
-    add("tension", "Passo indietro e doppia carriera",
-      `Uno di voi è pronto a rallentare molto, ma entrambi tenete alla doppia carriera. Chi, quando e per quanto?`,
-      [car(7), car(6)]);
-  if (mon(3).hi >= 7 && car(5).hi >= 7)
-    add("tension", "Casa e mobilità",
-      `Comprare casa presto e spostarsi per lavoro tirano in direzioni opposte: una casa di proprietà lega a un luogo.`,
-      [mon(3), car(5)]);
+      `Entrambe le carriere contano e almeno uno è pronto a spostarsi. Serve un luogo dove ci sia lavoro per tutti e due.`, [car(6), car(5)]);
 
   /* — Si rinforzano — */
   if (fam(0).lo >= 6 && fri(0).lo >= 6)
@@ -693,7 +801,7 @@ function placeNeeds(get) {
 
 function viewResults() {
   const n1 = esc(nameOf("player1")), n2 = esc(nameOf("player2"));
-  const { areas, aligned, discuss, different, tensions, synergies, needs } = analyse();
+  const { areas, aligned, discuss, different, tensions, synergies, internal, needs } = analyse();
   const lvA = c => `«${esc(levelText(c.item, c.a))}»`, lvB = c => `«${esc(levelText(c.item, c.b))}»`;
   const mid = c => `«${esc(levelText(c.item, Math.round(c.avg)))}»`;
 
@@ -742,6 +850,14 @@ function viewResults() {
     <b>${esc(f.title)}</b><span class="extra">${f.text}</span><span class="evs">${f.refs.map(ev).join("")}</span></li>`).join("")
     : `<li class="empty">${empty}</li>`;
 
+  const kindChip = k => k === "contradiction" ? `<span class="chip talk">Non coerenti</span>` : `<span class="chip mid">Difficili da conciliare</span>`;
+  const internalItem = f => `<li class="note ${f.kind === "contradiction" ? "talk" : "mid"}">
+    <span class="where">${kindChip(f.kind)}</span><b>${esc(f.title)}</b>
+    ${f.refs.map(c => `<span class="lv"><i class="dot ${f.who === "a" ? "p1" : "p2"}"></i><span><b>${esc(c.item.t)}</b>: «${esc(levelText(c.item, c[f.who]))}»</span></span>`).join("")}
+    <span class="extra">${esc(f.why)}</span></li>`;
+  const internalBlock = (who, n) => `<h3 class="sub"><i class="dot ${who === "a" ? "p1" : "p2"}"></i> ${n}</h3>
+    <ul class="notes">${internal[who].length ? internal[who].map(internalItem).join("") : `<li class="empty">Nessuna incompatibilità evidente nelle risposte di ${n}.</li>`}</ul>`;
+
   const tiles = areas.map(a => {
     const top = a.cats[0];
     return `<div class="tile"><b>${a.emoji} ${esc(a.name)}</b><span>${top.total ? `${esc(top.item.t)}: ${mid(top)}` : "—"}</span></div>`;
@@ -762,7 +878,9 @@ function viewResults() {
           <li><b>Da negoziare</b>: distanza di ${T.nuance + 1}–${T.negotiate}. Il punto d'incontro è a una fascia intera di distanza per ciascuno.</li>
           <li><b>Punto da discutere</b>: distanza di ${T.negotiate + 1} o più. Le posizioni stanno agli estremi della scala.</li>
           <li><b>Poco in gioco</b>: nessuno dei due supera ${T.quiet} pallini. Non serve parlarne.</li>
-          <li>Le voci si leggono anche <b>in combinazione</b>: sotto trovate gli incroci che rinforzano o mettono in tensione le vostre scelte.</li>
+          <li>Non c'è un limite ai pallini: il segnale sta nelle <b>combinazioni</b>.</li>
+          <li><b>Dentro ognuno di voi</b>: incrociamo le risposte della stessa persona. Sono <b>non coerenti</b> quando si escludono (per esempio nessun desiderio di figli ma un numero di figli), <b>difficili da conciliare</b> quando tirano in direzioni opposte (per esempio vivere accanto alle famiglie e trasferirsi ovunque).</li>
+          <li><b>Dove le scelte si incrociano</b>: combinazioni tra voi due che si rinforzano o mettono in tensione.</li>
         </ul>
       </details>
     </div>
@@ -773,6 +891,10 @@ function viewResults() {
     <div class="sec"><h2>💬 Di cosa vale la pena parlare</h2>
       <p>Sono le distanze più grandi. Potrebbe essere una cosa interessante da capire insieme.</p>
       <ul class="notes">${list(discuss, "Non emergono differenze forti: potete usare il tempo per raccontarvi cosa c'è dietro le scelte comuni.")}</ul></div>
+
+    <div class="sec"><h2>🧭 Dentro ognuno di voi</h2>
+      <p>Alcune risposte, prese insieme, possono essere difficili da tenere insieme. Non sono errori: sono punti su cui scegliere cosa pesa di più.</p>
+      ${internalBlock("a", n1)}${internalBlock("b", n2)}</div>
 
     <div class="sec"><h2>🔗 Dove le scelte si incrociano</h2>
       <p>Le voci non vivono da sole. Alcune combinazioni si rinforzano, altre chiedono di essere messe in relazione.</p>
@@ -797,7 +919,6 @@ function viewResults() {
    ===================================================================== */
 function addDot(i) {
   if (!state.draft) return;
-  if (sum(state.draft) >= POINTS) { bump(document.getElementById("trayCard")); return; }
   if (state.draft[i] >= MAX_PER_ITEM) { bump(document.querySelector(`.cat[data-i="${i}"]`)); return; }
   state.draft[i]++;
   updateRound(i);
@@ -811,7 +932,7 @@ function bump(el) { if (!el) return; el.classList.remove("bump"); void el.offset
 
 function confirmRound() {
   const who = turnKey();
-  if (!who || state.step !== "round" || !state.draft || sum(state.draft) !== POINTS) return;
+  if (!who || state.step !== "round" || !state.draft || sum(state.draft) === 0) return;
   const area = AREAS[state.currentRound];
   state.players[who].rounds[area.id] = state.draft.slice();   // da qui l'area è congelata
   state.draft = null;
