@@ -128,12 +128,14 @@ h2 { font-size: clamp(26px, 5.5vw, 34px); }
 .cat { display: grid; grid-template-columns: 1fr auto; align-items: stretch; background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); box-shadow: 0 2px 0 var(--line); overflow: hidden; transition: border-color .2s, background .2s; min-width: 0; }
 .cat.has { border-color: var(--me); }
 .cat.bump { animation: bump .3s; }
-.add { text-align: left; background: none; border: 0; padding: 12px 8px 12px 16px; min-height: 76px; display: grid; gap: 8px; align-content: space-between; min-width: 0; user-select: none; -webkit-user-select: none; }
+.add { text-align: left; background: none; border: 0; padding: 12px 8px 12px 16px; min-height: 92px; display: grid; gap: 6px; align-content: space-between; min-width: 0; user-select: none; -webkit-user-select: none; }
 .add:active { background: var(--me-soft); }
 .add .row { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; }
 .add .label { font-weight: 600; font-size: 16px; line-height: 1.25; }
 .add .badge { flex: none; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 99px; display: grid; place-items: center; font-weight: 700; font-variant-numeric: tabular-nums; background: var(--line); color: var(--ink-2); }
 .cat.has .badge { background: var(--me); color: #fff; }
+.desc { font-style: italic; font-size: 14px; line-height: 1.35; color: var(--ink-2); text-wrap: pretty; }
+.note .desc { font-size: 13px; }
 .mine { display: flex; flex-wrap: wrap; gap: 3px; min-height: 12px; }
 .sub { width: 56px; border: 0; border-left: 2px solid var(--line); background: none; font-size: 26px; color: var(--ink-2); }
 .sub:hover:not(:disabled) { background: var(--me-soft); color: var(--ink); }
@@ -226,23 +228,59 @@ h2 { font-size: clamp(26px, 5.5vw, 34px); }
 const POINTS = 20;
 const AREAS = [
   { id: "family", emoji: "👨‍👩‍👧", name: "Famiglia", items: [
-    "Presenza e tempo insieme", "Vicinanza alle famiglie", "Tradizioni familiari", "Aiutare i genitori",
-    "Rapporto con i suoceri", "Famiglia allargata", "Autonomia della nostra coppia", "Casa nostra / nostro nucleo" ] },
+    ["Vivere vicino alle famiglie", "Abitare abbastanza vicino da vedervi senza doverlo organizzare."],
+    ["Ritmo stabile con i genitori", "Sentirsi e vedersi con regolarità, non solo nelle occasioni."],
+    ["Prendersi cura dei genitori", "Esserci, anche con impegno pratico o economico, quando ne avranno bisogno."],
+    ["Feste e rituali di famiglia", "Natale, compleanni, pranzi della domenica: tenere vive le tradizioni che contano."],
+    ["Rapporto con i suoceri", "Costruire un legame sereno e di fiducia con la famiglia dell'altra persona."],
+    ["Fratelli, cugini e parenti", "Coltivare la famiglia allargata, oltre ai genitori."],
+    ["Confini della nostra coppia", "Decidere in due, senza che le famiglie d'origine pesino sulle scelte."],
+    ["Le nostre tradizioni", "Inventare abitudini e rituali nuovi, solo nostri."] ] },
   { id: "children", emoji: "👶", name: "Figli", items: [
-    "Avere figli", "Numero di figli", "Tempo con i figli", "Educazione e valori",
-    "Proteggere entrambe le carriere", "Aiuto esterno / nonni", "Sicurezza economica", "Tempo di coppia dopo i figli" ] },
+    ["Il desiderio di averne", "Quanto forte è l'idea di diventare genitori."],
+    ["Quando cominciare", "Scegliere il momento giusto, tra età, lavoro e stabilità."],
+    ["Quanti figli", "Una famiglia più raccolta o più numerosa."],
+    ["Presenza quotidiana", "Esserci per colazioni, compiti, malattie e sere: stare con loro davvero."],
+    ["Valori ed educazione", "Trasmettere una visione del mondo e un modo di crescere."],
+    ["Dividerci la cura", "Ripartire in modo equo carichi e responsabilità tra noi due."],
+    ["Rete di sostegno", "Contare su nonni, babysitter o amici per non fare tutto da soli."],
+    ["Cambiare stile di vita", "Adattare uscite, viaggi e ritmi di oggi alla vita con i figli."] ] },
   { id: "friends", emoji: "🫂", name: "Amici", items: [
-    "Amici storici", "Nuove amicizie", "Vita sociale", "Weekend e viaggi con amici",
-    "Restare vicini agli amici di sempre", "Creare una nuova comunità", "Tempo individuale con gli amici", "Casa aperta / convivialità" ] },
+    ["Amici di lunga data", "Mantenere vivi i legami storici, anche a distanza."],
+    ["Nuove amicizie", "Aprirci a persone nuove, ovunque andremo a vivere."],
+    ["Amici della coppia", "Avere un giro di amici che frequentiamo insieme."],
+    ["Amici solo miei", "Uscite e serate con i miei amici, senza il partner."],
+    ["Casa aperta", "Ospitare spesso: una cena, un aperitivo, qualcuno che si ferma a dormire."],
+    ["Vita sociale intensa", "Molte persone, molti inviti, l'agenda sempre piena."],
+    ["Poche amicizie profonde", "Pochi legami, ma solidi e con molta intimità."],
+    ["Esserci nei momenti importanti", "Matrimoni, nascite, momenti difficili: essere presenti e avere gli amici accanto."] ] },
   { id: "money", emoji: "💰", name: "Soldi", items: [
-    "Sicurezza finanziaria", "Reddito elevato", "Risparmio", "Investimenti",
-    "Casa", "Stile di vita", "Libertà finanziaria", "Risorse per i figli" ] },
+    ["Tranquillità economica", "Non pensare ai soldi per le spese di ogni giorno né per gli imprevisti."],
+    ["Risparmiare con costanza", "Mettere da parte una quota fissa ogni mese, anche rinunciando a qualcosa."],
+    ["Far crescere il patrimonio", "Investire i risparmi perché aumentino nel tempo."],
+    ["Una casa di proprietà", "Comprare una casa nostra invece di stare in affitto."],
+    ["Spendere per stare bene", "Ristoranti, viaggi, cose belle: godersi oggi ciò che si guadagna."],
+    ["Indipendenza dal lavoro", "Arrivare a poter scegliere se lavorare e quanto."],
+    ["Il futuro dei figli", "Accantonare per studi, esperienze e un buon inizio per loro."],
+    ["Gestire i soldi insieme", "Conto comune o separato, chi decide cosa, quanta trasparenza."] ] },
   { id: "career", emoji: "💼", name: "Carriera", items: [
-    "Crescita professionale", "Reddito", "Equilibrio vita/lavoro", "Doppia carriera",
-    "Mobilità geografica", "Stabilità", "Lavoro significativo", "Disponibilità a sacrificare carriera per famiglia" ] },
+    ["Crescere di ruolo", "Salire di livello, responsabilità e riconoscimento."],
+    ["Guadagnare di più", "Far crescere lo stipendio come obiettivo in sé."],
+    ["Un lavoro che ha senso", "Fare qualcosa in cui credo, anche a costo di guadagnare meno."],
+    ["Orari sostenibili", "Un lavoro che lascia energie per la vita fuori dall'ufficio."],
+    ["Stabilità del posto", "Contratto sicuro e continuità, senza salti nel vuoto."],
+    ["Spostarsi per lavoro", "Accettare trasferimenti o esperienze in altre città e paesi."],
+    ["Due carriere che convivono", "Ognuno realizza le proprie ambizioni, senza che una passi in secondo piano."],
+    ["Un passo indietro per la famiglia", "Rallentare o rinunciare a qualcosa quando la famiglia lo richiede."] ] },
   { id: "freeTime", emoji: "🌿", name: "Tempo libero", items: [
-    "Viaggi", "Weekend", "Sport e hobby", "Natura",
-    "Cultura ed eventi", "Tempo di coppia", "Tempo personale", "Vita tranquilla" ] }
+    ["Viaggi lontani", "Vacanze lunghe, mete nuove, scoperta."],
+    ["Fughe brevi", "Weekend fuori porta, senza troppi programmi."],
+    ["Sport e movimento", "Allenarsi, correre, praticare uno sport con regolarità."],
+    ["Natura e aria aperta", "Montagna, mare, camminate: stare fuori il più possibile."],
+    ["Cultura e spettacoli", "Mostre, teatro, concerti, cinema, libri."],
+    ["Passioni personali", "Un interesse tutto mio, con tempo dedicato."],
+    ["Momenti a due", "Serate e giornate pensate solo per noi."],
+    ["Ritmi tranquilli", "Serate a casa, agenda leggera, ozio senza sensi di colpa."] ] }
 ];
 const DEFAULT_NAMES = { player1: "Giocatore 1", player2: "Giocatore 2" };
 /* Soglie di lettura dei risultati (differenza in pallini tra i due giocatori per una categoria) */
@@ -341,10 +379,11 @@ function viewRound(who) {
   const pips = AREAS.map((a, i) =>
     `<span class="pip ${i < state.currentRound ? "done" : i === state.currentRound ? "now" : ""}">${a.emoji}</span>`).join("");
   const tray = Array.from({ length: POINTS }, () => "<i></i>").join("");
-  const cats = area.items.map((label, i) => `
+  const cats = area.items.map(([label, desc], i) => `
     <li class="cat" data-i="${i}">
       <button class="add" data-action="add" data-i="${i}">
         <span class="row"><span class="label">${esc(label)}</span><span class="badge">0</span></span>
+        <span class="desc">${esc(desc)}</span>
         <span class="mine"></span>
       </button>
       <button class="sub" data-action="sub" data-i="${i}" aria-label="Togli un pallino: ${esc(label)}">−</button>
@@ -374,7 +413,7 @@ function updateRound(popIndex = -1) {
     li.classList.toggle("has", n > 0);
     li.querySelector(".badge").textContent = n;
     li.querySelector(".sub").disabled = n === 0;
-    const label = AREAS[state.currentRound].items[i];
+    const label = AREAS[state.currentRound].items[i][0];
     li.querySelector(".add").setAttribute("aria-label", `${label}: ${n} ${pl(n, "pallino", "pallini")}. Aggiungi un pallino`);
     li.querySelector(".mine").innerHTML = Array.from({ length: n }, (_, k) =>
       `<i class="dot${i === popIndex && k === n - 1 ? " pop" : ""}"></i>`).join("");
@@ -416,9 +455,9 @@ const AREA_LABEL = { ok: "Molto allineati", mid: "Sfumature diverse", talk: "Da 
 function analyse() {
   const r1 = state.players.player1.rounds, r2 = state.players.player2.rounds;
   const areas = AREAS.map(area => {
-    const cats = area.items.map((label, i) => {
+    const cats = area.items.map(([label, desc], i) => {
       const a = r1[area.id][i], b = r2[area.id][i];
-      return { label, i, a, b, total: a + b, diff: Math.abs(a - b), level: catLevel(a, b), area };
+      return { label, desc, i, a, b, total: a + b, diff: Math.abs(a - b), level: catLevel(a, b), area };
     });
     const sumDiff = sum(cats.map(c => c.diff));
     return {
@@ -466,7 +505,7 @@ function viewResults() {
   }).join("");
 
   const noteHtml = (c, kind, text) => `<li class="note ${kind}">
-    <span class="where">${c.area.emoji} ${esc(c.area.name)}</span><b>${esc(c.label)}</b><span>${text}</span></li>`;
+    <span class="where">${c.area.emoji} ${esc(c.area.name)}</span><b>${esc(c.label)}</b><em class="desc">${esc(c.desc)}</em><span>${text}</span></li>`;
   const hiLo = c => {
     const aHigher = c.a >= c.b;
     return { hiName: esc(nameOf(aHigher ? "player1" : "player2")), loName: esc(nameOf(aHigher ? "player2" : "player1")),
