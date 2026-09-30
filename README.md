@@ -3,7 +3,7 @@
 ## La nostra mappa
 
 Gioco da tavolo digitale per due persone sullo stesso dispositivo. In ciascuna delle sei aree della
-vita (Famiglia, Figli, Amici, Soldi, Carriera, Tempo libero) ognuno distribuisce 20 pallini su otto
+vita (Famiglia, Figli, Amici, Soldi, Carriera, Tempo libero) ognuno distribuisce 30 pallini su otto
 voci, senza vedere le scelte dell'altro. Solo alla fine compare la mappa condivisa.
 
 **Avvio:** apri `la-nostra-mappa/index.html` in un browser. Nessuna installazione, nessun server,
@@ -13,7 +13,7 @@ nessuna rete: lo stato vive solo in memoria e "Ricomincia" lo azzera del tutto.
 - Ogni voce ha una scala da 0 a 10 pallini (massimo 10 per voce). I pallini sono un valore concreto:
   per esempio *Vicinanza alle famiglie* va da «Oltre 3 ore di viaggio» (0) a «Nello stesso quartiere» (10).
   Cinque livelli descrivono la scala: 0 · 1–3 · 4–6 · 7–9 · 10.
-- I pallini sono un budget (20 per area): non si può avere tutto al massimo.
+- I pallini sono un budget (30 per area): non si può avere tutto al massimo.
 
 **Come si leggono i risultati** (soglie in `T`, funzione `classify`)
 - distanza ≤ 2: in sintonia (pilastro condiviso se entrambi ≥ 6); nessuno dei due oltre 2: poco in gioco

@@ -112,7 +112,7 @@ h2 { font-size: clamp(26px, 5.5vw, 34px); }
 .tray-count { display: flex; align-items: baseline; gap: 5px; flex: none; white-space: nowrap; }
 .tray-count b { font-family: var(--display); font-size: 24px; line-height: 1; font-variant-numeric: tabular-nums; min-width: 1.2ch; text-align: right; }
 .tray-count span { font-size: 13px; color: var(--ink-2); }
-.tray { flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(20, 1fr); gap: 3px; align-items: center; }
+.tray { flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(15, 1fr); gap: 4px 3px; align-items: center; }
 .tray i { width: 100%; max-width: 16px; justify-self: center; aspect-ratio: 1; border-radius: 50%; background: var(--me); box-shadow: inset 0 -2px 0 rgba(0,0,0,.2), 0 1px 1px rgba(0,0,0,.18); transition: background .2s, box-shadow .2s, transform .2s; }
 .tray i.spent { background: transparent; box-shadow: inset 0 0 0 1.5px var(--line-2); transform: scale(.8); }
 
@@ -254,7 +254,7 @@ h3.sub { font-family: var(--body); font-size: 13px; letter-spacing: .1em; text-t
 /* =====================================================================
    CONFIGURAZIONE — modifica qui aree, categorie e numero di pallini.
    ===================================================================== */
-const POINTS = 20;
+const POINTS = 30;
 const MAX_PER_ITEM = 10;   // tetto per singola voce (blocco 2×5)
 /* Ogni voce ha un titolo (max 3 parole), una definizione e 5 livelli concreti della scala 0–10:
    0 pallini | 1–3 | 4–6 | 7–9 | 10 pallini.   Più pallini = più di quella cosa nella vostra vita.
@@ -297,7 +297,7 @@ const AREAS = [
        ["Facciamo tutto da soli", "Aiuto solo per emergenze", "Aiuto ogni settimana", "Aiuto quasi ogni giorno", "Rete sempre disponibile"]),
     it("Vita che cambia", "Quanto vorresti cambiare le tue abitudini per loro?",
        ["Nulla cambia", "Cambia qualche serata", "Cambia metà della vita", "Cambia quasi tutto", "Si vive attorno a loro"]) ] },
-  { id: "friends", emoji: "🫂", name: "Amici", items: [
+  { id: "friends", emoji: "🧑‍🤝‍🧑", name: "Amici", items: [
     it("Amici storici", "Quanto spesso vorresti vedere gli amici di sempre?",
        ["Una o due volte l'anno", "Ogni 2–3 mesi", "Una volta al mese", "Ogni settimana", "Quasi ogni giorno"]),
     it("Nuove amicizie", "Quante persone nuove vorresti conoscere ogni anno?",
