@@ -124,32 +124,36 @@ h2 { font-size: clamp(26px, 5.5vw, 34px); }
 .cats { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; grid-template-columns: 1fr; }
 @media (min-width: 640px) { .cats { grid-template-columns: 1fr 1fr; } }
 /* Altezza della carta = altezza della colonna verticale di 5 pallini (uguale per ogni voce) */
-.cat { --dot: 17px; --gap: 7px; --pad: 11px; height: calc(5 * var(--dot) + 4 * var(--gap) + 2 * var(--pad) + 4px); display: grid; grid-template-columns: minmax(0, 1fr) auto; background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); box-shadow: 0 2px 0 var(--line); overflow: hidden; transition: border-color .2s, background .2s; min-width: 0; }
+.cat { --dot: 15px; --gap: 6px; --pad: 11px; height: calc(5 * var(--dot) + 4 * var(--gap) + 2 * var(--pad) + 4px); display: grid; grid-template-columns: minmax(0, 1fr) auto; background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); box-shadow: 0 2px 0 var(--line); overflow: hidden; transition: border-color .2s, background .2s; min-width: 0; }
 .cat.has { border-color: var(--me); }
 .cat.bump { animation: bump .3s; }
-.add { text-align: left; background: none; border: 0; padding: var(--pad) 8px var(--pad) 14px; height: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; align-items: start; min-width: 0; user-select: none; -webkit-user-select: none; }
-.add:active { background: var(--me-soft); }
-.txt { display: grid; gap: 3px; align-content: start; min-width: 0; height: 100%; overflow: hidden; }
-.add .label { font-weight: 600; font-size: 15.5px; line-height: 1.25; }
-.desc { font-style: italic; font-size: 12.5px; line-height: 1.3; color: var(--ink-2); text-wrap: pretty; }
-.note .desc { font-size: 13px; }
-.anch { display: flex; align-items: center; gap: 6px; font-size: 12.5px; line-height: 1.3; color: var(--ink-2); min-width: 0; }
+.body { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px; align-items: start; padding: var(--pad) 6px var(--pad) 12px; height: 100%; min-width: 0; }
+/* titolo e sottotitolo in alto; scala e valore dinamico ancorati in basso */
+.txt { display: flex; flex-direction: column; justify-content: space-between; min-width: 0; height: 100%; overflow: hidden; }
+.head, .foot { display: grid; gap: 2px; min-width: 0; }
+.label { font-weight: 600; font-size: 15.5px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.desc { font-style: italic; font-size: 12.5px; line-height: 1.3; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.note .desc { font-size: 13px; white-space: normal; }
+.anch { display: flex; align-items: center; gap: 6px; font-size: 12px; line-height: 1.3; color: var(--ink-2); min-width: 0; }
 .anch b { flex: none; min-width: 20px; text-align: center; padding: 0 3px; border-radius: 6px; background: var(--line); color: var(--ink); font-size: 11px; line-height: 1.5; }
 .anch span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .anch.on { color: var(--ink); font-weight: 600; }
 .anch.on b { background: var(--me); color: #fff; }
-.now { font-size: 12.5px; line-height: 1.3; font-weight: 600; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.now { display: flex; align-items: center; gap: 5px; margin-top: 2px; font-size: 12px; line-height: 18px; font-weight: 600; color: var(--ink-2); min-width: 0; }
+.now .n { flex: none; min-width: 22px; height: 18px; padding: 0 5px; border-radius: 9px; display: grid; place-items: center; background: var(--line); color: var(--ink-2); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.now .lvl { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .cat.has .now { color: var(--me); }
+.cat.has .now .n { background: var(--me); color: #fff; }
 .slots { display: grid; grid-template-columns: repeat(2, var(--dot)); grid-template-rows: repeat(5, var(--dot)); grid-auto-flow: column; gap: var(--gap); }
 .slots i { width: var(--dot); height: var(--dot); border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--line-2); transition: background .15s, box-shadow .15s; }
 .slots i.on { background: var(--me); box-shadow: inset 0 -2px 0 rgba(0,0,0,.2), 0 1px 1px rgba(0,0,0,.18); }
 .slots i.pop { animation: pop .25s ease; }
-.ctl { width: 46px; display: grid; grid-template-rows: auto 1fr; justify-items: center; border-left: 2px solid var(--line); }
-.badge { margin-top: 8px; min-width: 28px; height: 28px; padding: 0 7px; border-radius: 99px; display: grid; place-items: center; font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; background: var(--line); color: var(--ink-2); }
-.cat.has .badge { background: var(--me); color: #fff; }
-.sub { width: 100%; min-height: 44px; border: 0; background: none; font-size: 26px; color: var(--ink-2); }
-.sub:hover:not(:disabled) { background: var(--me-soft); color: var(--ink); }
-.sub:disabled { opacity: .25; cursor: default; }
+.ctl { width: 52px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: var(--pad) 0; border-left: 2px solid var(--line); }
+.rbtn { width: 44px; height: 44px; flex: none; border-radius: 50%; display: grid; place-items: center; padding: 0 0 2px; font-size: 26px; line-height: 1; font-weight: 500; background: var(--surface); color: var(--ink); border: 2px solid var(--line-2); box-shadow: 0 2px 0 var(--line-2); transition: transform .1s, box-shadow .1s, opacity .2s, background .2s; }
+.rbtn.plus { background: var(--me); border-color: var(--me); color: #fff; box-shadow: 0 2px 0 rgba(0,0,0,.28); }
+.rbtn:hover:not(:disabled) { transform: translateY(-1px); }
+.rbtn:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
+.rbtn:disabled { opacity: .3; cursor: default; box-shadow: none; }
 
 .bar { position: sticky; bottom: 0; z-index: 5; margin: 18px -16px 0; padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(transparent, var(--bg) 30%); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .bar .msg { margin: 0; font-weight: 600; color: var(--ink); min-height: 1.5em; flex: 1 1 160px; }
@@ -268,106 +272,106 @@ const levelIdx = n => n <= 0 ? 0 : n >= MAX_PER_ITEM ? 4 : n <= 3 ? 1 : n <= 6 ?
 const levelText = (item, n) => item.l[levelIdx(n)];
 const AREAS = [
   { id: "family", emoji: "👨‍👩‍👧", name: "Famiglia", items: [
-    it("Vicinanza alle famiglie", "Distanza da casa delle famiglie d'origine.",
+    it("Vicinanza alle famiglie", "Distanza dalle famiglie",
        ["Oltre 3 ore di viaggio", "Fino a 3 ore di viaggio", "Entro 1–2 ore", "Entro 30–45 minuti", "Nello stesso quartiere"], true),
-    it("Contatto costante", "Quanto spesso vedete o sentite i genitori.",
+    it("Contatto costante", "Frequenza di visite e chiamate",
        ["Solo nelle occasioni", "Una volta al mese", "Ogni settimana", "Più volte a settimana", "Ogni giorno"]),
-    it("Cura dei genitori", "Impegno per i genitori quando invecchiano.",
+    it("Cura dei genitori", "Impegno quando invecchiano",
        ["Nessun impegno diretto", "Aiuto economico se serve", "Presenza regolare", "Aiuto pratico costante", "Accoglierli in casa nostra"]),
-    it("Feste e rituali", "Ricorrenze passate con le famiglie.",
+    it("Feste e rituali", "Ricorrenze passate insieme",
        ["Nessuna in particolare", "Solo le più importanti", "Circa metà delle feste", "Quasi tutte le feste", "Ogni festa e ricorrenza"]),
-    it("Rapporto coi suoceri", "Tempo e confidenza con i suoceri.",
-       ["Rapporto formale", "Cordiale, poco frequente", "Confidenza e visite regolari", "Molto vicini, vita in comune", "Come una seconda famiglia"]),
-    it("Famiglia allargata", "Coinvolgimento di fratelli, cugini e zii.",
+    it("Rapporto coi suoceri", "Tempo e confidenza con loro",
+       ["Rapporto formale", "Cordiale, poco frequente", "Confidenza e visite fisse", "Molto vicini, vita comune", "Come di famiglia"]),
+    it("Famiglia allargata", "Fratelli, cugini e zii",
        ["Solo la famiglia stretta", "Qualche incontro all'anno", "Un ritrovo al mese", "Un ritrovo a settimana", "Sempre insieme, un clan"]),
-    it("Confini di coppia", "Autonomia della coppia dalle famiglie.",
+    it("Confini di coppia", "Autonomia dalle famiglie",
        ["Decidono con noi", "Le ascoltiamo su tutto", "Ascoltiamo e decidiamo", "Decidiamo e informiamo", "Decidiamo solo in due"]),
-    it("Le nostre tradizioni", "Rituali tutti nostri, diversi da quelli d'origine.",
+    it("Le nostre tradizioni", "Rituali tutti nostri",
        ["Solo quelle di famiglia", "Qualche rito tutto nostro", "Un mix con le nostre", "Molte abitudini nostre", "Un calendario tutto nostro"]) ] },
   { id: "children", emoji: "👶", name: "Figli", items: [
-    it("Desiderio di figli", "Quanto forte è il desiderio di diventare genitori.",
+    it("Desiderio di figli", "Quanto forte è il desiderio",
        ["Non ne voglio", "Ci sto ancora pensando", "Mi piacerebbe", "Lo desidero molto", "È un progetto centrale"], true),
-    it("Quando cominciare", "Entro quando iniziare a provarci.",
+    it("Quando cominciare", "Quando iniziare a provarci",
        ["Non è nei piani", "Tra oltre 5 anni", "Tra 3 e 5 anni", "Entro 2 anni", "Il prima possibile"], true),
-    it("Quanti figli", "Numero di figli che immaginate.",
+    it("Quanti figli", "Numero di figli immaginati",
        ["Nessuno", "Uno", "Due", "Tre", "Quattro o più"], true),
-    it("Presenza quotidiana", "Tempo che i genitori dedicano ai figli ogni giorno.",
+    it("Presenza quotidiana", "Tempo dedicato ogni giorno",
        ["Solo nel weekend", "Qualche ora la sera", "Mattina e sera", "Gran parte della giornata", "Un genitore sempre a casa"]),
-    it("Valori ed educazione", "Quanto pesa un'impronta educativa precisa.",
+    it("Valori ed educazione", "Peso di un'impronta educativa",
        ["Scelgono da soli", "Poche regole di base", "Valori chiari e discussi", "Impronta educativa forte", "Progetto educativo preciso"]),
-    it("Dividerci la cura", "Quota di cura dei figli che spetta a ciascuno.",
+    it("Dividerci la cura", "Quota di cura per ciascuno",
        ["Uno fa quasi tutto", "70% e 30%", "60% e 40%", "Quasi 50 e 50", "50 e 50, sempre"], true),
-    it("Rete di sostegno", "Aiuto esterno: nonni, babysitter, amici.",
+    it("Rete di sostegno", "Nonni, babysitter, amici",
        ["Facciamo tutto da soli", "Aiuto solo per emergenze", "Aiuto ogni settimana", "Aiuto quasi ogni giorno", "Rete sempre disponibile"]),
-    it("Vita che cambia", "Quanto cambiano le abitudini di oggi.",
+    it("Vita che cambia", "Quanto cambiano le abitudini",
        ["Nulla cambia", "Cambia qualche serata", "Cambia metà della vita", "Cambia quasi tutto", "Si vive attorno a loro"]) ] },
   { id: "friends", emoji: "🫂", name: "Amici", items: [
-    it("Amici storici", "Quanto spesso vedete gli amici di sempre.",
+    it("Amici storici", "Frequenza con i vecchi amici",
        ["Una o due volte l'anno", "Ogni 2–3 mesi", "Una volta al mese", "Ogni settimana", "Quasi ogni giorno"]),
-    it("Nuove amicizie", "Persone nuove che entrano nella vostra vita.",
+    it("Nuove amicizie", "Persone nuove all'anno",
        ["Nessuna nuova", "1–2 nuove all'anno", "3–5 nuove all'anno", "6–10 nuove all'anno", "Sempre nuove conoscenze"]),
-    it("Amici di coppia", "Coppie di amici che frequentate insieme.",
+    it("Amici di coppia", "Coppie di amici in comune",
        ["Nessuna coppia", "Una coppia", "Due o tre coppie", "Quattro–sei coppie", "Un grande gruppo"]),
-    it("Amici solo miei", "Serate e weekend con amici, senza il partner.",
+    it("Amici solo miei", "Uscite senza il partner",
        ["Mai", "Una sera al mese", "Una sera a settimana", "Più sere a settimana", "Anche weekend interi"]),
-    it("Casa aperta", "Quanto spesso ospitate persone a casa.",
+    it("Casa aperta", "Quanto ospitate a casa",
        ["Mai ospiti", "Qualche volta l'anno", "Una volta al mese", "Ogni settimana", "Porta sempre aperta"]),
-    it("Inviti e feste", "Quanti inviti a eventi accettate.",
+    it("Inviti e feste", "Inviti a eventi accettati",
        ["Quasi nessuno", "Solo i più importanti", "Circa la metà", "Quasi tutti", "Ci siamo sempre"]),
-    it("Amici del cuore", "Persone con cui aprirvi davvero.",
+    it("Amici del cuore", "Persone a cui aprirvi",
        ["Nessuno oltre al partner", "Una persona", "Due o tre persone", "Quattro o cinque persone", "Sei o più persone"]),
-    it("Momenti importanti", "Presenza a matrimoni, nascite e momenti duri.",
+    it("Momenti importanti", "Esserci nei giorni che contano",
        ["Solo se è comodo", "Solo ai più vicini", "Anche viaggiando un po'", "Anche a lunga distanza", "Sempre, a ogni costo"]) ] },
   { id: "money", emoji: "💰", name: "Soldi", items: [
-    it("Tranquillità economica", "Risparmi di emergenza, in mesi di spese.",
+    it("Tranquillità economica", "Risparmi, in mesi di spese",
        ["Nessun cuscinetto", "1–3 mesi di spese", "6 mesi di spese", "1 anno di spese", "Oltre 2 anni di spese"]),
-    it("Risparmiare con costanza", "Quota dello stipendio messa da parte.",
+    it("Risparmio costante", "Quota dello stipendio da parte",
        ["Nulla, si spende tutto", "Fino al 10%", "Circa il 20%", "Circa il 30%", "Oltre il 40%"]),
-    it("Investire nel tempo", "Quota dei risparmi messa a rendere.",
+    it("Investire nel tempo", "Quota dei risparmi investita",
        ["Tutto fermo sul conto", "Fino al 20% investito", "Circa metà investita", "Circa l'80% investito", "Quasi tutto investito"]),
-    it("Casa di proprietà", "Casa in cui vivere: affitto o acquisto.",
+    it("Casa di proprietà", "Affitto o acquisto",
        ["Affitto, per sempre", "Affitto, poi si vedrà", "Acquisto tra qualche anno", "Acquisto a breve", "Casa nostra, subito"], true),
-    it("Godersi i soldi", "Quota del budget per piaceri ed esperienze.",
+    it("Godersi i soldi", "Quota del budget per piaceri",
        ["Solo il necessario", "Circa il 5%", "Circa il 10–15%", "Circa il 20–30%", "Oltre il 30%"]),
-    it("Indipendenza dal lavoro", "Età a cui poter smettere di lavorare.",
+    it("Indipendenza dal lavoro", "Età per smettere di lavorare",
        ["Solo a 67 anni o più", "Verso i 60 anni", "Verso i 55 anni", "Verso i 50 anni", "Prima dei 45 anni"]),
-    it("Futuro dei figli", "Quanto mettere da parte per i figli.",
+    it("Futuro dei figli", "Risparmi dedicati ai figli",
        ["Nulla di dedicato", "Un piccolo fondo", "Studi pagati", "Studi e aiuto per la casa", "Un patrimonio dedicato"]),
-    it("Gestione comune", "Quanta parte del denaro è in comune.",
+    it("Gestione comune", "Quanto denaro è in comune",
        ["Conti separati", "Solo le spese comuni", "Metà dei soldi in comune", "Quasi tutto in comune", "Un solo conto per tutto"]) ] },
   { id: "career", emoji: "💼", name: "Carriera", items: [
-    it("Crescere di ruolo", "Livello di responsabilità da raggiungere.",
+    it("Crescere di ruolo", "Responsabilità da raggiungere",
        ["Resto dove sono", "Un passo avanti", "Ruolo di responsabilità", "Posizione dirigenziale", "Vertice della mia area"]),
-    it("Guadagnare di più", "Crescita del reddito rispetto a oggi.",
+    it("Guadagnare di più", "Crescita del reddito",
        ["Reddito invariato", "+10–20%", "+30–50%", "Quasi il doppio", "Più del doppio"]),
-    it("Lavoro significativo", "Quanto il lavoro deve avere uno scopo.",
+    it("Lavoro significativo", "Quanto conta lo scopo",
        ["Basta che paghi bene", "Non deve annoiarmi", "Deve appassionarmi", "Deve avere un impatto", "È la mia missione"]),
-    it("Orari sostenibili", "Ore di lavoro: più pallini, meno ore.",
+    it("Orari sostenibili", "Ore di lavoro a settimana",
        ["Oltre 55 ore a settimana", "Circa 50 ore", "Circa 45 ore", "Circa 40 ore", "Meno di 35 ore"]),
-    it("Stabilità del posto", "Quanto spesso cambiare lavoro.",
+    it("Stabilità del posto", "Ogni quanto cambiare lavoro",
        ["Rischio e cambi continui", "Cambio ogni 2–3 anni", "Cambio ogni 5 anni", "Cambio ogni 10 anni", "Un posto sicuro a vita"]),
-    it("Spostarsi per lavoro", "Distanza a cui traslocare per un'opportunità.",
+    it("Spostarsi per lavoro", "Distanza del trasloco",
        ["Non mi sposto mai", "Nella stessa regione", "In un'altra regione", "In un altro paese", "Ovunque nel mondo"], true),
-    it("Doppia carriera", "Peso della carriera dell'altro nelle scelte.",
+    it("Doppia carriera", "Peso della carriera dell'altro",
        ["Una sola guida", "Una guida, l'altra segue", "Ci alterniamo", "Entrambe contano molto", "Sempre alla pari"]),
-    it("Passo indietro", "Quanto ridurre il lavoro per la famiglia.",
+    it("Passo indietro", "Lavoro ridotto per la famiglia",
        ["Non riduco nulla", "Qualche ora in meno", "Part-time per un periodo", "Pausa lunga dal lavoro", "Smettere di lavorare"], true) ] },
   { id: "freeTime", emoji: "🌿", name: "Tempo libero", items: [
-    it("Viaggi lontani", "Viaggi lunghi ogni anno.",
+    it("Viaggi lontani", "Viaggi lunghi ogni anno",
        ["Nessun viaggio lungo", "Una settimana all'anno", "Due settimane all'anno", "Un mese all'anno", "Più di un mese all'anno"]),
-    it("Fughe brevi", "Weekend fuori porta.",
+    it("Fughe brevi", "Weekend fuori porta",
        ["Nessuno", "Uno ogni 2–3 mesi", "Uno al mese", "Due al mese", "Ogni weekend"]),
-    it("Sport e movimento", "Allenamenti a settimana.",
+    it("Sport e movimento", "Allenamenti a settimana",
        ["Nessuno", "1 a settimana", "2–3 a settimana", "4–5 a settimana", "Ogni giorno"]),
-    it("Natura all'aperto", "Tempo passato in mezzo alla natura.",
+    it("Natura all'aperto", "Tempo in mezzo alla natura",
        ["Quasi mai", "Poche volte l'anno", "Una volta al mese", "Ogni settimana", "Vivere nella natura"]),
-    it("Cultura e spettacoli", "Mostre, teatro, concerti, cinema.",
+    it("Cultura e spettacoli", "Mostre, teatro, concerti",
        ["Mai", "Poche volte l'anno", "Una volta al mese", "Una volta a settimana", "Più volte a settimana"]),
-    it("Passioni personali", "Ore a settimana per una passione tua.",
+    it("Passioni personali", "Ore a settimana per te",
        ["Nessuna", "1–2 ore", "3–5 ore", "6–10 ore", "Oltre 10 ore"]),
-    it("Momenti a due", "Serate o giornate solo per la coppia.",
+    it("Momenti a due", "Serate e giornate solo noi",
        ["Quasi mai", "Una volta al mese", "Ogni 2 settimane", "Una volta a settimana", "Più volte a settimana"]),
-    it("Ritmi tranquilli", "Quanto lasciare l'agenda vuota.",
+    it("Ritmi tranquilli", "Quanto lasciare l'agenda vuota",
        ["Agenda sempre piena", "Un weekend libero su 4", "Metà weekend liberi", "Quasi tutti i weekend liberi", "Tempo libero senza piani"]) ] }
 ];
 const DEFAULT_NAMES = { player1: "Giocatore 1", player2: "Giocatore 2" };
@@ -473,16 +477,21 @@ function viewRound(who) {
   const tray = Array.from({ length: POINTS }, () => "<i></i>").join("");
   const cats = area.items.map((item, i) => `
     <li class="cat" data-i="${i}">
-      <button class="add" data-action="add" data-i="${i}">
-        <span class="txt"><span class="label">${esc(item.t)}</span>
-          <span class="desc">${esc(item.d)}</span>
-          <span class="anch" data-end="0"><b>0</b><span>${esc(item.l[0])}</span></span>
-          <span class="anch" data-end="4"><b>10</b><span>${esc(item.l[4])}</span></span>
-          <span class="now"></span></span>
+      <div class="body">
+        <div class="txt">
+          <span class="head"><span class="label">${esc(item.t)}</span><span class="desc">${esc(item.d)}</span></span>
+          <span class="foot">
+            <span class="anch" data-end="0"><b>0</b><span>${esc(item.l[0])}</span></span>
+            <span class="anch" data-end="4"><b>10</b><span>${esc(item.l[4])}</span></span>
+            <span class="now"><b class="n">0</b><span class="lvl"></span></span>
+          </span>
+        </div>
         <span class="slots" aria-hidden="true">${"<i></i>".repeat(MAX_PER_ITEM)}</span>
-      </button>
-      <div class="ctl"><span class="badge" aria-hidden="true">0</span>
-      <button class="sub" data-action="sub" data-i="${i}" aria-label="Togli un pallino: ${esc(item.t)}">−</button></div>
+      </div>
+      <div class="ctl">
+        <button class="rbtn plus" data-action="add" data-i="${i}" aria-label="Aggiungi un pallino: ${esc(item.t)}">+</button>
+        <button class="rbtn minus" data-action="sub" data-i="${i}" aria-label="Togli un pallino: ${esc(item.t)}">−</button>
+      </div>
     </li>`).join("");
   return `<section class="screen" data-area="${area.id}">
     <div class="pips pips-s" aria-hidden="true">${pipsHtml()}</div>
@@ -507,12 +516,15 @@ function updateRound(popIndex = -1) {
   document.querySelectorAll(".cat").forEach(li => {
     const i = +li.dataset.i, n = d[i];
     li.classList.toggle("has", n > 0);
-    li.querySelector(".badge").textContent = n;
-    li.querySelector(".sub").disabled = n === 0;
     const item = AREAS[state.currentRound].items[i], lvl = levelText(item, n);
-    li.querySelector(".now").textContent = "▸ " + lvl;
+    li.querySelector(".n").textContent = n;
+    li.querySelector(".lvl").textContent = lvl;
     li.querySelectorAll(".anch").forEach(an => an.classList.toggle("on", levelIdx(n) === +an.dataset.end));
-    li.querySelector(".add").setAttribute("aria-label", `${item.t}: ${n} ${pl(n, "pallino", "pallini")} su ${MAX_PER_ITEM}, ${lvl}. Aggiungi un pallino`);
+    const plus = li.querySelector(".plus"), minus = li.querySelector(".minus");
+    plus.disabled = n >= MAX_PER_ITEM || left === 0;
+    minus.disabled = n === 0;
+    plus.setAttribute("aria-label", `Aggiungi un pallino: ${item.t}. Ora ${n} su ${MAX_PER_ITEM}, ${lvl}`);
+    minus.setAttribute("aria-label", `Togli un pallino: ${item.t}. Ora ${n} su ${MAX_PER_ITEM}, ${lvl}`);
     li.querySelectorAll(".slots i").forEach((dot, k) => {
       dot.className = (k < n ? "on" : "") + (i === popIndex && k === n - 1 ? " pop" : "");
     });
@@ -875,8 +887,6 @@ document.addEventListener("click", e => {
 document.addEventListener("input", e => { if (e.target.id === "city") state.cityNote = e.target.value; });
 document.addEventListener("keydown", e => {
   if (e.key === "Escape") closeDialog();
-  const add = e.target.closest && e.target.closest(".add");
-  if (add && (e.key === "Backspace" || e.key === "-")) { e.preventDefault(); subDot(+add.dataset.i); }
 });
 
 render();
