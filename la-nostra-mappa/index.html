@@ -128,16 +128,20 @@ h2 { font-size: clamp(26px, 5.5vw, 34px); }
 .cat { display: grid; grid-template-columns: 1fr auto; align-items: stretch; background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); box-shadow: 0 2px 0 var(--line); overflow: hidden; transition: border-color .2s, background .2s; min-width: 0; }
 .cat.has { border-color: var(--me); }
 .cat.bump { animation: bump .3s; }
-.add { text-align: left; background: none; border: 0; padding: 12px 8px 12px 16px; min-height: 92px; display: grid; gap: 6px; align-content: space-between; min-width: 0; user-select: none; -webkit-user-select: none; }
+.add { text-align: left; background: none; border: 0; padding: 12px 8px 12px 14px; min-height: 104px; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; align-items: start; min-width: 0; user-select: none; -webkit-user-select: none; }
 .add:active { background: var(--me-soft); }
-.add .row { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; }
-.add .label { font-weight: 600; font-size: 16px; line-height: 1.25; }
-.add .badge { flex: none; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 99px; display: grid; place-items: center; font-weight: 700; font-variant-numeric: tabular-nums; background: var(--line); color: var(--ink-2); }
+.txt { display: grid; gap: 5px; align-content: start; min-width: 0; }
+.add .row { display: flex; gap: 8px; align-items: flex-start; justify-content: space-between; }
+.add .label { font-weight: 600; font-size: 16px; line-height: 1.25; padding-top: 3px; }
+.add .badge { flex: none; min-width: 28px; height: 28px; padding: 0 7px; border-radius: 99px; display: grid; place-items: center; font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; background: var(--line); color: var(--ink-2); }
 .cat.has .badge { background: var(--me); color: #fff; }
-.desc { font-style: italic; font-size: 14px; line-height: 1.35; color: var(--ink-2); text-wrap: pretty; }
+.desc { font-style: italic; font-size: 13.5px; line-height: 1.35; color: var(--ink-2); text-wrap: pretty; }
 .note .desc { font-size: 13px; }
-.mine { display: flex; flex-wrap: wrap; gap: 3px; min-height: 12px; }
-.sub { width: 56px; border: 0; border-left: 2px solid var(--line); background: none; font-size: 26px; color: var(--ink-2); }
+.slots { display: grid; grid-template-columns: repeat(2, 12px); grid-template-rows: repeat(5, 12px); grid-auto-flow: column; gap: 4px; padding-top: 3px; }
+.slots i { width: 12px; height: 12px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--line-2); transition: background .15s, box-shadow .15s; }
+.slots i.on { background: var(--me); box-shadow: inset 0 -2px 0 rgba(0,0,0,.2), 0 1px 1px rgba(0,0,0,.18); }
+.slots i.pop { animation: pop .25s ease; }
+.sub { width: 46px; border: 0; border-left: 2px solid var(--line); background: none; font-size: 26px; color: var(--ink-2); }
 .sub:hover:not(:disabled) { background: var(--me-soft); color: var(--ink); }
 .sub:disabled { opacity: .25; cursor: default; }
 
@@ -226,61 +230,62 @@ h2 { font-size: clamp(26px, 5.5vw, 34px); }
    CONFIGURAZIONE — modifica qui aree, categorie e numero di pallini.
    ===================================================================== */
 const POINTS = 20;
+const MAX_PER_ITEM = 10;   // tetto per singola voce (blocco 2×5)
 const AREAS = [
   { id: "family", emoji: "👨‍👩‍👧", name: "Famiglia", items: [
-    ["Vivere vicino alle famiglie", "Abitare abbastanza vicino da vedervi senza doverlo organizzare."],
-    ["Ritmo stabile con i genitori", "Sentirsi e vedersi con regolarità, non solo nelle occasioni."],
-    ["Prendersi cura dei genitori", "Esserci, anche con impegno pratico o economico, quando ne avranno bisogno."],
-    ["Feste e rituali di famiglia", "Natale, compleanni, pranzi della domenica: tenere vive le tradizioni che contano."],
-    ["Rapporto con i suoceri", "Costruire un legame sereno e di fiducia con la famiglia dell'altra persona."],
-    ["Fratelli, cugini e parenti", "Coltivare la famiglia allargata, oltre ai genitori."],
-    ["Confini della nostra coppia", "Decidere in due, senza che le famiglie d'origine pesino sulle scelte."],
-    ["Le nostre tradizioni", "Inventare abitudini e rituali nuovi, solo nostri."] ] },
+    ["Vicinanza alle famiglie", "Abitare abbastanza vicino da vedervi spesso, senza dover organizzare ogni incontro."],
+    ["Contatto costante", "Sentirsi e vedersi con ritmo regolare, non solo per le occasioni speciali."],
+    ["Cura dei genitori", "Esserci, con tempo o aiuto economico, quando i genitori avranno bisogno di noi."],
+    ["Feste e rituali", "Natale, compleanni, pranzi della domenica: tenere vive le tradizioni di famiglia."],
+    ["Rapporto coi suoceri", "Costruire un legame di fiducia e serenità con la famiglia dell'altra persona."],
+    ["Famiglia allargata", "Fratelli, cugini, zii, nipoti: coltivare i rapporti oltre il cerchio dei genitori."],
+    ["Confini di coppia", "Decidere le cose importanti tra noi due, senza il peso delle famiglie d'origine."],
+    ["Le nostre tradizioni", "Inventare abitudini e rituali nuovi, solo nostri, che non vengano dalle famiglie."] ] },
   { id: "children", emoji: "👶", name: "Figli", items: [
-    ["Il desiderio di averne", "Quanto forte è l'idea di diventare genitori."],
-    ["Quando cominciare", "Scegliere il momento giusto, tra età, lavoro e stabilità."],
-    ["Quanti figli", "Una famiglia più raccolta o più numerosa."],
-    ["Presenza quotidiana", "Esserci per colazioni, compiti, malattie e sere: stare con loro davvero."],
-    ["Valori ed educazione", "Trasmettere una visione del mondo e un modo di crescere."],
-    ["Dividerci la cura", "Ripartire in modo equo carichi e responsabilità tra noi due."],
+    ["Desiderio di figli", "Quanto è forte, per te, l'idea di diventare genitore e crescere dei figli."],
+    ["Quando cominciare", "Trovare il momento giusto tra età, lavoro, casa e voglia di iniziare."],
+    ["Quanti figli", "Una famiglia raccolta con uno o due figli, oppure una casa più numerosa."],
+    ["Presenza quotidiana", "Esserci per colazioni, compiti, malattie e serate: passare con loro molto tempo."],
+    ["Valori ed educazione", "Decidere che visione del mondo trasmettere e con quale stile crescerli."],
+    ["Dividerci la cura", "Ripartire in modo equo carichi, notti in bianco e responsabilità tra noi due."],
     ["Rete di sostegno", "Contare su nonni, babysitter o amici per non fare tutto da soli."],
-    ["Cambiare stile di vita", "Adattare uscite, viaggi e ritmi di oggi alla vita con i figli."] ] },
+    ["Vita che cambia", "Adattare uscite, viaggi e ritmi di oggi a una vita organizzata attorno ai figli."] ] },
   { id: "friends", emoji: "🫂", name: "Amici", items: [
-    ["Amici di lunga data", "Mantenere vivi i legami storici, anche a distanza."],
-    ["Nuove amicizie", "Aprirci a persone nuove, ovunque andremo a vivere."],
-    ["Amici della coppia", "Avere un giro di amici che frequentiamo insieme."],
-    ["Amici solo miei", "Uscite e serate con i miei amici, senza il partner."],
-    ["Casa aperta", "Ospitare spesso: una cena, un aperitivo, qualcuno che si ferma a dormire."],
-    ["Vita sociale intensa", "Molte persone, molti inviti, l'agenda sempre piena."],
-    ["Poche amicizie profonde", "Pochi legami, ma solidi e con molta intimità."],
-    ["Esserci nei momenti importanti", "Matrimoni, nascite, momenti difficili: essere presenti e avere gli amici accanto."] ] },
+    ["Amici storici", "Mantenere vivi i legami di lunga data, anche quando la distanza pesa."],
+    ["Nuove amicizie", "Aprirci a persone nuove e costruire legami veri nei posti dove vivremo."],
+    ["Amici della coppia", "Avere un giro di amici che frequentiamo insieme, per uscire e cenare."],
+    ["Amici solo miei", "Avere spazio per serate e weekend con i miei amici, senza il partner."],
+    ["Casa aperta", "Ospitare spesso: una cena improvvisata, un aperitivo, chi si ferma a dormire."],
+    ["Vita sociale intensa", "Frequentare molte persone e ricevere tanti inviti, con l'agenda sempre piena."],
+    ["Poche amicizie profonde", "Preferire pochi legami solidi e intimi a una rete larga di conoscenze."],
+    ["Momenti importanti", "Esserci per gli amici nei giorni di festa e di difficoltà, e averli accanto."] ] },
   { id: "money", emoji: "💰", name: "Soldi", items: [
-    ["Tranquillità economica", "Non pensare ai soldi per le spese di ogni giorno né per gli imprevisti."],
+    ["Tranquillità economica", "Non doversi preoccupare dei soldi per le spese quotidiane né per gli imprevisti."],
     ["Risparmiare con costanza", "Mettere da parte una quota fissa ogni mese, anche rinunciando a qualcosa."],
-    ["Far crescere il patrimonio", "Investire i risparmi perché aumentino nel tempo."],
-    ["Una casa di proprietà", "Comprare una casa nostra invece di stare in affitto."],
-    ["Spendere per stare bene", "Ristoranti, viaggi, cose belle: godersi oggi ciò che si guadagna."],
-    ["Indipendenza dal lavoro", "Arrivare a poter scegliere se lavorare e quanto."],
-    ["Il futuro dei figli", "Accantonare per studi, esperienze e un buon inizio per loro."],
-    ["Gestire i soldi insieme", "Conto comune o separato, chi decide cosa, quanta trasparenza."] ] },
+    ["Investire nel tempo", "Far lavorare i risparmi con investimenti a lungo termine, per farli crescere."],
+    ["Casa di proprietà", "Comprare una casa nostra invece di stare in affitto, con impegno e rinunce."],
+    ["Godersi i soldi", "Spendere per stare bene ora: ristoranti, viaggi, cose belle da vivere oggi."],
+    ["Indipendenza dal lavoro", "Arrivare al punto in cui si può scegliere liberamente se lavorare, e quanto."],
+    ["Futuro dei figli", "Accantonare fin da subito per studi, esperienze e un buon inizio per i figli."],
+    ["Gestione comune", "Come gestire il denaro in due: conto unico o separato, chi decide cosa."] ] },
   { id: "career", emoji: "💼", name: "Carriera", items: [
-    ["Crescere di ruolo", "Salire di livello, responsabilità e riconoscimento."],
-    ["Guadagnare di più", "Far crescere lo stipendio come obiettivo in sé."],
-    ["Un lavoro che ha senso", "Fare qualcosa in cui credo, anche a costo di guadagnare meno."],
-    ["Orari sostenibili", "Un lavoro che lascia energie per la vita fuori dall'ufficio."],
-    ["Stabilità del posto", "Contratto sicuro e continuità, senza salti nel vuoto."],
-    ["Spostarsi per lavoro", "Accettare trasferimenti o esperienze in altre città e paesi."],
-    ["Due carriere che convivono", "Ognuno realizza le proprie ambizioni, senza che una passi in secondo piano."],
-    ["Un passo indietro per la famiglia", "Rallentare o rinunciare a qualcosa quando la famiglia lo richiede."] ] },
+    ["Crescere di ruolo", "Salire di livello e ottenere più responsabilità e riconoscimento."],
+    ["Guadagnare di più", "Far crescere lo stipendio nel tempo, come obiettivo in sé."],
+    ["Lavoro significativo", "Fare qualcosa in cui credo davvero, anche guadagnando meno."],
+    ["Orari sostenibili", "Un lavoro che lasci tempo ed energie per la vita fuori dall'ufficio."],
+    ["Stabilità del posto", "Un contratto sicuro e continuità, evitando salti nel vuoto e cambi improvvisi."],
+    ["Spostarsi per lavoro", "Accettare trasferimenti o esperienze in altre città e in altri paesi."],
+    ["Doppia carriera", "Far sì che entrambi realizzino le proprie ambizioni, senza passare in secondo piano."],
+    ["Passo indietro", "Rallentare o rinunciare a qualcosa nel lavoro quando la famiglia lo richiede."] ] },
   { id: "freeTime", emoji: "🌿", name: "Tempo libero", items: [
-    ["Viaggi lontani", "Vacanze lunghe, mete nuove, scoperta."],
-    ["Fughe brevi", "Weekend fuori porta, senza troppi programmi."],
-    ["Sport e movimento", "Allenarsi, correre, praticare uno sport con regolarità."],
-    ["Natura e aria aperta", "Montagna, mare, camminate: stare fuori il più possibile."],
-    ["Cultura e spettacoli", "Mostre, teatro, concerti, cinema, libri."],
-    ["Passioni personali", "Un interesse tutto mio, con tempo dedicato."],
-    ["Momenti a due", "Serate e giornate pensate solo per noi."],
-    ["Ritmi tranquilli", "Serate a casa, agenda leggera, ozio senza sensi di colpa."] ] }
+    ["Viaggi lontani", "Vacanze lunghe e mete nuove, anche dall'altra parte del mondo."],
+    ["Fughe brevi", "Weekend fuori porta e gite improvvisate, senza troppi programmi."],
+    ["Sport e movimento", "Allenarsi, correre, praticare uno sport con regolarità ogni settimana."],
+    ["Natura all'aperto", "Montagna, mare, camminate: passare più tempo possibile fuori dalla città."],
+    ["Cultura e spettacoli", "Mostre, teatro, concerti, cinema, libri: riempire il tempo di stimoli."],
+    ["Passioni personali", "Coltivare un interesse tutto mio, con tempo dedicato che non sempre si condivide."],
+    ["Momenti a due", "Serate e giornate pensate solo per noi, senza altri impegni di mezzo."],
+    ["Ritmi tranquilli", "Serate a casa, agenda leggera, giornate lente, senza sensi di colpa per il riposo."] ] }
 ];
 const DEFAULT_NAMES = { player1: "Giocatore 1", player2: "Giocatore 2" };
 /* Soglie di lettura dei risultati (differenza in pallini tra i due giocatori per una categoria) */
@@ -382,9 +387,9 @@ function viewRound(who) {
   const cats = area.items.map(([label, desc], i) => `
     <li class="cat" data-i="${i}">
       <button class="add" data-action="add" data-i="${i}">
-        <span class="row"><span class="label">${esc(label)}</span><span class="badge">0</span></span>
-        <span class="desc">${esc(desc)}</span>
-        <span class="mine"></span>
+        <span class="txt"><span class="row"><span class="label">${esc(label)}</span><span class="badge">0</span></span>
+        <span class="desc">${esc(desc)}</span></span>
+        <span class="slots" aria-hidden="true">${"<i></i>".repeat(MAX_PER_ITEM)}</span>
       </button>
       <button class="sub" data-action="sub" data-i="${i}" aria-label="Togli un pallino: ${esc(label)}">−</button>
     </li>`).join("");
@@ -415,8 +420,9 @@ function updateRound(popIndex = -1) {
     li.querySelector(".sub").disabled = n === 0;
     const label = AREAS[state.currentRound].items[i][0];
     li.querySelector(".add").setAttribute("aria-label", `${label}: ${n} ${pl(n, "pallino", "pallini")}. Aggiungi un pallino`);
-    li.querySelector(".mine").innerHTML = Array.from({ length: n }, (_, k) =>
-      `<i class="dot${i === popIndex && k === n - 1 ? " pop" : ""}"></i>`).join("");
+    li.querySelectorAll(".slots i").forEach((dot, k) => {
+      dot.className = (k < n ? "on" : "") + (i === popIndex && k === n - 1 ? " pop" : "");
+    });
   });
   document.getElementById("msg").textContent = left === 0 ? "Hai distribuito tutti i pallini." : "";
   document.getElementById("confirm").disabled = left !== 0;
@@ -563,6 +569,7 @@ function viewResults() {
 function addDot(i) {
   if (!state.draft) return;
   if (sum(state.draft) >= POINTS) { bump(document.getElementById("trayCard")); return; }
+  if (state.draft[i] >= MAX_PER_ITEM) { bump(document.querySelector(`.cat[data-i="${i}"]`)); return; }
   state.draft[i]++;
   updateRound(i);
 }
