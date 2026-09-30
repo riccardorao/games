@@ -134,8 +134,8 @@ h2 { font-size: clamp(26px, 5.5vw, 34px); }
 .desc { font-style: italic; font-size: 12.5px; line-height: 1.3; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.6em; }
 .note .desc { font-size: 13px; display: block; min-height: 0; }
 /* la risposta sta sempre in fondo, in corsivo */
-.now { font-style: italic; font-size: 13px; line-height: 1.3; font-weight: 600; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.cat.has .now { color: var(--me); }
+.answer { font-style: italic; font-size: 13px; line-height: 1.3; font-weight: 600; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.cat.has .answer { color: var(--me); }
 .slots { display: grid; grid-template-columns: repeat(2, var(--dot)); grid-template-rows: repeat(5, var(--dot)); grid-auto-flow: column; gap: var(--gap); }
 .slots i { width: var(--dot); height: var(--dot); border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--line-2); transition: background .15s, box-shadow .15s; }
 .slots i.on { background: var(--me); box-shadow: inset 0 -2px 0 rgba(0,0,0,.2), 0 1px 1px rgba(0,0,0,.18); }
@@ -297,7 +297,7 @@ const AREAS = [
        ["Facciamo tutto da soli", "Aiuto solo per emergenze", "Aiuto ogni settimana", "Aiuto quasi ogni giorno", "Rete sempre disponibile"]),
     it("Vita che cambia", "Quanto vorresti cambiare le tue abitudini per loro?",
        ["Nulla cambia", "Cambia qualche serata", "Cambia metà della vita", "Cambia quasi tutto", "Si vive attorno a loro"]) ] },
-  { id: "friends", emoji: "🧑‍🤝‍🧑", name: "Amici", items: [
+  { id: "friends", emoji: "🫂", name: "Amici", items: [
     it("Amici storici", "Quanto spesso vorresti vedere gli amici di sempre?",
        ["Una o due volte l'anno", "Ogni 2–3 mesi", "Una volta al mese", "Ogni settimana", "Quasi ogni giorno"]),
     it("Nuove amicizie", "Quante persone nuove vorresti conoscere ogni anno?",
@@ -472,7 +472,7 @@ function viewRound(who) {
       <div class="body">
         <div class="txt">
           <span class="head"><span class="label">${esc(item.t)}</span><span class="desc">${esc(item.d)}</span></span>
-          <span class="now"></span>
+          <span class="answer"></span>
         </div>
         <span class="slots" aria-hidden="true">${"<i></i>".repeat(MAX_PER_ITEM)}</span>
       </div>
@@ -505,7 +505,7 @@ function updateRound(popIndex = -1) {
     const i = +li.dataset.i, n = d[i];
     li.classList.toggle("has", n > 0);
     const item = AREAS[state.currentRound].items[i], lvl = levelText(item, n);
-    li.querySelector(".now").textContent = lvl;
+    li.querySelector(".answer").textContent = lvl;
     const plus = li.querySelector(".plus"), minus = li.querySelector(".minus");
     plus.disabled = n >= MAX_PER_ITEM || left === 0;
     minus.disabled = n === 0;
