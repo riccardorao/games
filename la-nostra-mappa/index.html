@@ -125,23 +125,24 @@ h2 { font-size: clamp(26px, 5.5vw, 34px); }
 
 .cats { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; grid-template-columns: 1fr; }
 @media (min-width: 640px) { .cats { grid-template-columns: 1fr 1fr; } }
-.cat { display: grid; grid-template-columns: 1fr auto; align-items: stretch; background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); box-shadow: 0 2px 0 var(--line); overflow: hidden; transition: border-color .2s, background .2s; min-width: 0; }
+/* Altezza della carta = altezza della colonna verticale di 5 pallini (uguale per ogni voce) */
+.cat { --dot: 15px; --gap: 6px; --pad: 11px; height: calc(5 * var(--dot) + 4 * var(--gap) + 2 * var(--pad) + 4px); display: grid; grid-template-columns: minmax(0, 1fr) auto; background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); box-shadow: 0 2px 0 var(--line); overflow: hidden; transition: border-color .2s, background .2s; min-width: 0; }
 .cat.has { border-color: var(--me); }
 .cat.bump { animation: bump .3s; }
-.add { text-align: left; background: none; border: 0; padding: 12px 8px 12px 14px; min-height: 104px; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; align-items: start; min-width: 0; user-select: none; -webkit-user-select: none; }
+.add { text-align: left; background: none; border: 0; padding: var(--pad) 8px var(--pad) 14px; height: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; align-items: start; min-width: 0; user-select: none; -webkit-user-select: none; }
 .add:active { background: var(--me-soft); }
-.txt { display: grid; gap: 5px; align-content: start; min-width: 0; }
-.add .row { display: flex; gap: 8px; align-items: flex-start; justify-content: space-between; }
-.add .label { font-weight: 600; font-size: 16px; line-height: 1.25; padding-top: 3px; }
-.add .badge { flex: none; min-width: 28px; height: 28px; padding: 0 7px; border-radius: 99px; display: grid; place-items: center; font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; background: var(--line); color: var(--ink-2); }
-.cat.has .badge { background: var(--me); color: #fff; }
+.txt { display: grid; gap: 4px; align-content: start; min-width: 0; height: 100%; overflow: hidden; }
+.add .label { font-weight: 600; font-size: 15.5px; line-height: 1.25; }
 .desc { font-style: italic; font-size: 13.5px; line-height: 1.35; color: var(--ink-2); text-wrap: pretty; }
 .note .desc { font-size: 13px; }
-.slots { display: grid; grid-template-columns: repeat(2, 12px); grid-template-rows: repeat(5, 12px); grid-auto-flow: column; gap: 4px; padding-top: 3px; }
-.slots i { width: 12px; height: 12px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--line-2); transition: background .15s, box-shadow .15s; }
+.slots { display: grid; grid-template-columns: repeat(2, var(--dot)); grid-template-rows: repeat(5, var(--dot)); grid-auto-flow: column; gap: var(--gap); }
+.slots i { width: var(--dot); height: var(--dot); border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--line-2); transition: background .15s, box-shadow .15s; }
 .slots i.on { background: var(--me); box-shadow: inset 0 -2px 0 rgba(0,0,0,.2), 0 1px 1px rgba(0,0,0,.18); }
 .slots i.pop { animation: pop .25s ease; }
-.sub { width: 46px; border: 0; border-left: 2px solid var(--line); background: none; font-size: 26px; color: var(--ink-2); }
+.ctl { width: 46px; display: grid; grid-template-rows: auto 1fr; justify-items: center; border-left: 2px solid var(--line); }
+.badge { margin-top: 8px; min-width: 28px; height: 28px; padding: 0 7px; border-radius: 99px; display: grid; place-items: center; font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; background: var(--line); color: var(--ink-2); }
+.cat.has .badge { background: var(--me); color: #fff; }
+.sub { width: 100%; min-height: 44px; border: 0; background: none; font-size: 26px; color: var(--ink-2); }
 .sub:hover:not(:disabled) { background: var(--me-soft); color: var(--ink); }
 .sub:disabled { opacity: .25; cursor: default; }
 
@@ -387,11 +388,12 @@ function viewRound(who) {
   const cats = area.items.map(([label, desc], i) => `
     <li class="cat" data-i="${i}">
       <button class="add" data-action="add" data-i="${i}">
-        <span class="txt"><span class="row"><span class="label">${esc(label)}</span><span class="badge">0</span></span>
+        <span class="txt"><span class="label">${esc(label)}</span>
         <span class="desc">${esc(desc)}</span></span>
         <span class="slots" aria-hidden="true">${"<i></i>".repeat(MAX_PER_ITEM)}</span>
       </button>
-      <button class="sub" data-action="sub" data-i="${i}" aria-label="Togli un pallino: ${esc(label)}">−</button>
+      <div class="ctl"><span class="badge" aria-hidden="true">0</span>
+      <button class="sub" data-action="sub" data-i="${i}" aria-label="Togli un pallino: ${esc(label)}">−</button></div>
     </li>`).join("");
   return `<section class="screen" data-area="${area.id}">
     <div class="pips" aria-hidden="true">${pips}</div>
