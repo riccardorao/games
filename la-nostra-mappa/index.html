@@ -52,7 +52,7 @@ main:focus { outline: none; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* ---------- header ---------- */
-.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 14px; min-height: 64px; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 6px; min-height: 52px; }
 .brand { font-family: var(--display); font-weight: 700; font-size: 17px; letter-spacing: .01em; white-space: nowrap; flex: none; }
 .top-r { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .who { flex: 0 1 auto; display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 99px; background: var(--me-soft); font-size: 14px; font-weight: 600; min-width: 0; }
@@ -101,26 +101,24 @@ h2 { font-size: clamp(26px, 5.5vw, 34px); }
 @keyframes pop { 0% { transform: scale(.2); } 70% { transform: scale(1.25); } 100% { transform: scale(1); } }
 
 /* ---------- round ---------- */
-.pips { display: flex; justify-content: space-between; gap: 6px; padding-bottom: 12px; }
-.pip { flex: 1; display: grid; place-items: center; height: 38px; border-radius: 12px; font-size: 18px; background: transparent; border: 1.5px dashed var(--line-2); filter: grayscale(1); opacity: .55; }
+.pips { display: flex; justify-content: space-between; gap: 6px; padding-bottom: 6px; }
+.pip { flex: 1; display: grid; place-items: center; height: 30px; border-radius: 10px; font-size: 16px; background: transparent; border: 1.5px dashed var(--line-2); filter: grayscale(1); opacity: .55; }
 .pip.done { background: var(--me-soft); border: 1.5px solid transparent; filter: none; opacity: .9; }
 .pip.now { background: var(--surface); border: 2px solid var(--me); filter: none; opacity: 1; box-shadow: 0 2px 0 var(--me); }
 
-.tray-wrap { position: sticky; top: 0; z-index: 5; margin-inline: -16px; padding: 10px 16px 12px; background: linear-gradient(var(--bg) 82%, transparent); }
-.tray-card { background: var(--surface); border: 2px solid var(--line-2); border-radius: var(--radius); box-shadow: 0 3px 0 var(--line-2); padding: 12px 16px; display: flex; align-items: center; gap: 16px; }
+.tray-wrap { position: sticky; top: 0; z-index: 5; margin-inline: -16px; padding: 4px 16px 8px; background: linear-gradient(var(--bg) 85%, transparent); }
+.tray-card { background: var(--surface); border: 2px solid var(--line-2); border-radius: 16px; box-shadow: 0 2px 0 var(--line-2); padding: 8px 12px; display: flex; align-items: center; gap: 12px; }
 .tray-card.bump { animation: bump .3s; }
-@keyframes bump { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-.tray-count { display: grid; min-width: 78px; }
-.tray-count b { font-family: var(--display); font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums; }
+.tray-count { display: flex; align-items: baseline; gap: 5px; flex: none; white-space: nowrap; }
+.tray-count b { font-family: var(--display); font-size: 24px; line-height: 1; font-variant-numeric: tabular-nums; min-width: 1.2ch; text-align: right; }
 .tray-count span { font-size: 13px; color: var(--ink-2); }
-.tray-count small { font-size: 11px; color: var(--ink-2); letter-spacing: .04em; }
-.tray { flex: 1; display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; max-width: 340px; margin-left: auto; }
-.tray i { aspect-ratio: 1; border-radius: 50%; background: var(--me); box-shadow: inset 0 -2px 0 rgba(0,0,0,.2), 0 1px 1px rgba(0,0,0,.18); transition: background .2s, box-shadow .2s, transform .2s; max-width: 26px; }
-.tray i.spent { background: transparent; box-shadow: inset 0 0 0 2px var(--line-2); transform: scale(.78); }
+.tray { flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(20, 1fr); gap: 3px; align-items: center; }
+.tray i { width: 100%; max-width: 16px; justify-self: center; aspect-ratio: 1; border-radius: 50%; background: var(--me); box-shadow: inset 0 -2px 0 rgba(0,0,0,.2), 0 1px 1px rgba(0,0,0,.18); transition: background .2s, box-shadow .2s, transform .2s; }
+.tray i.spent { background: transparent; box-shadow: inset 0 0 0 1.5px var(--line-2); transform: scale(.8); }
 
-.area-title { display: flex; align-items: center; gap: 14px; padding: 14px 0 16px; }
-.area-title .em { font-size: 38px; line-height: 1; }
-.area-title h2 { letter-spacing: .05em; text-transform: uppercase; font-size: clamp(22px, 5vw, 28px); }
+.area-title { display: flex; align-items: center; gap: 12px; padding: 4px 0 10px; }
+.area-title .em { font-size: 30px; line-height: 1; }
+.area-title h2 { letter-spacing: .05em; text-transform: uppercase; font-size: clamp(20px, 5vw, 26px); }
 .area-title p { margin: 2px 0 0; font-size: 13px; color: var(--ink-2); }
 
 .cats { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; grid-template-columns: 1fr; }
@@ -215,10 +213,14 @@ h2 { font-size: clamp(26px, 5.5vw, 34px); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+.pips-h { display: none; flex: 0 1 300px; padding: 0; }
+.pips-h .pip { height: 30px; }
+@media (min-width: 640px) {
+  .pips-h { display: flex; }
+  .pips-s { display: none; }
+}
 @media (max-width: 420px) {
-  .tray-card { gap: 10px; padding: 10px 12px; }
-  .tray-count { min-width: 64px; }
-  .tray-count b { font-size: 34px; }
+  .tray-card { gap: 8px; padding: 8px 10px; }
 }
 </style>
 </head>
@@ -344,9 +346,15 @@ function render() {
   if (m && state.phase !== "setup") m.focus({ preventScroll: true });
 }
 
+function pipsHtml() {
+  return AREAS.map((a, i) =>
+    `<span class="pip ${i < state.currentRound ? "done" : i === state.currentRound ? "now" : ""}">${a.emoji}</span>`).join("");
+}
 function header(who) {
+  const inRound = who && state.step === "round";
   const chip = who ? `<span class="who"><i></i><span>${esc(nameOf(who))}</span></span>` : "";
   return `<header class="top"><div class="brand">La nostra mappa</div>
+    ${inRound ? `<div class="pips pips-h" aria-hidden="true">${pipsHtml()}</div>` : ""}
     <div class="top-r">${chip}<button class="link" data-action="ask-reset">Ricomincia</button></div></header>`;
 }
 
@@ -382,8 +390,6 @@ function viewTurnIntro(who) {
 
 function viewRound(who) {
   const area = AREAS[state.currentRound];
-  const pips = AREAS.map((a, i) =>
-    `<span class="pip ${i < state.currentRound ? "done" : i === state.currentRound ? "now" : ""}">${a.emoji}</span>`).join("");
   const tray = Array.from({ length: POINTS }, () => "<i></i>").join("");
   const cats = area.items.map(([label, desc], i) => `
     <li class="cat" data-i="${i}">
@@ -396,9 +402,9 @@ function viewRound(who) {
       <button class="sub" data-action="sub" data-i="${i}" aria-label="Togli un pallino: ${esc(label)}">−</button></div>
     </li>`).join("");
   return `<section class="screen" data-area="${area.id}">
-    <div class="pips" aria-hidden="true">${pips}</div>
+    <div class="pips pips-s" aria-hidden="true">${pipsHtml()}</div>
     <div class="tray-wrap"><div class="tray-card" id="trayCard">
-      <div class="tray-count"><b id="left">${POINTS}</b><span id="leftLbl">rimasti</span><small>su ${POINTS} pallini</small></div>
+      <div class="tray-count"><b id="left">${POINTS}</b><span id="leftLbl">rimasti</span></div>
       <div class="tray" id="tray" aria-hidden="true">${tray}</div>
     </div></div>
     <div class="area-title"><span class="em" aria-hidden="true">${area.emoji}</span>
