@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>La nostra mappa</title>
+<title>Metà Strada</title>
 <style>
 /* Layout: una colonna centrata da "tavolo da gioco"; carte con bordo pieno e ombra netta, pallini come gettoni. */
 :root {
@@ -53,7 +53,29 @@ main:focus { outline: none; }
 
 /* ---------- header ---------- */
 .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 6px; min-height: 52px; }
-.brand { font-family: var(--display); font-weight: 700; font-size: 17px; letter-spacing: .01em; white-space: nowrap; flex: none; }
+.brand { display: flex; align-items: center; gap: 9px; font-family: var(--display); font-weight: 700; font-size: 18px; letter-spacing: .01em; white-space: nowrap; flex: none; }
+.logo { display: inline-flex; align-items: center; }
+.logo .dot { width: 11px; height: 11px; }
+.lg-bar { width: 12px; height: 5px; margin: 0 -2px; background: var(--mid); border-radius: 3px; }
+.logo.big .dot { width: 24px; height: 24px; }
+.logo.big .lg-bar { width: 44px; height: 9px; margin: 0 -3px; transform-origin: center; animation: grow 1.1s ease-out both; }
+.logo.big .dot.p1 { animation: meetL 1.1s cubic-bezier(.2,.9,.3,1.2) both; }
+.logo.big .dot.p2 { animation: meetR 1.1s cubic-bezier(.2,.9,.3,1.2) both; }
+@keyframes meetL { from { transform: translateX(-46px); } }
+@keyframes meetR { from { transform: translateX(46px); } }
+@keyframes grow { from { transform: scaleX(0); } }
+.tag { margin: 0; font-family: var(--display); font-size: 20px; color: var(--ink-2); }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
+.steps span { background: var(--surface); border: 2px solid var(--line); border-radius: 16px; padding: 10px 4px; display: grid; gap: 4px; font-size: 13px; font-weight: 600; box-shadow: 0 2px 0 var(--line); }
+.steps b { font-size: 26px; line-height: 1; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
+.small-steps b { font-size: 22px; font-family: var(--display); color: var(--me); }
+.center > * { position: relative; z-index: 2; }
+.confetti { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
+.confetti i { position: absolute; top: -20px; border-radius: 50%; animation: fall linear both; }
+.confetti .c0 { background: var(--p1); } .confetti .c1 { background: var(--p2); } .confetti .c2 { background: var(--mid); } .confetti .c3 { background: var(--ok); } .confetti .c4 { background: var(--talk); }
+@keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+.toast { position: fixed; top: calc(14px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 60; background: var(--ink); color: var(--bg); padding: 10px 20px; border-radius: 99px; font-weight: 700; white-space: nowrap; box-shadow: 0 4px 0 rgba(0,0,0,.25); animation: toast 1.9s ease both; }
+@keyframes toast { 0% { transform: translate(-50%, -34px); opacity: 0; } 12%, 80% { transform: translate(-50%, 0); opacity: 1; } 100% { transform: translate(-50%, -34px); opacity: 0; } }
 .top-r { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .who { flex: 0 1 auto; display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 99px; background: var(--me-soft); font-size: 14px; font-weight: 600; min-width: 0; }
 .who i { width: 10px; height: 10px; border-radius: 50%; background: var(--me); flex: none; }
@@ -101,27 +123,33 @@ h2 { font-size: clamp(26px, 5.5vw, 34px); }
 @keyframes pop { 0% { transform: scale(.2); } 70% { transform: scale(1.25); } 100% { transform: scale(1); } }
 
 /* ---------- round ---------- */
-.pips { display: flex; justify-content: space-between; gap: 6px; padding-bottom: 6px; }
+.pips { display: flex; justify-content: space-between; gap: 6px; padding-block: 7px 6px; }
 .pip { flex: 1; display: grid; place-items: center; height: 34px; border-radius: 12px; font-size: 18px; line-height: 1; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; background: transparent; border: 2px solid var(--line); opacity: .5; }
+.pip { position: relative; }
 .pip.done { background: var(--me-soft); border-color: transparent; opacity: 1; }
-.pip.now { background: var(--surface); border-color: var(--me); opacity: 1; box-shadow: 0 2px 0 var(--me); }
+.pip.done::after { content: "✓"; position: absolute; right: -3px; top: -6px; width: 16px; height: 16px; border-radius: 50%; background: var(--me); color: #fff; font: 700 10px/16px system-ui, sans-serif; text-align: center; }
+@keyframes pulse { 50% { box-shadow: 0 2px 0 var(--me), 0 0 0 5px color-mix(in srgb, var(--me) 20%, transparent); } }
+.pip.now { background: var(--surface); border-color: var(--me); opacity: 1; box-shadow: 0 2px 0 var(--me); animation: pulse 1.8s ease-in-out infinite; }
 
 .area-title { display: flex; align-items: center; gap: 12px; padding: 4px 0 10px; }
 .area-title .em { font-size: 30px; line-height: 1; }
-.area-title h2 { letter-spacing: .05em; text-transform: uppercase; font-size: clamp(20px, 5vw, 26px); }
+.area-title h2 { font-size: clamp(22px, 5.5vw, 28px); }
 
 .cats { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; grid-template-columns: 1fr; }
 @media (min-width: 640px) { .cats { grid-template-columns: 1fr 1fr; } }
 /* Altezza della carta = altezza della colonna verticale di 5 pallini (uguale per ogni voce) */
-.cat { --dot: 15px; --gap: 6px; --pad: 11px; height: calc(5 * var(--dot) + 4 * var(--gap) + 2 * var(--pad) + 4px); display: grid; grid-template-columns: minmax(0, 1fr) auto; background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); box-shadow: 0 2px 0 var(--line); overflow: hidden; transition: border-color .2s, background .2s; min-width: 0; }
+.cat { --dot: 14px; --gap: 5px; --pad: 11px; height: calc(5 * var(--dot) + 4 * var(--gap) + 2 * var(--pad) + 4px); display: grid; grid-template-columns: minmax(0, 1fr) auto; background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); box-shadow: 0 2px 0 var(--line); overflow: hidden; transition: border-color .2s, background .2s; min-width: 0; }
 .cat.has { border-color: var(--me); }
 .cat.bump { animation: bump .3s; }
 .body { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px; align-items: start; padding: var(--pad) 6px var(--pad) 12px; height: 100%; min-width: 0; }
 /* titolo e sottotitolo in alto; scala e valore dinamico ancorati in basso */
 .txt { display: flex; flex-direction: column; justify-content: space-between; min-width: 0; height: 100%; overflow: hidden; }
 .head { display: grid; gap: 4px; min-width: 0; }
-.label { font-weight: 600; font-size: 15.5px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.desc { font-style: italic; font-size: 12.5px; line-height: 1.3; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.6em; }
+.label { display: flex; align-items: center; gap: 7px; font-weight: 600; font-size: 15px; line-height: 1.25; min-width: 0; }
+.label > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.ico { flex: none; font-style: normal; font-size: 17px; line-height: 1; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
+.cat.max .label::after { content: "★"; flex: none; margin-left: auto; color: #d49a1a; font-size: 14px; }
+.desc { font-style: italic; font-size: 12.5px; line-height: 1.3; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* la risposta sta sempre in fondo, in corsivo */
 .answer { font-style: italic; font-size: 13px; line-height: 1.3; font-weight: 600; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .cat.has .answer { color: var(--me); }
@@ -180,7 +208,7 @@ h2 { font-size: clamp(26px, 5.5vw, 34px); }
 .map-area { background: var(--surface); border: 2px solid var(--line); border-radius: 20px; padding: 10px 10px 6px; scroll-margin-top: 12px; }
 .map-area > header { display: flex; align-items: center; gap: 10px; padding: 2px 4px 8px; }
 .map-area .em { font-size: 22px; }
-.map-area h3 { font-size: 15px; letter-spacing: .07em; text-transform: uppercase; margin-right: auto; }
+.map-area h3 { font-size: 17px; margin-right: auto; }
 .map-area .stk { width: 64px; flex: none; }
 .rw { border-top: 1.5px solid var(--line); border-radius: 0; }
 .rw summary { list-style: none; display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 4px; cursor: pointer; }
@@ -195,6 +223,12 @@ h2 { font-size: clamp(26px, 5.5vw, 34px); }
 .pt.p1 { background: var(--p1); } .pt.p2 { background: var(--p2); }
 .rw.eq .pt.p1 { margin-left: -11px; } .rw.eq .pt.p2 { margin-left: -3px; }
 .rw.none summary { opacity: .5; }
+.rw .pt { animation: ptIn .8s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--n) * 35ms); }
+.rw .rw-bar { animation: barIn .8s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--n) * 35ms); }
+@keyframes ptIn { from { left: 7px; } }
+@keyframes barIn { from { left: 7px; width: 0; } }
+.medal { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--ok-soft); font-size: 15px; line-height: 1; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
+.qq .ico { font-size: 15px; margin-right: 2px; }
 .rw[open] { background: color-mix(in srgb, var(--bg) 50%, var(--surface)); border-radius: 12px; }
 .rw.flash { animation: flash 1.4s ease; }
 @keyframes flash { 0%, 55% { background: var(--mid-soft); } }
@@ -230,16 +264,6 @@ h2 { font-size: clamp(26px, 5.5vw, 34px); }
 .ev b { font-weight: 600; margin-right: 2px; }
 .ev .dot { width: 9px; height: 9px; }
 
-/* dove */
-.needs { display: flex; flex-wrap: wrap; gap: 8px; }
-.needs span { padding: 6px 14px; border-radius: 99px; background: rgba(255,250,240,.14); border: 1.5px solid rgba(255,250,240,.28); font-size: 14px; color: var(--bg); }
-.city { background: var(--ink); color: var(--bg); border-radius: 28px; padding: 24px 18px; display: grid; gap: 14px; margin-top: 30px; }
-.city h2 { font-size: clamp(24px, 6vw, 32px); }
-.city p { margin: 0; color: #d9ccb8; }
-.city .q { font-family: var(--display); font-size: 19px; color: var(--bg); }
-.city .field label { color: #d9ccb8; }
-.city .field input { background: var(--surface); border-color: transparent; color: var(--ink); }
-
 /* ---------- modale ---------- */
 .scrim { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; background: rgba(36,29,25,.55); animation: fade .2s both; }
 @keyframes fade { from { opacity: 0; } }
@@ -270,114 +294,114 @@ h2 { font-size: clamp(26px, 5.5vw, 34px); }
    CONFIGURAZIONE — modifica qui aree, categorie e numero di pallini.
    ===================================================================== */
 const MAX_PER_ITEM = 10;   // ogni voce va da 0 a 10 pallini; non c'è un tetto sul totale
-/* Ogni voce ha un titolo (max 3 parole), una definizione e 5 livelli concreti della scala 0–10:
+/* Ogni voce ha titolo (max 3 parole, iniziali maiuscole), icona, domanda breve e 5 livelli concreti della scala 0–10:
    0 pallini | 1–3 | 4–6 | 7–9 | 10 pallini.   Più pallini = più di quella cosa nella vostra vita.
    crit = tema di fondo: pesa di più quando emerge una differenza. */
-const it = (t, d, l, crit = false) => ({ t, d, l, crit });
+const it = (t, ico, d, l, crit = false) => ({ t, ico, d, l, crit });
 const levelIdx = n => n <= 0 ? 0 : n >= MAX_PER_ITEM ? 4 : n <= 3 ? 1 : n <= 6 ? 2 : 3;
 const levelText = (item, n) => item.l[levelIdx(n)];
 const AREAS = [
   { id: "family", emoji: "👨‍👩‍👧", name: "Famiglia", items: [
-    it("Vicinanza alle famiglie", "Quanto vicino vorresti vivere alle famiglie?",
+    it("Vicinanza alle Famiglie", "🏘️", "Quanto vicino vorresti vivere?",
        ["Oltre 3 ore di viaggio", "Fino a 3 ore di viaggio", "Entro 1–2 ore", "Entro 30–45 minuti", "Nello stesso quartiere"], true),
-    it("Contatto costante", "Quanto spesso vorresti vedere o sentire i genitori?",
+    it("Contatto Costante", "📞", "Quanto spesso vi sentite?",
        ["Solo nelle occasioni", "Una volta al mese", "Ogni settimana", "Più volte a settimana", "Ogni giorno"]),
-    it("Cura dei genitori", "Quanto vorresti occuparti dei genitori quando invecchiano?",
+    it("Cura dei Genitori", "🧓", "Quanto ti occuperai di loro?",
        ["Nessun impegno diretto", "Aiuto economico se serve", "Presenza regolare", "Aiuto pratico costante", "Accoglierli in casa nostra"]),
-    it("Feste e rituali", "Quante feste vorresti passare con le famiglie?",
+    it("Feste e Rituali", "🎄", "Quante feste insieme?",
        ["Nessuna in particolare", "Solo le più importanti", "Circa metà delle feste", "Quasi tutte le feste", "Ogni festa e ricorrenza"]),
-    it("Rapporto coi suoceri", "Che rapporto vorresti avere con i suoceri?",
+    it("Rapporto coi Suoceri", "🤝", "Che rapporto vorresti?",
        ["Rapporto formale", "Cordiale, poco frequente", "Confidenza e visite fisse", "Molto vicini, vita comune", "Come di famiglia"]),
-    it("Famiglia allargata", "Quanto vorresti coinvolgere fratelli, cugini e zii?",
+    it("Famiglia Allargata", "🌳", "Quanto coinvolgere i parenti?",
        ["Solo la famiglia stretta", "Qualche incontro all'anno", "Un ritrovo al mese", "Un ritrovo a settimana", "Sempre insieme, un clan"]),
-    it("Confini di coppia", "Quanto vorreste decidere da soli, senza le famiglie?",
+    it("Confini di Coppia", "🚧", "Quanto decidere da soli?",
        ["Decidono con noi", "Le ascoltiamo su tutto", "Ascoltiamo e decidiamo", "Decidiamo e informiamo", "Decidiamo solo in due"]),
-    it("Le nostre tradizioni", "Quante tradizioni tutte vostre vorreste inventare?",
+    it("Le Nostre Tradizioni", "🕯️", "Quanti rituali tutti vostri?",
        ["Solo quelle di famiglia", "Qualche rito tutto nostro", "Un mix con le nostre", "Molte abitudini nostre", "Un calendario tutto nostro"]) ] },
   { id: "children", emoji: "👶", name: "Figli", items: [
-    it("Desiderio di figli", "Quanto forte è il tuo desiderio di diventare genitore?",
+    it("Desiderio di Figli", "💛", "Quanto forte è il desiderio?",
        ["Non ne voglio", "Ci sto ancora pensando", "Mi piacerebbe", "Lo desidero molto", "È un progetto centrale"], true),
-    it("Quando cominciare", "Entro quando vorreste iniziare a provarci?",
+    it("Quando Cominciare", "⏳", "Entro quando iniziare?",
        ["Non è nei piani", "Tra oltre 5 anni", "Tra 3 e 5 anni", "Entro 2 anni", "Il prima possibile"], true),
-    it("Quanti figli", "Quanti figli vorresti avere?",
+    it("Quanti Figli", "🧸", "Quanti ne vorresti?",
        ["Nessuno", "Uno", "Due", "Tre", "Quattro o più"], true),
-    it("Presenza quotidiana", "Quanto tempo vorresti dedicare ai figli ogni giorno?",
+    it("Presenza Quotidiana", "🕰️", "Quanto tempo con loro?",
        ["Solo nel weekend", "Qualche ora la sera", "Mattina e sera", "Gran parte della giornata", "Un genitore sempre a casa"]),
-    it("Valori ed educazione", "Quanto vorresti dare un'impronta educativa precisa?",
+    it("Valori ed Educazione", "🎓", "Quanto conta l'educazione?",
        ["Scelgono da soli", "Poche regole di base", "Valori chiari e discussi", "Impronta educativa forte", "Progetto educativo preciso"]),
-    it("Dividerci la cura", "Come vorreste dividervi la cura dei figli?",
+    it("Dividerci la Cura", "⚖️", "Come dividervi la cura?",
        ["Uno fa quasi tutto", "70% e 30%", "60% e 40%", "Quasi 50 e 50", "50 e 50, sempre"], true),
-    it("Rete di sostegno", "Su che aiuto esterno vorresti poter contare?",
+    it("Rete di Sostegno", "🕸️", "Che aiuto esterno vorresti?",
        ["Facciamo tutto da soli", "Aiuto solo per emergenze", "Aiuto ogni settimana", "Aiuto quasi ogni giorno", "Rete sempre disponibile"]),
-    it("Vita che cambia", "Quanto vorresti cambiare le tue abitudini per loro?",
+    it("Vita che Cambia", "🔄", "Quanto cambiano le abitudini?",
        ["Nulla cambia", "Cambia qualche serata", "Cambia metà della vita", "Cambia quasi tutto", "Si vive attorno a loro"]) ] },
   { id: "friends", emoji: "🫂", name: "Amici", items: [
-    it("Amici storici", "Quanto spesso vorresti vedere gli amici di sempre?",
+    it("Amici Storici", "📸", "Quanto spesso li vedi?",
        ["Una o due volte l'anno", "Ogni 2–3 mesi", "Una volta al mese", "Ogni settimana", "Quasi ogni giorno"]),
-    it("Nuove amicizie", "Quante persone nuove vorresti conoscere ogni anno?",
+    it("Nuove Amicizie", "👋", "Quante nuove ogni anno?",
        ["Nessuna nuova", "1–2 nuove all'anno", "3–5 nuove all'anno", "6–10 nuove all'anno", "Sempre nuove conoscenze"]),
-    it("Amici di coppia", "Con quante coppie di amici vorreste uscire insieme?",
+    it("Amici di Coppia", "🥂", "Quante coppie di amici?",
        ["Nessuna coppia", "Una coppia", "Due o tre coppie", "Quattro–sei coppie", "Un grande gruppo"]),
-    it("Amici solo miei", "Quanto tempo vorresti con i tuoi amici, senza il partner?",
+    it("Amici Solo Miei", "🍻", "Quanto tempo senza partner?",
        ["Mai", "Una sera al mese", "Una sera a settimana", "Più sere a settimana", "Anche weekend interi"]),
-    it("Casa aperta", "Quanto spesso vorreste ospitare persone a casa?",
+    it("Casa Aperta", "🚪", "Quanto spesso ospitare?",
        ["Mai ospiti", "Qualche volta l'anno", "Una volta al mese", "Ogni settimana", "Porta sempre aperta"]),
-    it("Inviti e feste", "A quanti inviti ed eventi vorresti andare?",
+    it("Inviti e Feste", "🎉", "A quanti inviti vai?",
        ["Quasi nessuno", "Solo i più importanti", "Circa la metà", "Quasi tutti", "Ci siamo sempre"]),
-    it("Amici del cuore", "Con quante persone vorresti poterti aprire davvero?",
+    it("Amici del Cuore", "💞", "Con quanti ti apri davvero?",
        ["Nessuno oltre al partner", "Una persona", "Due o tre persone", "Quattro o cinque persone", "Sei o più persone"]),
-    it("Momenti importanti", "Quanto vorresti esserci nei momenti importanti degli amici?",
+    it("Momenti Importanti", "💍", "Quanto ci sei per loro?",
        ["Solo se è comodo", "Solo ai più vicini", "Anche viaggiando un po'", "Anche a lunga distanza", "Sempre, a ogni costo"]) ] },
   { id: "money", emoji: "💰", name: "Soldi", items: [
-    it("Tranquillità economica", "Quanti mesi di spese vorreste avere da parte?",
+    it("Tranquillità Economica", "🛡️", "Quanti mesi di spese da parte?",
        ["Nessun cuscinetto", "1–3 mesi di spese", "6 mesi di spese", "1 anno di spese", "Oltre 2 anni di spese"]),
-    it("Risparmio costante", "Quanta parte dello stipendio vorresti risparmiare?",
+    it("Risparmio Costante", "🐷", "Quanto stipendio risparmi?",
        ["Nulla, si spende tutto", "Fino al 10%", "Circa il 20%", "Circa il 30%", "Oltre il 40%"]),
-    it("Investire nel tempo", "Quanta parte dei risparmi vorresti investire?",
+    it("Investire nel Tempo", "📈", "Quanto investire dei risparmi?",
        ["Tutto fermo sul conto", "Fino al 20% investito", "Circa metà investita", "Circa l'80% investito", "Quasi tutto investito"]),
-    it("Casa di proprietà", "Come vorreste vivere: in affitto o in casa vostra?",
+    it("Casa di Proprietà", "🏠", "Affitto o casa vostra?",
        ["Affitto, per sempre", "Affitto, poi si vedrà", "Acquisto tra qualche anno", "Acquisto a breve", "Casa nostra, subito"], true),
-    it("Godersi i soldi", "Quanto del budget vorresti dedicare ai piaceri?",
+    it("Godersi i Soldi", "🍾", "Quanto budget per i piaceri?",
        ["Solo il necessario", "Circa il 5%", "Circa il 10–15%", "Circa il 20–30%", "Oltre il 30%"]),
-    it("Indipendenza dal lavoro", "A che età vorresti poter smettere di lavorare?",
+    it("Indipendenza dal Lavoro", "🏝️", "A che età smettere di lavorare?",
        ["Solo a 67 anni o più", "Verso i 60 anni", "Verso i 55 anni", "Verso i 50 anni", "Prima dei 45 anni"]),
-    it("Futuro dei figli", "Quanto vorreste mettere da parte per i figli?",
+    it("Futuro dei Figli", "🎒", "Quanto accantonare per loro?",
        ["Nulla di dedicato", "Un piccolo fondo", "Studi pagati", "Studi e aiuto per la casa", "Un patrimonio dedicato"]),
-    it("Gestione comune", "Quanto denaro vorreste gestire in comune?",
+    it("Gestione Comune", "🏦", "Quanto denaro in comune?",
        ["Conti separati", "Solo le spese comuni", "Metà dei soldi in comune", "Quasi tutto in comune", "Un solo conto per tutto"]) ] },
   { id: "career", emoji: "💼", name: "Carriera", items: [
-    it("Crescere di ruolo", "Che livello di responsabilità vorresti raggiungere?",
+    it("Crescere di Ruolo", "🚀", "Che livello vuoi raggiungere?",
        ["Resto dove sono", "Un passo avanti", "Ruolo di responsabilità", "Posizione dirigenziale", "Vertice della mia area"]),
-    it("Guadagnare di più", "Di quanto vorresti far crescere il tuo reddito?",
+    it("Guadagnare di Più", "💶", "Quanto far crescere il reddito?",
        ["Reddito invariato", "+10–20%", "+30–50%", "Quasi il doppio", "Più del doppio"]),
-    it("Lavoro significativo", "Quanto deve avere uno scopo il tuo lavoro?",
+    it("Lavoro Significativo", "🎯", "Quanto conta lo scopo?",
        ["Basta che paghi bene", "Non deve annoiarmi", "Deve appassionarmi", "Deve avere un impatto", "È la mia missione"]),
-    it("Orari sostenibili", "Quante ore a settimana vorresti lavorare?",
+    it("Orari Sostenibili", "⏰", "Quante ore a settimana?",
        ["Oltre 55 ore a settimana", "Circa 50 ore", "Circa 45 ore", "Circa 40 ore", "Meno di 35 ore"]),
-    it("Stabilità del posto", "Ogni quanto vorresti cambiare lavoro?",
+    it("Stabilità del Posto", "⚓", "Ogni quanto cambiare lavoro?",
        ["Rischio e cambi continui", "Cambio ogni 2–3 anni", "Cambio ogni 5 anni", "Cambio ogni 10 anni", "Un posto sicuro a vita"]),
-    it("Spostarsi per lavoro", "Fin dove vorresti traslocare per un'opportunità?",
+    it("Spostarsi per Lavoro", "✈️", "Fin dove ti trasferiresti?",
        ["Non mi sposto mai", "Nella stessa regione", "In un'altra regione", "In un altro paese", "Ovunque nel mondo"], true),
-    it("Doppia carriera", "Quanto conta la carriera dell'altro nelle vostre scelte?",
+    it("Doppia Carriera", "🧑‍💼", "Quanto pesa la sua carriera?",
        ["Una sola guida", "Una guida, l'altra segue", "Ci alterniamo", "Entrambe contano molto", "Sempre alla pari"]),
-    it("Passo indietro", "Quanto vorresti ridurre il lavoro per la famiglia?",
+    it("Passo Indietro", "⏪", "Quanto ridurre il lavoro?",
        ["Non riduco nulla", "Qualche ora in meno", "Part-time per un periodo", "Pausa lunga dal lavoro", "Smettere di lavorare"], true) ] },
-  { id: "freeTime", emoji: "🌿", name: "Tempo libero", items: [
-    it("Viaggi lontani", "Quanto vorresti viaggiare lontano ogni anno?",
+  { id: "freeTime", emoji: "🌿", name: "Tempo Libero", items: [
+    it("Viaggi Lontani", "🌍", "Quanto viaggiare ogni anno?",
        ["Nessun viaggio lungo", "Una settimana all'anno", "Due settimane all'anno", "Un mese all'anno", "Più di un mese all'anno"]),
-    it("Fughe brevi", "Quanti weekend fuori porta vorreste fare?",
+    it("Fughe Brevi", "🧳", "Quanti weekend fuori porta?",
        ["Nessuno", "Uno ogni 2–3 mesi", "Uno al mese", "Due al mese", "Ogni weekend"]),
-    it("Sport e movimento", "Quanto vorresti allenarti ogni settimana?",
+    it("Sport e Movimento", "🏃", "Quanti allenamenti a settimana?",
        ["Nessuno", "1 a settimana", "2–3 a settimana", "4–5 a settimana", "Ogni giorno"]),
-    it("Natura all'aperto", "Quanto tempo vorresti passare nella natura?",
+    it("Natura all'Aperto", "🌲", "Quanto tempo nella natura?",
        ["Quasi mai", "Poche volte l'anno", "Una volta al mese", "Ogni settimana", "Vivere nella natura"]),
-    it("Cultura e spettacoli", "Quante uscite culturali vorresti fare?",
+    it("Cultura e Spettacoli", "🎭", "Quante uscite culturali?",
        ["Mai", "Poche volte l'anno", "Una volta al mese", "Una volta a settimana", "Più volte a settimana"]),
-    it("Passioni personali", "Quante ore vorresti dedicare a una tua passione?",
+    it("Passioni Personali", "🎨", "Quante ore per le tue passioni?",
        ["Nessuna", "1–2 ore", "3–5 ore", "6–10 ore", "Oltre 10 ore"]),
-    it("Momenti a due", "Quanto tempo vorreste passare solo voi due?",
+    it("Momenti a Due", "🍷", "Quanto tempo solo voi due?",
        ["Quasi mai", "Una volta al mese", "Ogni 2 settimane", "Una volta a settimana", "Più volte a settimana"]),
-    it("Ritmi tranquilli", "Quanto vorresti lasciare l'agenda vuota?",
+    it("Ritmi Tranquilli", "🛋️", "Quanto lasciare l'agenda vuota?",
        ["Agenda sempre piena", "Un weekend libero su 4", "Metà weekend liberi", "Quasi tutti i weekend liberi", "Tempo libero senza piani"]) ] }
 ];
 const DEFAULT_NAMES = { player1: "Giocatore 1", player2: "Giocatore 2" };
@@ -397,7 +421,6 @@ function freshState() {
     step: "intro",
     currentRound: 0,
     draft: null,               // pallini della sola area in corso (non ancora confermata)
-    cityNote: "",
     players: {
       player1: { name: "", rounds: {} },   // rounds[areaId] = [n, n, ...] (congelato alla conferma)
       player2: { name: "", rounds: {} }
@@ -440,41 +463,45 @@ function pipsHtml() {
   return AREAS.map((a, i) =>
     `<span class="pip ${i < state.currentRound ? "done" : i === state.currentRound ? "now" : ""}">${a.emoji}</span>`).join("");
 }
+const logo = (cls = "") => `<span class="logo ${cls}" aria-hidden="true"><i class="dot p1"></i><i class="lg-bar"></i><i class="dot p2"></i></span>`;
+function confetti() {
+  return `<div class="confetti" aria-hidden="true">${Array.from({ length: 30 }, (_, i) =>
+    `<i class="c${i % 5}" style="left:${(i * 37) % 100}%;width:${8 + (i % 4) * 2}px;height:${8 + (i % 4) * 2}px;animation-delay:${((i * 13) % 16) / 10}s;animation-duration:${2.4 + (i % 5) * 0.4}s"></i>`).join("")}</div>`;
+}
 function header(who) {
   const inRound = who && state.step === "round";
   const chip = who ? `<span class="who"><i></i><span>${esc(nameOf(who))}</span></span>` : "";
-  return `<header class="top"><div class="brand">La nostra mappa</div>
+  return `<header class="top"><div class="brand">${logo()}Metà Strada</div>
     ${inRound ? `<div class="pips pips-h" aria-hidden="true">${pipsHtml()}</div>` : ""}
     <div class="top-r">${chip}<button class="link" data-action="ask-reset">Ricomincia</button></div></header>`;
 }
 
 function viewSetup() {
   return `<section class="screen center">
-    <div class="hero-dots" aria-hidden="true">${dots(3, "p1 lg")}${dots(3, "p2 lg")}</div>
-    <h1>La nostra mappa</h1>
-    <p class="lead">Sei aree della vita che costruite insieme. In ognuna, ciascuno di voi risponde da solo e in segreto su scale concrete da 0 a 10 pallini. Alla fine si scopre la mappa.</p>
+    ${logo("big")}
+    <h1>Metà Strada</h1>
+    <p class="tag">Scoprite dove vi incontrate</p>
+    <div class="steps" aria-hidden="true"><span><b>🎲</b>Rispondi</span><span><b>🤫</b>In Segreto</span><span><b>🧭</b>Incontratevi</span></div>
     <div class="names">
-      <div class="field p1"><label for="name1">Chi comincia (facoltativo)</label>
+      <div class="field p1"><label for="name1">Chi Comincia</label>
         <input id="name1" maxlength="20" autocomplete="off" placeholder="${DEFAULT_NAMES.player1}" value="${esc(state.players.player1.name)}"></div>
-      <div class="field p2"><label for="name2">Chi gioca dopo (facoltativo)</label>
+      <div class="field p2"><label for="name2">Chi Gioca Dopo</label>
         <input id="name2" maxlength="20" autocomplete="off" placeholder="${DEFAULT_NAMES.player2}" value="${esc(state.players.player2.name)}"></div>
     </div>
-    <button class="btn" data-action="start">Inizia →</button>
-    <p class="small">Un solo dispositivo, due turni. Nulla viene salvato o inviato online.</p>
+    <button class="btn" data-action="start">Si Parte →</button>
+    <p class="small">🔒 Un solo dispositivo. Nulla viene salvato.</p>
   </section>`;
 }
 
 function viewTurnIntro(who) {
   const first = who === "player1";
-  const other = nameOf(first ? "player2" : "player1");
+  const other = esc(nameOf(first ? "player2" : "player1"));
   return `<section class="screen center">
     <div class="big-emoji" aria-hidden="true">${first ? "🎲" : "🤫"}</div>
-    <h1>${first ? "Tocca a te" : `Tocca a ${esc(nameOf("player2"))}`}</h1>
-    <p class="lead">${first
-      ? `Sei aree, otto voci ciascuna. Ogni voce ha una scala da 0 a 10 con significati concreti: metti i pallini dove ti rispecchi. Non c'è un limite.`
-      : `Le scelte di ${esc(other)} sono state nascoste. Fai le tue scelte senza vedere quelle dell'altra persona.`}</p>
-    ${first ? `<p class="small">Le tue scelte restano nascoste fino alla fine.</p>` : ""}
-    <button class="btn me" data-action="begin-turn">Comincia →</button>
+    <h1>${first ? "Tocca a Te" : `Tocca a ${esc(nameOf("player2"))}`}</h1>
+    <div class="steps small-steps" aria-hidden="true"><span><b>6</b>Tappe</span><span><b>8</b>Voci</span><span><b>0–10</b>Pallini</span></div>
+    <p class="small">🔒 ${first ? "Le tue risposte restano segrete." : `Le risposte di ${other} sono nascoste.`}</p>
+    <button class="btn me" data-action="begin-turn">Via →</button>
   </section>`;
 }
 
@@ -484,7 +511,7 @@ function viewRound(who) {
     <li class="cat" data-i="${i}">
       <div class="body">
         <div class="txt">
-          <span class="head"><span class="label">${esc(item.t)}</span><span class="desc">${esc(item.d)}</span></span>
+          <span class="head"><span class="label"><i class="ico" aria-hidden="true">${item.ico}</i><span>${esc(item.t)}</span></span><span class="desc">${esc(item.d)}</span></span>
           <span class="answer"></span>
         </div>
         <span class="slots" aria-hidden="true">${"<i></i>".repeat(MAX_PER_ITEM)}</span>
@@ -510,6 +537,7 @@ function updateRound(popIndex = -1) {
   document.querySelectorAll(".cat").forEach(li => {
     const i = +li.dataset.i, n = d[i];
     li.classList.toggle("has", n > 0);
+    li.classList.toggle("max", n === MAX_PER_ITEM);
     const item = AREAS[state.currentRound].items[i], lvl = levelText(item, n);
     li.querySelector(".answer").textContent = lvl;
     const plus = li.querySelector(".plus"), minus = li.querySelector(".minus");
@@ -524,20 +552,19 @@ function updateRound(popIndex = -1) {
 }
 
 function viewHandoff() {
-  return `<section class="screen center">
+  return `<section class="screen center">${confetti()}
     <div class="big-emoji" aria-hidden="true">🤝</div>
-    <h1>Hai finito.</h1>
-    <p class="lead">Ora passa il dispositivo a ${esc(nameOf("player2"))}.</p>
-    <button class="btn" data-action="handoff">Passa il dispositivo →</button>
+    <h1>Fatto!</h1>
+    <p class="lead">Passa il dispositivo a ${esc(nameOf("player2"))}</p>
+    <button class="btn" data-action="handoff">Passa il Dispositivo →</button>
   </section>`;
 }
 
 function viewReady() {
-  return `<section class="screen center">
-    <div class="hero-dots" aria-hidden="true">${dots(3, "p1 lg")}${dots(3, "p2 lg")}</div>
-    <h1>Avete entrambi finito.</h1>
-    <p class="lead">Le due mappe si incrociano adesso.</p>
-    <button class="btn" data-action="reveal">Scopri la nostra mappa →</button>
+  return `<section class="screen center">${confetti()}
+    ${logo("big")}
+    <h1>Tutti Pronti!</h1>
+    <button class="btn" data-action="reveal">Scopri la Mappa →</button>
   </section>`;
 }
 
@@ -591,7 +618,7 @@ function analyse() {
     .sort((x, y) => (y.kind === "knot") - (x.kind === "knot") || y.item.crit - x.item.crit || y.diff - x.diff || y.hi - x.hi).slice(0, 3);
   const different = all.filter(c => ["nuance", "negotiate", "knot"].includes(c.kind) && !discuss.includes(c))
     .sort((x, y) => y.diff - x.diff || y.hi - x.hi).slice(0, 3);
-  return { areas, all, get, aligned, discuss, different, ...crossings(get), internal: internalConflicts(get), needs: placeNeeds(get) };
+  return { areas, all, get, aligned, discuss, different, ...crossings(get), internal: internalConflicts(get) };
 }
 
 /* Incompatibilità nelle risposte della stessa persona.
@@ -599,102 +626,102 @@ function analyse() {
    contradiction = due risposte che si escludono a vicenda
    tension       = due risposte possibili, ma difficili da tenere insieme senza scegliere cosa pesa di più */
 const CONFLICTS = [
-  { kind: "contradiction", title: "Figli: risposte che non tornano",
+  { kind: "contradiction", title: "Figli: Risposte che non Tornano",
     when: v => v("children", 0) <= 1 && Math.max(v("children", 1), v("children", 2), v("children", 3)) >= 4,
     refs: v => [["children", 0], v("children", 2) >= v("children", 1) && v("children", 2) >= v("children", 3) ? ["children", 2] : v("children", 1) >= v("children", 3) ? ["children", 1] : ["children", 3]],
-    why: "Il desiderio di figli è molto basso, ma hai risposto su altri aspetti dei figli come se ci fossero. Qual è la tua posizione?" },
-  { kind: "contradiction", title: "Figli: desiderio e numero",
+    why: "Desiderio basso, ma rispondi su altri temi dei figli." },
+  { kind: "contradiction", title: "Figli: Desiderio e Numero",
     when: v => v("children", 0) >= 4 && v("children", 2) === 0,
     refs: [["children", 0], ["children", 2]],
-    why: "Desideri dei figli ma hai indicato «nessuno» come numero. Quale delle due risposte rispecchia meglio quello che pensi?" },
-  { kind: "contradiction", title: "Vedersi ogni giorno, ma lontani",
+    why: "Desideri figli ma hai scelto «nessuno»." },
+  { kind: "contradiction", title: "Ogni Giorno, ma Lontani",
     when: v => v("family", 1) >= 7 && v("family", 0) <= 3,
     refs: [["family", 1], ["family", 0]],
-    why: "Vorresti vedere o sentire i genitori quasi ogni giorno, ma a più di due o tre ore di distanza. Le due cose difficilmente stanno insieme." },
-  { kind: "contradiction", title: "Cura costante, ma lontani",
+    why: "Ogni giorno insieme, ma a più di 3 ore." },
+  { kind: "contradiction", title: "Cura Costante, ma Lontani",
     when: v => v("family", 2) >= 7 && v("family", 0) <= 3,
     refs: [["family", 2], ["family", 0]],
-    why: "Immagini un aiuto pratico costante ai genitori, ma vivendo lontano da loro. Come lo renderesti possibile?" },
-  { kind: "contradiction", title: "Presenza con i figli e ore di lavoro",
+    why: "Aiuto costante ai genitori, ma lontano da loro." },
+  { kind: "contradiction", title: "Presenza e Ore di Lavoro",
     when: v => v("children", 3) >= 7 && v("career", 3) <= 3,
     refs: [["children", 3], ["career", 3]],
-    why: "Vorresti esserci per i figli gran parte della giornata e insieme lavorare più di 50 ore a settimana. Il tempo è uno solo." },
-  { kind: "tension", title: "Radici e movimento",
+    why: "Sempre presente con i figli, ma oltre 50 ore di lavoro." },
+  { kind: "tension", title: "Radici e Movimento",
     when: v => v("family", 0) >= 7 && v("career", 5) >= 7,
     refs: [["family", 0], ["career", 5]],
-    why: "Vivere vicino alle famiglie e poterti trasferire ovunque per lavoro spesso non stanno insieme. Quale pesa di più?" },
-  { kind: "tension", title: "Amici di sempre e trasferimento",
+    why: "Vicino alle famiglie, ma pronto a trasferirti ovunque." },
+  { kind: "tension", title: "Amici e Trasferimento",
     when: v => v("friends", 0) >= 7 && v("career", 5) >= 7,
     refs: [["friends", 0], ["career", 5]],
-    why: "Vedere spesso gli amici di sempre e trasferirti lontano sono due direzioni diverse." },
-  { kind: "tension", title: "Posto sicuro e mobilità",
+    why: "Amici vicini, ma trasferimento lontano." },
+  { kind: "tension", title: "Posto Sicuro e Mobilità",
     when: v => v("career", 4) >= 7 && v("career", 5) >= 7,
     refs: [["career", 4], ["career", 5]],
-    why: "Un posto sicuro a lungo e la disponibilità a spostarti ovunque tirano in direzioni opposte." },
-  { kind: "tension", title: "Ruolo alto e orari leggeri",
+    why: "Un posto sicuro, ma ovunque nel mondo." },
+  { kind: "tension", title: "Ruolo Alto e Orari Leggeri",
     when: v => v("career", 0) >= 7 && v("career", 3) >= 7,
     refs: [["career", 0], ["career", 3]],
-    why: "Un ruolo di grande responsabilità e orari leggeri raramente convivono. Quale dei due lasceresti andare per primo?" },
-  { kind: "tension", title: "Ambizione e presenza",
+    why: "Grande responsabilità, ma orari leggeri." },
+  { kind: "tension", title: "Ambizione e Presenza",
     when: v => v("career", 0) >= 7 && v("children", 3) >= 7,
     refs: [["career", 0], ["children", 3]],
-    why: "Molta ambizione e molta presenza quotidiana con i figli chiedono di decidere chi copre cosa." },
-  { kind: "tension", title: "Doppia carriera e passo indietro",
+    why: "Tanta ambizione e tanta presenza con i figli." },
+  { kind: "tension", title: "Doppia Carriera e Passo Indietro",
     when: v => v("career", 6) >= 7 && v("career", 7) >= 7,
     refs: [["career", 6], ["career", 7]],
-    why: "Tenere alla doppia carriera e prevedere un passo indietro importante sono due direzioni diverse." },
-  { kind: "tension", title: "Meno lavoro, più reddito",
+    why: "Due carriere, ma un grande passo indietro." },
+  { kind: "tension", title: "Meno Lavoro, Più Reddito",
     when: v => v("career", 7) >= 7 && v("career", 1) >= 7,
     refs: [["career", 7], ["career", 1]],
-    why: "Ridurre molto il lavoro e far crescere molto il reddito insieme richiedono un compromesso." },
-  { kind: "tension", title: "Missione e guadagno",
+    why: "Lavorare molto meno, guadagnando molto di più." },
+  { kind: "tension", title: "Missione e Guadagno",
     when: v => v("career", 2) >= 7 && v("career", 1) >= 7,
     refs: [["career", 2], ["career", 1]],
-    why: "Un lavoro con una missione e una forte crescita del reddito non sempre coincidono." },
-  { kind: "tension", title: "Spendere e risparmiare",
+    why: "Un lavoro con missione e reddito in forte crescita." },
+  { kind: "tension", title: "Spendere e Risparmiare",
     when: v => v("money", 4) >= 7 && v("money", 1) >= 7,
     refs: [["money", 4], ["money", 1]],
-    why: "Spendere molto per i piaceri e mettere da parte molto: il budget difficilmente basta a entrambe le cose." },
-  { kind: "tension", title: "Smettere presto, risparmiare poco",
+    why: "Spendere molto e risparmiare molto insieme." },
+  { kind: "tension", title: "Smettere Presto, Risparmiare Poco",
     when: v => v("money", 5) >= 7 && v("money", 1) <= 3,
     refs: [["money", 5], ["money", 1]],
-    why: "Smettere di lavorare presto senza mettere da parte molto: come si finanzia quell'obiettivo?" },
-  { kind: "tension", title: "Casa presto, risparmi bassi",
+    why: "Smettere presto con pochi risparmi." },
+  { kind: "tension", title: "Casa Presto, Risparmi Bassi",
     when: v => v("money", 3) >= 7 && v("money", 1) <= 3,
     refs: [["money", 3], ["money", 1]],
-    why: "Comprare casa a breve con poco risparmio: da dove arrivano le risorse?" },
-  { kind: "tension", title: "Cuscinetto senza risparmio",
+    why: "Comprare casa a breve con pochi risparmi." },
+  { kind: "tension", title: "Cuscinetto senza Risparmio",
     when: v => v("money", 0) >= 7 && v("money", 1) <= 2,
     refs: [["money", 0], ["money", 1]],
-    why: "Un grande cuscinetto di sicurezza senza un risparmio regolare: come lo si costruisce?" },
-  { kind: "tension", title: "Casa di proprietà e mobilità",
+    why: "Grande cuscinetto, nessun risparmio regolare." },
+  { kind: "tension", title: "Casa di Proprietà e Mobilità",
     when: v => v("money", 3) >= 7 && v("career", 5) >= 7,
     refs: [["money", 3], ["career", 5]],
-    why: "Una casa di proprietà lega a un luogo, la disponibilità a spostarsi no." },
-  { kind: "tension", title: "Famiglia numerosa, abitudini invariate",
+    why: "Una casa di proprietà lega a un luogo." },
+  { kind: "tension", title: "Famiglia Numerosa, Stesse Abitudini",
     when: v => v("children", 2) >= 7 && v("children", 7) <= 3,
     refs: [["children", 2], ["children", 7]],
-    why: "Immagini una famiglia numerosa ma con poche abitudini che cambiano. Di solito servono scelte concrete." },
-  { kind: "tension", title: "Aiuto atteso, famiglie lontane",
+    why: "Tanti figli, poche abitudini da cambiare." },
+  { kind: "tension", title: "Aiuto Atteso, Famiglie Lontane",
     when: v => v("children", 6) >= 7 && v("family", 0) <= 3,
     refs: [["children", 6], ["family", 0]],
-    why: "Ti aspetti un aiuto esterno quasi quotidiano, con le famiglie lontane. Chi sarebbe la rete?" },
-  { kind: "tension", title: "Inviti sempre e ritmi lenti",
+    why: "Molto aiuto esterno, con le famiglie lontane." },
+  { kind: "tension", title: "Inviti Sempre e Ritmi Lenti",
     when: v => v("friends", 5) >= 7 && v("freeTime", 7) >= 7,
     refs: [["friends", 5], ["freeTime", 7]],
-    why: "Andare quasi a ogni invito e lasciare l'agenda vuota si escludono a vicenda." },
-  { kind: "tension", title: "Amici e coppia: il tempo è uno",
+    why: "Quasi sempre fuori, ma agenda vuota." },
+  { kind: "tension", title: "Tempo: Amici e Coppia",
     when: v => v("friends", 3) >= 7 && v("freeTime", 6) >= 7,
     refs: [["friends", 3], ["freeTime", 6]],
-    why: "Molte serate con i tuoi amici e molte serate solo in coppia: il tempo è uno solo." },
-  { kind: "tension", title: "Il tempo non basta per tutto",
+    why: "Molte serate con gli amici e molte in coppia." },
+  { kind: "tension", title: "Il Tempo non Basta per Tutto",
     when: v => TIME_ITEMS.filter(([id, i]) => v(id, i) >= 7).length >= 6,
     refs: v => TIME_ITEMS.map(([id, i]) => [id, i, v(id, i)]).sort((x, y) => y[2] - x[2]).slice(0, 4).map(([id, i]) => [id, i]),
-    why: "Hai indicato tante cose che richiedono tempo, tutte a livelli alti: amici, viaggi, sport, coppia, famiglie. Quali sono davvero le più importanti?" },
-  { kind: "tension", title: "Il budget non basta per tutto",
+    why: "Troppe voci ad alto livello richiedono tempo." },
+  { kind: "tension", title: "Il Budget non Basta per Tutto",
     when: v => BUDGET_ITEMS.filter(([id, i]) => v(id, i) >= 7).length >= 4,
     refs: v => BUDGET_ITEMS.map(([id, i]) => [id, i, v(id, i)]).sort((x, y) => y[2] - x[2]).slice(0, 4).map(([id, i]) => [id, i]),
-    why: "Vorresti risparmiare, investire, spendere, comprare casa e accantonare per i figli, tutto a livelli alti. Le risorse difficilmente coprono ogni voce." }
+    why: "Troppe voci ad alto livello richiedono denaro." }
 ];
 /* voci che costano tempo / soldi: servono al controllo "non basta per tutto" */
 const TIME_ITEMS = [["freeTime", 0], ["freeTime", 1], ["freeTime", 2], ["freeTime", 5], ["freeTime", 6],
@@ -713,8 +740,8 @@ function internalConflicts(get) {
     }
     for (const area of AREAS) {
       const n = area.items.filter((_, i) => v(area.id, i) >= 8).length;
-      if (n >= 5) out[who].push({ kind: "tension", title: `Molte voci al massimo: ${area.name}`, refs: [], who, strength: n * 8,
-        why: `In quest'area ${n} voci su ${area.items.length} sono a 8 o più. Se dovessi sceglierne tre, quali?` });
+      if (n >= 5) out[who].push({ kind: "tension", title: `Molte Voci al Massimo: ${area.name}`, refs: [], who, strength: n * 8,
+        why: `${n} voci su ${area.items.length} sono a 8 o più: scegline tre.` });
     }
     out[who].sort((x, y) => (y.kind === "contradiction") - (x.kind === "contradiction") || y.strength - x.strength);
     out[who] = out[who].slice(0, 6);
@@ -728,114 +755,72 @@ function crossings(get) {
   const fam = i => get("family", i), chi = i => get("children", i), fri = i => get("friends", i),
         mon = i => get("money", i), car = i => get("career", i), tl = i => get("freeTime", i);
   const N = { a: esc(nameOf("player1")), b: esc(nameOf("player2")) };
-  const lv = (c, n) => `«${esc(levelText(c.item, Math.round(n)))}»`;
   const found = [];
-  const add = (type, title, text, refs) => found.push({ type, title, text, refs,
+  const add = (type, title, text, refs, ico = "") => found.push({ type, title, text, refs, ico,
     strength: refs.reduce((s, c) => s + c.hi, 0) });
-  const has = (title) => found.some(f => f.title === title);
+  const has = title => found.some(f => f.title === title);
 
-  /* — Tensioni tra persone diverse — */
+  /* — Sfide: tensioni tra persone diverse — */
   for (const [x, y] of [["a", "b"], ["b", "a"]]) {
-    if (Math.max(fam(0)[x], fri(0)[x]) >= 7 && car(5)[y] >= 7 && !has("Radici e movimento"))
-      add("tension", "Radici e movimento",
-        `${N[x]} vuole restare vicino a famiglia e amici, ${N[y]} è pronto a spostarsi per lavoro. Un luogo ben collegato può tenere insieme le due cose?`,
-        [fam(0), fri(0), car(5)]);
-    if (car(0)[x] >= 7 && chi(3)[y] >= 7 && chi(5).avg <= 6 && !has("Ambizione e presenza"))
-      add("tension", "Ambizione e presenza",
-        `${N[x]} punta a un ruolo di grande responsabilità, ${N[y]} a una forte presenza quotidiana con i figli. La divisione della cura che immaginate (in media ${lv(chi(5), chi(5).avg)}) lascia spazio a entrambe le cose?`,
-        [car(0), chi(3), chi(5)]);
-    if (mon(4)[x] >= 7 && mon(1)[y] >= 7 && !has("Spendere e risparmiare"))
-      add("tension", "Spendere e risparmiare",
-        `${N[x]} vuole godersi i soldi, ${N[y]} vuole metterne da parte molti. Come trovate un equilibrio?`, [mon(4), mon(1)]);
-    if (mon(5)[x] >= 7 && car(1)[y] <= 3 && !has("Libertà dal lavoro e reddito"))
-      add("tension", "Libertà dal lavoro e reddito",
-        `${N[x]} immagina di smettere di lavorare presto (${lv(mon(5), mon(5)[x])}), ${N[y]} non punta a far crescere il reddito. Come si finanzia quell'obiettivo?`,
-        [mon(5), car(1)]);
-    if (car(3)[x] >= 7 && car(0)[y] >= 7 && !has("Orari leggeri e ruolo alto"))
-      add("tension", "Orari leggeri e ruolo alto",
-        `${N[x]} vuole orari leggeri, ${N[y]} un ruolo di grande responsabilità: le due richieste possono pesare l'una sull'altra.`, [car(3), car(0)]);
-    if (chi(1)[x] >= 7 && fam(0)[y] <= 3 && !has("Figli presto, famiglie lontane"))
-      add("tension", "Figli presto, famiglie lontane",
-        `${N[x]} pensa ai figli a breve, mentre ${N[y]} accetta famiglie d'origine lontane (${lv(fam(0), fam(0)[y])}). Chi potrebbe fare da rete?`,
-        [chi(1), fam(0)]);
-    if (chi(0)[x] >= 6 && mon(1)[y] <= 3 && !has("Figli e risparmi"))
-      add("tension", "Figli e risparmi",
-        `${N[x]} desidera dei figli, ${N[y]} mette da parte poco. Cosa dovrebbe cambiare, e da quando?`, [chi(0), mon(1)]);
-    if (car(7)[x] >= 7 && car(6)[y] >= 7 && !has("Passo indietro e doppia carriera"))
-      add("tension", "Passo indietro e doppia carriera",
-        `${N[x]} è pronto a rallentare molto, ${N[y]} tiene alla doppia carriera. Chi, quando e per quanto?`, [car(7), car(6)]);
-    if (mon(3)[x] >= 7 && car(5)[y] >= 7 && !has("Casa e mobilità"))
-      add("tension", "Casa e mobilità",
-        `${N[x]} vuole comprare casa presto, ${N[y]} è pronto a spostarsi per lavoro: una casa di proprietà lega a un luogo.`, [mon(3), car(5)]);
+    if (Math.max(fam(0)[x], fri(0)[x]) >= 7 && car(5)[y] >= 7 && !has("Radici e Movimento"))
+      add("tension", "Radici e Movimento", `${N[x]} vuole restare vicino, ${N[y]} è pronto a spostarsi.`, [fam(0), fri(0), car(5)]);
+    if (car(0)[x] >= 7 && chi(3)[y] >= 7 && chi(5).avg <= 6 && !has("Ambizione e Presenza"))
+      add("tension", "Ambizione e Presenza", `${N[x]} punta al ruolo, ${N[y]} alla presenza con i figli.`, [car(0), chi(3), chi(5)]);
+    if (mon(4)[x] >= 7 && mon(1)[y] >= 7 && !has("Spendere e Risparmiare"))
+      add("tension", "Spendere e Risparmiare", `${N[x]} vuole spendere, ${N[y]} risparmiare.`, [mon(4), mon(1)]);
+    if (mon(5)[x] >= 7 && car(1)[y] <= 3 && !has("Libertà dal Lavoro e Reddito"))
+      add("tension", "Libertà dal Lavoro e Reddito", `${N[x]} vuole smettere presto, ${N[y]} non punta al reddito.`, [mon(5), car(1)]);
+    if (car(3)[x] >= 7 && car(0)[y] >= 7 && !has("Orari Leggeri e Ruolo Alto"))
+      add("tension", "Orari Leggeri e Ruolo Alto", `${N[x]} vuole orari leggeri, ${N[y]} un ruolo di responsabilità.`, [car(3), car(0)]);
+    if (chi(1)[x] >= 7 && fam(0)[y] <= 3 && !has("Figli Presto, Famiglie Lontane"))
+      add("tension", "Figli Presto, Famiglie Lontane", `${N[x]} vuole figli presto, ${N[y]} accetta famiglie lontane.`, [chi(1), fam(0)]);
+    if (chi(0)[x] >= 6 && mon(1)[y] <= 3 && !has("Figli e Risparmi"))
+      add("tension", "Figli e Risparmi", `${N[x]} desidera figli, ${N[y]} risparmia poco.`, [chi(0), mon(1)]);
+    if (car(7)[x] >= 7 && car(6)[y] >= 7 && !has("Passo Indietro e Doppia Carriera"))
+      add("tension", "Passo Indietro e Doppia Carriera", `${N[x]} è pronto a rallentare, ${N[y]} tiene alla doppia carriera.`, [car(7), car(6)]);
+    if (mon(3)[x] >= 7 && car(5)[y] >= 7 && !has("Casa e Mobilità"))
+      add("tension", "Casa e Mobilità", `${N[x]} vuole comprare casa, ${N[y]} spostarsi per lavoro.`, [mon(3), car(5)]);
   }
   if (car(6).lo >= 6 && car(5).hi >= 7)
-    add("tension", "Due carriere, un trasferimento",
-      `Entrambe le carriere contano e almeno uno è pronto a spostarsi. Serve un luogo dove ci sia lavoro per tutti e due.`, [car(6), car(5)]);
+    add("tension", "Due Carriere, un Trasferimento", `Serve un luogo con lavoro per entrambi.`, [car(6), car(5)]);
 
-  /* — Si rinforzano — */
+  /* — Badge: punti di forza condivisi — */
   if (fam(0).lo >= 6 && fri(0).lo >= 6)
-    add("synergy", "Radici condivise",
-      `Entrambi volete restare vicini a famiglia e amici di sempre: il luogo può diventare il vostro punto fermo.`, [fam(0), fri(0)]);
+    add("synergy", "Radici Condivise", `Entrambi volete restare vicini a famiglia e amici.`, [fam(0), fri(0)], "🌳");
   if (car(5).lo >= 6 && tl(0).lo >= 6)
-    add("synergy", "Vita in movimento",
-      `Entrambi siete pronti a spostarvi e a viaggiare molto: vi muovete con lo stesso passo.`, [car(5), tl(0)]);
+    add("synergy", "Vita in Movimento", `Entrambi pronti a spostarvi e viaggiare.`, [car(5), tl(0)], "🌍");
   if (tl(7).lo >= 6 && tl(3).lo >= 5 && car(3).lo >= 5)
-    add("synergy", "Ritmi lenti e natura",
-      `Entrambi cercate agenda leggera, orari sostenibili e tempo all'aperto: uno stile di vita coerente.`, [tl(7), tl(3), car(3)]);
+    add("synergy", "Ritmi Lenti e Natura", `Entrambi cercate calma e aria aperta.`, [tl(7), tl(3), car(3)], "🍃");
   if (fri(4).lo >= 5 && mon(3).lo >= 5 && fri(2).lo >= 4)
-    add("synergy", "Casa come punto d'incontro",
-      `Una casa vostra, aperta agli amici e alle altre coppie: un desiderio che condividete.`, [fri(4), mon(3), fri(2)]);
+    add("synergy", "Casa Punto d'Incontro", `Casa vostra, aperta agli amici.`, [fri(4), mon(3), fri(2)], "🏡");
   if (chi(0).lo >= 6 && chi(3).lo >= 5 && chi(5).lo >= 5)
-    add("synergy", "Famiglia al centro",
-      `Entrambi desiderate dei figli, volete esserci ogni giorno e dividervi la cura in modo simile.`, [chi(0), chi(3), chi(5)]);
+    add("synergy", "Famiglia al Centro", `Figli desiderati, presenza e cura condivise.`, [chi(0), chi(3), chi(5)], "👨‍👩‍👧");
   if (car(6).lo >= 7 && car(1).lo >= 4)
-    add("synergy", "Due carriere ambiziose",
-      `Entrambi volete una doppia carriera che cresca: un progetto comune, non una concessione.`, [car(6), car(1)]);
+    add("synergy", "Due Carriere Ambiziose", `Entrambi puntate alla doppia carriera.`, [car(6), car(1)], "🚀");
   if (mon(0).lo >= 6 && mon(1).lo >= 5)
-    add("synergy", "Base finanziaria solida",
-      `Entrambi date valore a un cuscinetto e al risparmio regolare: le decisioni economiche partono da un terreno comune.`, [mon(0), mon(1)]);
+    add("synergy", "Base Finanziaria Solida", `Cuscinetto e risparmio vi uniscono.`, [mon(0), mon(1)], "🛡️");
   if (tl(6).lo >= 6 && tl(1).lo >= 5)
-    add("synergy", "Tempo per noi",
-      `Entrambi volete serate e fughe pensate per la coppia: un'abitudine da proteggere anche quando la vita si riempie.`, [tl(6), tl(1)]);
+    add("synergy", "Tempo per Noi", `Serate e fughe pensate per la coppia.`, [tl(6), tl(1)], "🕯️");
 
   const by = t => found.filter(f => f.type === t).sort((x, y) => y.strength - x.strength);
   return { tensions: by("tension").slice(0, 4), synergies: by("synergy").slice(0, 3) };
 }
 
-/* Requisiti del luogo: cosa dovrebbe permettere, non quale città scegliere. */
-function placeNeeds(get) {
-  const fam = i => get("family", i), chi = i => get("children", i), fri = i => get("friends", i),
-        mon = i => get("money", i), car = i => get("career", i), tl = i => get("freeTime", i);
-  const m = (...v) => Math.max(...v);
-  return [
-    [fam(0).avg >= 6,                                           "Vicino alle famiglie",               fam(0).avg],
-    [car(5).hi >= 7 || tl(0).avg >= 6,                          "Ben collegato: aeroporto e treni",   m(car(5).hi, tl(0).avg)],
-    [car(6).avg >= 6,                                           "Lavoro per due carriere",            car(6).avg],
-    [m(fri(1).avg, fri(4).avg) >= 5 || fri(2).avg >= 4,         "Amici e comunità in cui inserirsi",  m(fri(1).avg, fri(4).avg, fri(2).avg)],
-    [m(mon(0).avg, mon(1).avg) >= 5 || mon(3).avg >= 6,         "Costo della vita sostenibile",       m(mon(0).avg, mon(1).avg, mon(3).avg)],
-    [m(tl(3).avg, tl(7).avg) >= 5,                              "Natura a portata di mano",           m(tl(3).avg, tl(7).avg)],
-    [m(tl(4).avg, fri(5).avg) >= 5,                             "Cultura e vita sociale",             m(tl(4).avg, fri(5).avg)],
-    [chi(0).avg >= 5,                                           "Scuole e servizi per famiglie",      chi(0).avg]
-  ].filter(x => x[0]).sort((x, y) => y[2] - x[2]).slice(0, 6).map(x => x[1]);
-}
-
 function viewResults() {
   const n1 = esc(nameOf("player1")), n2 = esc(nameOf("player2"));
-  const { areas, aligned, discuss, different, tensions, synergies, internal, needs } = analyse();
+  const { areas, aligned, discuss, different, tensions, synergies, internal } = analyse();
   const key = c => `${c.area.id}-${c.i}`;
   const P = w => (w === "a" ? "p1" : "p2"), NM = w => (w === "a" ? n1 : n2);
   const phrase = (c, v) => esc(levelText(c.item, v));
   const mid = c => `«${esc(levelText(c.item, Math.round(c.avg)))}»`;
-  const hiName = c => esc(nameOf(c.a >= c.b ? "player1" : "player2")), loName = c => esc(nameOf(c.a >= c.b ? "player2" : "player1"));
+  const loName = c => esc(nameOf(c.a >= c.b ? "player2" : "player1"));
   const outcome = c => {
     if (c.kind === "quiet") return "Poco in gioco per entrambi.";
-    if (c.kind === "pillar") return "Un pilastro su cui costruire.";
-    if (c.kind === "sync") return "Scelte vicine: nessuna tensione.";
-    if (c.kind === "nuance") return `Punto d'incontro naturale: ${mid(c)}.`;
-    if (c.kind === "negotiate") return c.lo <= 2
-      ? `Per ${loName(c)} conta poco: può essere una concessione facile per ${hiName(c)}.`
-      : `Serve un compromesso a metà scala, intorno a ${mid(c)}.`;
-    return `${c.item.crit ? "Tema di fondo. " : ""}Il punto medio (${mid(c)}) potrebbe non andare bene a nessuno dei due.`;
+    if (c.kind === "pillar") return "🏅 Pilastro condiviso!";
+    if (c.kind === "sync") return "Scelte vicine.";
+    if (c.kind === "nuance") return `Metà strada: ${mid(c)}.`;
+    if (c.kind === "negotiate") return c.lo <= 2 ? `Per ${loName(c)} conta poco: concessione facile.` : `Compromesso a metà: ${mid(c)}.`;
+    return `${c.item.crit ? "Tema di fondo · " : ""}Punto medio: ${mid(c)}.`;
   };
 
   /* voci coinvolte in un'incoerenza personale: segnate con un "!" nel colore della persona */
@@ -844,15 +829,15 @@ function viewResults() {
 
   /* una voce = una riga: due pallini su una scala 0–10, colorata dall'esito; i dettagli si aprono al tocco */
   const pos = v => `calc(7px + (100% - 14px) * ${v / 10})`;
-  const row = c => {
+  const row = (c, n) => {
     const cls = KIND[c.kind].cls, fl = flags[key(c)] || [];
-    return `<details class="rw ${cls}${c.a === c.b ? " eq" : ""}" id="rw-${key(c)}" data-a="${c.a}" data-b="${c.b}">
+    return `<details class="rw ${cls}${c.a === c.b ? " eq" : ""}" id="rw-${key(c)}" data-a="${c.a}" data-b="${c.b}" style="--n:${n}">
       <summary><span class="rw-t">${esc(c.item.t)}${fl.map(x => `<i class="flag ${P(x.w)}">!</i>`).join("")}</span>
         <span class="rw-track" aria-hidden="true"><i class="rw-bar" style="left:${pos(c.lo)};width:calc((100% - 14px) * ${c.diff / 10})"></i>
           <i class="pt p1" style="left:${pos(c.a)}"></i><i class="pt p2" style="left:${pos(c.b)}"></i></span>
         <span class="sr">${n1}: ${c.a} su 10. ${n2}: ${c.b} su 10.</span></summary>
       <div class="rw-d">
-        <p class="qq">${esc(c.item.d)}</p>
+        <p class="qq"><span class="ico">${c.item.ico}</span> ${esc(c.item.d)}</p>
         <p class="ln"><i class="dot p1"></i><span><b>${n1}</b> · ${c.a}: «${phrase(c, c.a)}»</span></p>
         <p class="ln"><i class="dot p2"></i><span><b>${n2}</b> · ${c.b}: «${phrase(c, c.b)}»</span></p>
         <p class="out ${cls}">${outcome(c)}</p>
@@ -872,51 +857,42 @@ function viewResults() {
   const go = (arr, cls) => arr.map(c => `<button class="go ${cls}" data-action="goto" data-k="${key(c)}">${esc(c.item.t)}</button>`).join("");
   const sumRow = (cls, label, arr) => arr.length
     ? `<div class="sum-row"><span class="sum-l ${cls}"><i></i>${label}</span><div class="sum-c">${go(arr, cls)}</div></div>` : "";
-  const summary = [sumRow("ok", "Allineati", aligned), sumRow("mid", "Differenza", different), sumRow("talk", "Da discutere", discuss)].join("")
-    || `<p class="muted">Nessun punto saliente: le risposte sono tutte vicine o poco in gioco.</p>`;
+  const summary = [sumRow("ok", "Allineati", aligned), sumRow("mid", "Differenza", different), sumRow("talk", "Da Discutere", discuss)].join("")
+    || `<p class="muted">Tutto vicino o poco in gioco.</p>`;
 
-  /* segnali: incoerenze personali, incroci tra voi due, punti di forza — una riga ciascuno */
+  /* sfide e badge: una riga ciascuno */
   const ev = c => `<span class="ev"><b>${esc(c.item.t)}</b><i class="dot p1"></i>${c.a}<i class="dot p2"></i>${c.b}</span>`;
-  const own = (f) => ({ cls: f.kind === "contradiction" ? "talk" : "mid", dots: [P(f.who)],
-    tag: f.kind === "contradiction" ? "Non coerenti" : "Da conciliare", title: f.title,
+  const own = f => ({ cls: f.kind === "contradiction" ? "talk" : "mid", mark: `<i class="dot ${P(f.who)}"></i>`,
+    tag: f.kind === "contradiction" ? "Da Chiarire" : "Da Conciliare", title: f.title,
     body: f.refs.map(c => `<p class="ln"><i class="dot ${P(f.who)}"></i><span><b>${esc(c.item.t)}</b>: «${phrase(c, c[f.who])}»</span></p>`).join("") + `<p>${esc(f.why)}</p>` });
-  const both = (f, cls, tag) => ({ cls, dots: ["p1", "p2"], tag, title: f.title, body: `<p>${f.text}</p><div class="evs">${f.refs.map(ev).join("")}</div>` });
+  const both = (f, cls, tag, mark) => ({ cls, mark, tag, title: f.title, body: `<p>${f.text}</p><div class="evs">${f.refs.map(ev).join("")}</div>` });
   const ORDER = { talk: 0, mid: 1, ok: 2 };
   const sigs = [...internal.a.slice(0, 3).map(own), ...internal.b.slice(0, 3).map(own),
-                ...tensions.slice(0, 3).map(f => both(f, "mid", "Tra voi")), ...synergies.slice(0, 2).map(f => both(f, "ok", "Si rinforzano"))]
+                ...tensions.slice(0, 3).map(f => both(f, "mid", "Sfida", `<i class="dot p1"></i><i class="dot p2"></i>`)),
+                ...synergies.slice(0, 3).map(f => both(f, "ok", "Badge", `<span class="medal">${f.ico}</span>`))]
     .sort((x, y) => ORDER[x.cls] - ORDER[y.cls]);
   const sigHtml = sigs.length ? sigs.map(s => `<details class="sig ${s.cls}"><summary>
-      <span class="dots" aria-hidden="true">${s.dots.map(d => `<i class="dot ${d}"></i>`).join("")}</span>
+      <span class="dots" aria-hidden="true">${s.mark}</span>
       <span class="st">${esc(s.title)}</span><span class="tg ${s.cls}">${s.tag}</span></summary>
       <div class="sig-d">${s.body}</div></details>`).join("")
-    : `<p class="muted">Nessun segnale particolare: le vostre risposte si compongono senza attriti evidenti.</p>`;
+    : `<p class="muted">Nessuna sfida all'orizzonte.</p>`;
 
   return `<section class="screen dash">
     <div class="res-head">
-      <h1>La vostra mappa</h1>
+      <h1>La Vostra Mappa</h1>
       <div class="legend">
         <span><i class="dot p1"></i>${n1}</span><span><i class="dot p2"></i>${n2}</span>
-        <span class="chip ok">Allineati</span><span class="chip mid">Differenza</span><span class="chip talk">Da discutere</span><span class="chip none">Poco in gioco</span>
+        <span class="chip ok">Allineati · 0–2</span><span class="chip mid">Differenza · 3–6</span><span class="chip talk">Da Discutere · 7+</span><span class="chip none">Poco in Gioco</span>
       </div>
-      <p class="hint">Ogni riga è una scala da 0 a 10. Distanza tra i due pallini: fino a 2 allineati, da 3 a 6 differenza, 7 o più da discutere. Tocca una voce per i dettagli.</p>
     </div>
     <div class="ov">${tiles}</div>
     <div class="sum">${summary}</div>
-    <div class="map">${areas.map(a => `<section class="map-area" id="area-${a.id}">
+    <div class="map">${areas.map((a, ai) => `<section class="map-area" id="area-${a.id}">
       <header><span class="em" aria-hidden="true">${a.emoji}</span><h3>${esc(a.name)}</h3>${stack(a.cats)}</header>
-      <div class="rws">${byOrder(a).map(row).join("")}</div></section>`).join("")}</div>
+      <div class="rws">${byOrder(a).map((c, i) => row(c, ai * 2 + i)).join("")}</div></section>`).join("")}</div>
 
-    <h2 class="sec-t">Da tenere d'occhio</h2>
+    <h2 class="sec-t">Sfide e Badge</h2>
     <div class="sigs">${sigHtml}</div>
-
-    <div class="city">
-      <h2>🏠 E quindi… dove?</h2>
-      <p>La città non era una scelta del gioco. È una conseguenza delle priorità che avete appena espresso.</p>
-      ${needs.length ? `<div class="needs">${needs.map(n => `<span>${esc(n)}</span>`).join("")}</div>` : ""}
-      <p class="q">Quale tipo di città ci permette di far funzionare meglio questa combinazione?</p>
-      <div class="field"><label for="city">La prima città che ci viene in mente:</label>
-        <input id="city" maxlength="80" autocomplete="off" value="${esc(state.cityNote)}"></div>
-    </div>
     <div class="center" style="padding-top:32px"><button class="btn ghost" data-action="ask-reset">Ricomincia</button></div>
   </section>`;
 }
@@ -928,12 +904,22 @@ function addDot(i) {
   if (!state.draft) return;
   if (state.draft[i] >= MAX_PER_ITEM) { bump(document.querySelector(`.cat[data-i="${i}"]`)); return; }
   state.draft[i]++;
+  tick();
   updateRound(i);
 }
 function subDot(i) {
   if (!state.draft || state.draft[i] <= 0) return;
   state.draft[i]--;
+  tick();
   updateRound();
+}
+function tick() { try { if (navigator.vibrate) navigator.vibrate(8); } catch (e) {} }
+function toast(msg) {
+  const old = document.getElementById("toast"); if (old) old.remove();
+  const el = document.createElement("div");
+  el.className = "toast"; el.id = "toast"; el.setAttribute("role", "status"); el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1900);
 }
 function bump(el) { if (!el) return; el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump"); }
 
@@ -944,6 +930,7 @@ function confirmRound() {
   state.players[who].rounds[area.id] = state.draft.slice();   // da qui l'area è congelata
   state.draft = null;
   state.currentRound++;
+  const done = area;
   if (state.currentRound < AREAS.length) {
     state.draft = new Array(AREAS[state.currentRound].items.length).fill(0);
   } else {
@@ -951,6 +938,7 @@ function confirmRound() {
     state.step = "intro";
   }
   render();
+  if (state.step === "round") toast(`${done.emoji} ${done.name} Completata!`);
 }
 
 function openResetDialog() {
@@ -970,6 +958,7 @@ function closeDialog() { const m = document.getElementById("modal"); if (m) m.re
 function resetAll() {
   state = freshState();
   closeDialog();
+  const t = document.getElementById("toast"); if (t) t.remove();
   render();
 }
 
@@ -1004,7 +993,6 @@ document.addEventListener("click", e => {
     case "do-reset": resetAll(); break;
   }
 });
-document.addEventListener("input", e => { if (e.target.id === "city") state.cityNote = e.target.value; });
 document.addEventListener("keydown", e => {
   if (e.key === "Escape") closeDialog();
 });
