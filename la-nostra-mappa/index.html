@@ -122,7 +122,6 @@ h2 { font-size: clamp(26px, 5.5vw, 34px); }
 .head { display: grid; gap: 4px; min-width: 0; }
 .label { font-weight: 600; font-size: 15.5px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .desc { font-style: italic; font-size: 12.5px; line-height: 1.3; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.6em; }
-.note .desc { font-size: 13px; display: block; min-height: 0; }
 /* la risposta sta sempre in fondo, in corsivo */
 .answer { font-style: italic; font-size: 13px; line-height: 1.3; font-weight: 600; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .cat.has .answer { color: var(--me); }
@@ -137,84 +136,107 @@ h2 { font-size: clamp(26px, 5.5vw, 34px); }
 .rbtn:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
 .rbtn:disabled { opacity: .3; cursor: default; box-shadow: none; }
 
-.bar { position: sticky; bottom: 0; z-index: 5; margin: 18px -16px 0; padding: 22px 16px calc(12px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(transparent, var(--bg) 20px); display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.bar .msg { margin: 0; font-size: 13px; font-weight: 600; color: var(--ink); min-height: 1.4em; text-align: center; }
+.bar { position: sticky; bottom: 0; z-index: 5; margin: 18px -16px 0; padding: 18px 16px calc(12px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(transparent, var(--bg) 14px); display: flex; flex-direction: column; align-items: center; gap: 6px; }
 
 /* ---------- results ---------- */
-.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; font-size: 14px; }
-.legend span { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; }
-.res-head { display: grid; gap: 14px; padding-block: 8px 20px; }
-.areas { display: grid; gap: 18px; }
-.area { background: var(--surface); border: 2px solid var(--line); border-radius: 24px; box-shadow: 0 3px 0 var(--line); padding: 18px 16px 16px; display: grid; gap: 14px; }
-.area-h { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.area-h .em { font-size: 28px; line-height: 1; }
-.area-h h3 { letter-spacing: .06em; text-transform: uppercase; font-size: 20px; margin-right: auto; }
-.chip { display: inline-flex; align-items: center; gap: 7px; padding: 4px 12px; border-radius: 99px; font-size: 13px; font-weight: 600; white-space: nowrap; }
-.chip::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.wrap.wide { max-width: 1040px; }
+.res-head { display: grid; gap: 12px; padding-block: 4px 14px; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: 14px; }
+.legend > span:not(.chip) { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; }
+.chip { display: inline-flex; align-items: center; gap: 7px; padding: 3px 11px; border-radius: 99px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.chip::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
 .chip.ok { background: var(--ok-soft); color: #3d6a47; }
 .chip.mid { background: var(--mid-soft); color: #7d5a0c; }
 .chip.talk { background: var(--talk-soft); color: #9a3720; }
 .chip.none { background: var(--line); color: var(--ink-2); }
-.cat-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
-.rc { display: grid; gap: 6px; padding: 10px 12px 10px 14px; border-radius: 14px; border-left: 5px solid var(--line-2); background: color-mix(in srgb, var(--surface) 60%, var(--bg)); }
-.rc.ok { border-left-color: var(--ok); }
-.rc.mid { border-left-color: var(--mid); }
-.rc.talk { border-left-color: var(--talk); }
-.rc.none { border-left-color: var(--line-2); }
-.rc-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.rc-name { font-weight: 600; min-width: 0; }
-.rc-h .chip { flex: none; font-size: 11.5px; padding: 2px 9px; }
-.rc-tot { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.rc-line { display: flex; align-items: center; gap: 10px; min-height: 16px; }
-.rc-line .g { flex: 0 0 118px; display: flex; flex-wrap: wrap; gap: 2px; }
-.rc-line .dot { width: 10px; height: 10px; }
-.rc-line .zero { font-size: 12px; font-weight: 700; color: var(--ink-2); line-height: 12px; }
-.rc-line em { font-size: 13px; color: var(--ink); min-width: 0; }
-.rc-foot { font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
-.area-f { display: grid; gap: 4px; font-size: 14px; color: var(--ink-2); border-top: 1.5px dashed var(--line-2); padding-top: 12px; }
-.area-f b { color: var(--ink); }
+.hint, .muted { margin: 0; font-size: 13px; color: var(--ink-2); }
 
-.sec { display: grid; gap: 12px; margin-top: 36px; }
-.sec h2 { font-size: clamp(22px, 5vw, 28px); }
-.sec > p { margin: 0; color: var(--ink-2); }
-.notes { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.note { background: var(--surface); border: 2px solid var(--line); border-radius: 18px; padding: 14px 16px; display: grid; gap: 4px; }
-.note.ok { border-color: var(--ok); }
-.note.mid { border-color: var(--mid); }
-.note.talk { border-color: var(--talk); }
-.note b { font-size: 16px; }
-.note span { font-size: 14px; color: var(--ink-2); }
-.note em.desc { font-style: italic; }
-.note .where { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
-.pair { display: grid; gap: 3px; margin-top: 2px; }
-.lv { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--ink); }
-.where .chip { text-transform: none; letter-spacing: 0; }
-.note .lv b { font-size: inherit; font-weight: 600; }
-.lv { align-items: flex-start; }
-.lv .dot { margin-top: 4px; }
-h3.sub .dot { width: 11px; height: 11px; margin-right: 4px; vertical-align: -1px; }
-.note .extra { font-size: 14px; color: var(--ink-2); }
-.evs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-.ev { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 99px; background: var(--bg); font-size: 12px; font-variant-numeric: tabular-nums; }
+/* panoramica: sei riquadri, barra = quante voci per esito */
+.ov { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+@media (min-width: 720px) { .ov { grid-template-columns: repeat(6, 1fr); } }
+.ov-t { background: var(--surface); border: 2px solid var(--line); border-radius: 16px; padding: 10px 10px 12px; display: grid; gap: 6px; text-align: left; min-width: 0; min-height: 44px; }
+.ov-t:hover { border-color: var(--line-2); }
+.ov-t .e, .map-area .em { font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; line-height: 1; }
+.ov-t .e { font-size: 22px; }
+.ov-t b { font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stk { display: flex; height: 6px; border-radius: 3px; overflow: hidden; gap: 1px; background: var(--line); }
+.seg.ok { background: var(--ok); } .seg.mid { background: var(--mid); } .seg.talk { background: var(--talk); } .seg.none { background: var(--line-2); }
+
+/* sintesi a etichette */
+.sum { display: grid; gap: 10px; margin-top: 12px; background: var(--surface); border: 2px solid var(--line); border-radius: 18px; padding: 12px 14px; }
+.sum-row { display: grid; grid-template-columns: 124px 1fr; gap: 10px; align-items: start; }
+@media (max-width: 440px) { .sum-row { grid-template-columns: 1fr; gap: 6px; } }
+.sum-l { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; min-height: 36px; }
+.sum-l i { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.sum-l.ok i { background: var(--ok); } .sum-l.mid i { background: var(--mid); } .sum-l.talk i { background: var(--talk); }
+.sum-c { display: flex; flex-wrap: wrap; gap: 6px; }
+.go { border: 0; border-radius: 99px; padding: 0 13px; min-height: 40px; font-size: 13px; font-weight: 600; }
+.go.ok { background: var(--ok-soft); color: #3d6a47; } .go.mid { background: var(--mid-soft); color: #7d5a0c; } .go.talk { background: var(--talk-soft); color: #9a3720; }
+.go:active { transform: translateY(1px); }
+
+/* mappa: una riga per voce */
+.map { display: grid; gap: 12px; margin-top: 14px; }
+@media (min-width: 720px) { .map { grid-template-columns: 1fr 1fr; align-items: start; } }
+.map-area { background: var(--surface); border: 2px solid var(--line); border-radius: 20px; padding: 10px 10px 6px; scroll-margin-top: 12px; }
+.map-area > header { display: flex; align-items: center; gap: 10px; padding: 2px 4px 8px; }
+.map-area .em { font-size: 22px; }
+.map-area h3 { font-size: 15px; letter-spacing: .07em; text-transform: uppercase; margin-right: auto; }
+.map-area .stk { width: 64px; flex: none; }
+.rw { border-top: 1.5px solid var(--line); border-radius: 0; }
+.rw summary { list-style: none; display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 4px; cursor: pointer; }
+.rw summary::-webkit-details-marker { display: none; }
+.rw-t { flex: 0 0 40%; font-size: 13px; font-weight: 600; line-height: 1.2; min-width: 0; }
+.rw-track { position: relative; flex: 1; height: 24px; min-width: 0; }
+.rw-track::before { content: ""; position: absolute; left: 7px; right: 7px; top: 50%; height: 2px; margin-top: -1px; border-radius: 1px; background: var(--line); }
+.rw-track::after { content: ""; position: absolute; left: 50%; top: 6px; bottom: 6px; width: 1.5px; background: var(--line-2); }
+.rw-bar { position: absolute; top: 50%; height: 6px; margin-top: -3px; border-radius: 3px; background: var(--line-2); }
+.rw.ok .rw-bar { background: var(--ok); } .rw.mid .rw-bar { background: var(--mid); } .rw.talk .rw-bar { background: var(--talk); }
+.pt { position: absolute; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; border: 2px solid var(--surface); box-shadow: 0 0 0 1px rgba(0,0,0,.14); z-index: 1; }
+.pt.p1 { background: var(--p1); } .pt.p2 { background: var(--p2); }
+.rw.eq .pt.p1 { margin-left: -11px; } .rw.eq .pt.p2 { margin-left: -3px; }
+.rw.none summary { opacity: .5; }
+.rw[open] { background: color-mix(in srgb, var(--bg) 50%, var(--surface)); border-radius: 12px; }
+.rw.flash { animation: flash 1.4s ease; }
+@keyframes flash { 0%, 55% { background: var(--mid-soft); } }
+.rw-d { padding: 2px 10px 10px; display: grid; gap: 6px; font-size: 13px; }
+.rw-d p, .sig-d p { margin: 0; }
+.qq { font-style: italic; color: var(--ink-2); }
+.ln { display: flex; gap: 8px; align-items: flex-start; }
+.ln .dot { margin-top: 4px; flex: none; }
+.out { font-weight: 600; }
+.out.ok { color: #3d6a47; } .out.mid { color: #7d5a0c; } .out.talk { color: #9a3720; } .out.none { color: var(--ink-2); }
+.flag { display: inline-grid; place-items: center; width: 15px; height: 15px; border-radius: 50%; color: #fff; font-size: 10px; font-weight: 800; font-style: normal; margin-left: 6px; vertical-align: 1px; }
+.flag.p1 { background: var(--p1); } .flag.p2 { background: var(--p2); }
+.warn { display: flex; gap: 8px; align-items: flex-start; }
+.warn .flag { margin: 1px 0 0; flex: none; }
+
+/* segnali: una riga ciascuno */
+.sec-t { font-size: clamp(20px, 4.5vw, 24px); margin-top: 30px; }
+.sigs { display: grid; gap: 8px; margin-top: 10px; }
+@media (min-width: 720px) { .sigs { grid-template-columns: 1fr 1fr; align-items: start; } }
+.sig { background: var(--surface); border: 2px solid var(--line); border-left-width: 5px; border-radius: 14px; }
+.sig.ok { border-left-color: var(--ok); } .sig.mid { border-left-color: var(--mid); } .sig.talk { border-left-color: var(--talk); }
+.sig summary { list-style: none; display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 6px 12px; cursor: pointer; }
+.sig summary::-webkit-details-marker { display: none; }
+.sig .dots { display: inline-flex; gap: 3px; flex: none; }
+.sig .dots .dot { width: 10px; height: 10px; }
+.sig .st { flex: 1; min-width: 0; font-weight: 600; font-size: 14px; line-height: 1.25; }
+.sig .tg { flex: none; font-size: 11.5px; font-weight: 600; padding: 2px 9px; border-radius: 99px; }
+.tg.ok { background: var(--ok-soft); color: #3d6a47; } .tg.mid { background: var(--mid-soft); color: #7d5a0c; } .tg.talk { background: var(--talk-soft); color: #9a3720; }
+.sig-d { padding: 0 12px 12px; display: grid; gap: 6px; font-size: 13px; color: var(--ink-2); }
+.sig-d .ln { color: var(--ink); }
+.evs { display: flex; flex-wrap: wrap; gap: 6px; }
+.ev { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 99px; background: var(--bg); font-size: 12px; color: var(--ink); font-variant-numeric: tabular-nums; }
 .ev b { font-weight: 600; margin-right: 2px; }
 .ev .dot { width: 9px; height: 9px; }
-h3.sub { font-family: var(--body); font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); margin-top: 8px; }
-.how { font-size: 14px; color: var(--ink-2); background: var(--surface); border: 2px solid var(--line); border-radius: 16px; padding: 4px 14px; }
-.how summary { cursor: pointer; min-height: 40px; display: flex; align-items: center; font-weight: 600; color: var(--ink); }
-.how ul { margin: 0 0 10px; padding-left: 18px; display: grid; gap: 6px; }
-.needs-h { font-size: 14px; }
+
+/* dove */
 .needs { display: flex; flex-wrap: wrap; gap: 8px; }
 .needs span { padding: 6px 14px; border-radius: 99px; background: rgba(255,250,240,.14); border: 1.5px solid rgba(255,250,240,.28); font-size: 14px; color: var(--bg); }
-.empty { font-size: 15px; color: var(--ink-2); padding: 14px 16px; border: 2px dashed var(--line-2); border-radius: 18px; }
-
-.city { background: var(--ink); color: var(--bg); border-radius: 28px; padding: 26px 18px; display: grid; gap: 16px; margin-top: 44px; }
-.city h2 { font-size: clamp(26px, 6vw, 36px); }
+.city { background: var(--ink); color: var(--bg); border-radius: 28px; padding: 24px 18px; display: grid; gap: 14px; margin-top: 30px; }
+.city h2 { font-size: clamp(24px, 6vw, 32px); }
 .city p { margin: 0; color: #d9ccb8; }
-.city .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
-.tile { background: rgba(255,250,240,.08); border: 1.5px solid rgba(255,250,240,.2); border-radius: 16px; padding: 12px 14px; display: grid; gap: 4px; min-width: 0; }
-.tile b { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
-.tile span { font-size: 13px; color: #d9ccb8; }
-.city .q { font-family: var(--display); font-size: 20px; color: var(--bg); }
+.city .q { font-family: var(--display); font-size: 19px; color: var(--bg); }
 .city .field label { color: #d9ccb8; }
 .city .field input { background: var(--surface); border-color: transparent; color: var(--ink); }
 
@@ -407,7 +429,7 @@ function render() {
     case "ready":   body = viewReady(); break;
     case "results": body = viewResults(); break;
   }
-  $app.innerHTML = `<div class="wrap">${header(who)}<main id="main" tabindex="-1">${body}</main></div>`;
+  $app.innerHTML = `<div class="wrap${state.phase === "results" ? " wide" : ""}">${header(who)}<main id="main" tabindex="-1">${body}</main></div>`;
   if (state.phase === "player1" || state.phase === "player2") if (state.step === "round") updateRound();
   window.scrollTo(0, 0);
   const m = document.getElementById("main");
@@ -477,14 +499,14 @@ function viewRound(who) {
     <div class="area-title"><span class="em" aria-hidden="true">${area.emoji}</span>
       <h2>${esc(area.name)}</h2><span class="sr">Area ${state.currentRound + 1} di ${AREAS.length}</span></div>
     <ul class="cats">${cats}</ul>
-    <div class="bar"><p class="msg" id="msg" role="status" aria-live="polite"></p>
-      <button class="btn me" id="confirm" data-action="confirm" disabled>${state.currentRound === AREAS.length - 1 ? "Termina" : "Avanti"}</button></div>
+    <div class="bar">
+      <button class="btn me" id="confirm" data-action="confirm">${state.currentRound === AREAS.length - 1 ? "Termina" : "Avanti"}</button></div>
   </section>`;
 }
 
 /* aggiornamento "in place" della schermata di round, senza ricostruirla */
 function updateRound(popIndex = -1) {
-  const d = state.draft, total = sum(d);
+  const d = state.draft;
   document.querySelectorAll(".cat").forEach(li => {
     const i = +li.dataset.i, n = d[i];
     li.classList.toggle("has", n > 0);
@@ -499,8 +521,6 @@ function updateRound(popIndex = -1) {
       dot.className = (k < n ? "on" : "") + (i === popIndex && k === n - 1 ? " pop" : "");
     });
   });
-  document.getElementById("msg").textContent = total === 0 ? "Muovi almeno un pallino per continuare." : "";
-  document.getElementById("confirm").disabled = total === 0;
 }
 
 function viewHandoff() {
@@ -802,115 +822,102 @@ function placeNeeds(get) {
 function viewResults() {
   const n1 = esc(nameOf("player1")), n2 = esc(nameOf("player2"));
   const { areas, aligned, discuss, different, tensions, synergies, internal, needs } = analyse();
-  const lvA = c => `«${esc(levelText(c.item, c.a))}»`, lvB = c => `«${esc(levelText(c.item, c.b))}»`;
+  const key = c => `${c.area.id}-${c.i}`;
+  const P = w => (w === "a" ? "p1" : "p2"), NM = w => (w === "a" ? n1 : n2);
+  const phrase = (c, v) => esc(levelText(c.item, v));
   const mid = c => `«${esc(levelText(c.item, Math.round(c.avg)))}»`;
-
-  const areaCards = areas.map(area => {
-    const rows = area.cats.map(c => {
-      const k = KIND[c.kind];
-      const g = (n, cls) => `<span class="g">${n ? dots(n, cls) : '<span class="zero">0</span>'}</span>`;
-      return `<li class="rc ${k.cls}">
-        <div class="rc-h"><span class="rc-name">${esc(c.item.t)}</span><span class="chip ${k.cls}">${k.label}</span></div>
-        <div class="rc-line" role="img" aria-label="${n1}: ${c.a}, ${esc(levelText(c.item, c.a))}">${g(c.a, "p1")}<em>${lvA(c)}</em></div>
-        <div class="rc-line" role="img" aria-label="${n2}: ${c.b}, ${esc(levelText(c.item, c.b))}">${g(c.b, "p2")}<em>${lvB(c)}</em></div>
-        <div class="rc-foot">${c.total} ${pl(c.total, "pallino totale", "pallini totali")}</div>
-      </li>`;
-    }).join("");
-    const top = area.cats[0], gap = [...area.cats].sort((x, y) => y.diff - x.diff)[0];
-    return `<article class="area">
-      <div class="area-h"><span class="em" aria-hidden="true">${area.emoji}</span><h3>${esc(area.name)}</h3>
-        <span class="chip ${area.level}">${AREA_LABEL[area.level]}</span></div>
-      <ul class="cat-list">${rows}</ul>
-      <div class="area-f">
-        <span>Voce con più peso: <b>${esc(top.item.t)}</b> (${top.total})</span>
-        <span>${gap.diff >= T.negotiate - 1
-          ? `Differenza maggiore: <b>${esc(gap.item.t)}</b> (${gap.a} contro ${gap.b})`
-          : "Nessuna differenza marcata in quest'area."}</span>
-      </div></article>`;
-  }).join("");
-
-  const pair = c => `<span class="pair"><span class="lv"><i class="dot p1"></i>${n1}: ${lvA(c)}</span><span class="lv"><i class="dot p2"></i>${n2}: ${lvB(c)}</span></span>`;
   const hiName = c => esc(nameOf(c.a >= c.b ? "player1" : "player2")), loName = c => esc(nameOf(c.a >= c.b ? "player2" : "player1"));
-  const extra = c => {
+  const outcome = c => {
+    if (c.kind === "quiet") return "Poco in gioco per entrambi.";
     if (c.kind === "pillar") return "Un pilastro su cui costruire.";
-    if (c.kind === "sync") return "Scelte vicine: nessuna tensione su questo punto.";
-    if (c.kind === "nuance") return `Punto d'incontro naturale: ${mid(c)}. Ciascuno si sposta al massimo di 2 pallini.`;
+    if (c.kind === "sync") return "Scelte vicine: nessuna tensione.";
+    if (c.kind === "nuance") return `Punto d'incontro naturale: ${mid(c)}.`;
     if (c.kind === "negotiate") return c.lo <= 2
-      ? `Per ${loName(c)} conta poco: può essere una concessione semplice e importante per ${hiName(c)}.`
-      : `Servirà un compromesso a metà scala, intorno a ${mid(c)}.`;
-    return `${c.item.crit ? "Tema di fondo. " : ""}Il punto medio (${mid(c)}) potrebbe non soddisfare nessuno dei due: vale la pena capire cosa c'è dietro ciascuna scelta.`;
+      ? `Per ${loName(c)} conta poco: può essere una concessione facile per ${hiName(c)}.`
+      : `Serve un compromesso a metà scala, intorno a ${mid(c)}.`;
+    return `${c.item.crit ? "Tema di fondo. " : ""}Il punto medio (${mid(c)}) potrebbe non andare bene a nessuno dei due.`;
   };
-  const noteHtml = c => `<li class="note ${KIND[c.kind].cls}">
-    <span class="where">${c.area.emoji} ${esc(c.area.name)}</span><b>${esc(c.item.t)}</b>
-    <em class="desc">${esc(c.item.d)}</em>${pair(c)}<span class="extra">${extra(c)}</span></li>`;
-  const list = (arr, empty) => arr.length ? arr.map(noteHtml).join("") : `<li class="empty">${empty}</li>`;
 
+  /* voci coinvolte in un'incoerenza personale: segnate con un "!" nel colore della persona */
+  const flags = {};
+  for (const w of ["a", "b"]) for (const f of internal[w]) for (const c of f.refs) (flags[key(c)] = flags[key(c)] || []).push({ w, f });
+
+  /* una voce = una riga: due pallini su una scala 0–10, colorata dall'esito; i dettagli si aprono al tocco */
+  const pos = v => `calc(7px + (100% - 14px) * ${v / 10})`;
+  const row = c => {
+    const cls = KIND[c.kind].cls, fl = flags[key(c)] || [];
+    return `<details class="rw ${cls}${c.a === c.b ? " eq" : ""}" id="rw-${key(c)}" data-a="${c.a}" data-b="${c.b}">
+      <summary><span class="rw-t">${esc(c.item.t)}${fl.map(x => `<i class="flag ${P(x.w)}">!</i>`).join("")}</span>
+        <span class="rw-track" aria-hidden="true"><i class="rw-bar" style="left:${pos(c.lo)};width:calc((100% - 14px) * ${c.diff / 10})"></i>
+          <i class="pt p1" style="left:${pos(c.a)}"></i><i class="pt p2" style="left:${pos(c.b)}"></i></span>
+        <span class="sr">${n1}: ${c.a} su 10. ${n2}: ${c.b} su 10.</span></summary>
+      <div class="rw-d">
+        <p class="qq">${esc(c.item.d)}</p>
+        <p class="ln"><i class="dot p1"></i><span><b>${n1}</b> · ${c.a}: «${phrase(c, c.a)}»</span></p>
+        <p class="ln"><i class="dot p2"></i><span><b>${n2}</b> · ${c.b}: «${phrase(c, c.b)}»</span></p>
+        <p class="out ${cls}">${outcome(c)}</p>
+        ${fl.map(x => `<p class="warn"><i class="flag ${P(x.w)}">!</i><span><b>${NM(x.w)}</b>: ${esc(x.f.title)}</span></p>`).join("")}
+      </div></details>`;
+  };
+  const stack = cats => {
+    const n = { ok: 0, mid: 0, talk: 0, none: 0 };
+    cats.forEach(c => n[KIND[c.kind].cls]++);
+    return `<span class="stk" aria-hidden="true">${["ok", "mid", "talk", "none"].filter(k => n[k]).map(k => `<i class="seg ${k}" style="flex:${n[k]}"></i>`).join("")}</span>`;
+  };
+  const byOrder = area => [...area.cats].sort((x, y) => x.i - y.i);
+
+  const tiles = areas.map(a => `<button class="ov-t" data-action="goto-area" data-k="${a.id}">
+    <span class="e" aria-hidden="true">${a.emoji}</span><b>${esc(a.name)}</b>${stack(a.cats)}</button>`).join("");
+
+  const go = (arr, cls) => arr.map(c => `<button class="go ${cls}" data-action="goto" data-k="${key(c)}">${esc(c.item.t)}</button>`).join("");
+  const sumRow = (cls, label, arr) => arr.length
+    ? `<div class="sum-row"><span class="sum-l ${cls}"><i></i>${label}</span><div class="sum-c">${go(arr, cls)}</div></div>` : "";
+  const summary = [sumRow("ok", "Allineati", aligned), sumRow("mid", "Differenza", different), sumRow("talk", "Da discutere", discuss)].join("")
+    || `<p class="muted">Nessun punto saliente: le risposte sono tutte vicine o poco in gioco.</p>`;
+
+  /* segnali: incoerenze personali, incroci tra voi due, punti di forza — una riga ciascuno */
   const ev = c => `<span class="ev"><b>${esc(c.item.t)}</b><i class="dot p1"></i>${c.a}<i class="dot p2"></i>${c.b}</span>`;
-  const crossHtml = (arr, cls, empty) => arr.length ? arr.map(f => `<li class="note ${cls}">
-    <b>${esc(f.title)}</b><span class="extra">${f.text}</span><span class="evs">${f.refs.map(ev).join("")}</span></li>`).join("")
-    : `<li class="empty">${empty}</li>`;
+  const own = (f) => ({ cls: f.kind === "contradiction" ? "talk" : "mid", dots: [P(f.who)],
+    tag: f.kind === "contradiction" ? "Non coerenti" : "Da conciliare", title: f.title,
+    body: f.refs.map(c => `<p class="ln"><i class="dot ${P(f.who)}"></i><span><b>${esc(c.item.t)}</b>: «${phrase(c, c[f.who])}»</span></p>`).join("") + `<p>${esc(f.why)}</p>` });
+  const both = (f, cls, tag) => ({ cls, dots: ["p1", "p2"], tag, title: f.title, body: `<p>${f.text}</p><div class="evs">${f.refs.map(ev).join("")}</div>` });
+  const ORDER = { talk: 0, mid: 1, ok: 2 };
+  const sigs = [...internal.a.slice(0, 3).map(own), ...internal.b.slice(0, 3).map(own),
+                ...tensions.slice(0, 3).map(f => both(f, "mid", "Tra voi")), ...synergies.slice(0, 2).map(f => both(f, "ok", "Si rinforzano"))]
+    .sort((x, y) => ORDER[x.cls] - ORDER[y.cls]);
+  const sigHtml = sigs.length ? sigs.map(s => `<details class="sig ${s.cls}"><summary>
+      <span class="dots" aria-hidden="true">${s.dots.map(d => `<i class="dot ${d}"></i>`).join("")}</span>
+      <span class="st">${esc(s.title)}</span><span class="tg ${s.cls}">${s.tag}</span></summary>
+      <div class="sig-d">${s.body}</div></details>`).join("")
+    : `<p class="muted">Nessun segnale particolare: le vostre risposte si compongono senza attriti evidenti.</p>`;
 
-  const kindChip = k => k === "contradiction" ? `<span class="chip talk">Non coerenti</span>` : `<span class="chip mid">Difficili da conciliare</span>`;
-  const internalItem = f => `<li class="note ${f.kind === "contradiction" ? "talk" : "mid"}">
-    <span class="where">${kindChip(f.kind)}</span><b>${esc(f.title)}</b>
-    ${f.refs.map(c => `<span class="lv"><i class="dot ${f.who === "a" ? "p1" : "p2"}"></i><span><b>${esc(c.item.t)}</b>: «${esc(levelText(c.item, c[f.who]))}»</span></span>`).join("")}
-    <span class="extra">${esc(f.why)}</span></li>`;
-  const internalBlock = (who, n) => `<h3 class="sub"><i class="dot ${who === "a" ? "p1" : "p2"}"></i> ${n}</h3>
-    <ul class="notes">${internal[who].length ? internal[who].map(internalItem).join("") : `<li class="empty">Nessuna incompatibilità evidente nelle risposte di ${n}.</li>`}</ul>`;
-
-  const tiles = areas.map(a => {
-    const top = a.cats[0];
-    return `<div class="tile"><b>${a.emoji} ${esc(a.name)}</b><span>${top.total ? `${esc(top.item.t)}: ${mid(top)}` : "—"}</span></div>`;
-  }).join("");
-
-  return `<section class="screen">
+  return `<section class="screen dash">
     <div class="res-head">
       <h1>La vostra mappa</h1>
-      <p class="lead">Nessun vincitore: ogni voce ha una scala concreta e qui vedete dove le vostre posizioni si incontrano.</p>
       <div class="legend">
         <span><i class="dot p1"></i>${n1}</span><span><i class="dot p2"></i>${n2}</span>
-        <span class="chip ok">In sintonia</span><span class="chip mid">Sfumatura</span><span class="chip talk">Punto da discutere</span><span class="chip none">Poco in gioco</span>
+        <span class="chip ok">Allineati</span><span class="chip mid">Differenza</span><span class="chip talk">Da discutere</span><span class="chip none">Poco in gioco</span>
       </div>
-      <details class="how"><summary>Come leggiamo i risultati</summary>
-        <ul>
-          <li><b>In sintonia</b>: la distanza tra i vostri pallini è ${T.aligned} o meno. Se entrambi siete a ${T.pillar} o più, è un <b>pilastro condiviso</b>.</li>
-          <li><b>Sfumatura</b>: distanza di ${T.aligned + 1}–${T.nuance}. Per incontrarvi ciascuno si sposta al massimo di 2 pallini, restando nella stessa fascia della scala.</li>
-          <li><b>Da negoziare</b>: distanza di ${T.nuance + 1}–${T.negotiate}. Il punto d'incontro è a una fascia intera di distanza per ciascuno.</li>
-          <li><b>Punto da discutere</b>: distanza di ${T.negotiate + 1} o più. Le posizioni stanno agli estremi della scala.</li>
-          <li><b>Poco in gioco</b>: nessuno dei due supera ${T.quiet} pallini. Non serve parlarne.</li>
-          <li>Non c'è un limite ai pallini: il segnale sta nelle <b>combinazioni</b>.</li>
-          <li><b>Dentro ognuno di voi</b>: incrociamo le risposte della stessa persona. Sono <b>non coerenti</b> quando si escludono (per esempio nessun desiderio di figli ma un numero di figli), <b>difficili da conciliare</b> quando tirano in direzioni opposte (per esempio vivere accanto alle famiglie e trasferirsi ovunque).</li>
-          <li><b>Dove le scelte si incrociano</b>: combinazioni tra voi due che si rinforzano o mettono in tensione.</li>
-        </ul>
-      </details>
+      <p class="hint">Ogni riga è una scala da 0 a 10. Distanza tra i due pallini: fino a 2 allineati, da 3 a 6 differenza, 7 o più da discutere. Tocca una voce per i dettagli.</p>
     </div>
-    <div class="areas">${areaCards}</div>
+    <div class="ov">${tiles}</div>
+    <div class="sum">${summary}</div>
+    <div class="map">${areas.map(a => `<section class="map-area" id="area-${a.id}">
+      <header><span class="em" aria-hidden="true">${a.emoji}</span><h3>${esc(a.name)}</h3>${stack(a.cats)}</header>
+      <div class="rws">${byOrder(a).map(row).join("")}</div></section>`).join("")}</div>
 
-    <div class="sec"><h2>🟢 Dove siamo già molto allineati</h2><ul class="notes">${list(aligned, "Nessuna coincidenza netta questa volta. Le sfumature qui sotto sono un buon punto di partenza.")}</ul></div>
-    <div class="sec"><h2>🟡 Dove abbiamo priorità diverse</h2><ul class="notes">${list(different, "Nessun'altra differenza di rilievo. Le priorità sono vicine.")}</ul></div>
-    <div class="sec"><h2>💬 Di cosa vale la pena parlare</h2>
-      <p>Sono le distanze più grandi. Potrebbe essere una cosa interessante da capire insieme.</p>
-      <ul class="notes">${list(discuss, "Non emergono differenze forti: potete usare il tempo per raccontarvi cosa c'è dietro le scelte comuni.")}</ul></div>
-
-    <div class="sec"><h2>🧭 Dentro ognuno di voi</h2>
-      <p>Alcune risposte, prese insieme, possono essere difficili da tenere insieme. Non sono errori: sono punti su cui scegliere cosa pesa di più.</p>
-      ${internalBlock("a", n1)}${internalBlock("b", n2)}</div>
-
-    <div class="sec"><h2>🔗 Dove le scelte si incrociano</h2>
-      <p>Le voci non vivono da sole. Alcune combinazioni si rinforzano, altre chiedono di essere messe in relazione.</p>
-      <h3 class="sub">Si rinforzano</h3><ul class="notes">${crossHtml(synergies, "ok", "Nessuna combinazione forte in comune, per ora.")}</ul>
-      <h3 class="sub">Da mettere in relazione</h3><ul class="notes">${crossHtml(tensions, "mid", "Nessun incrocio in tensione: le vostre scelte si compongono senza attriti evidenti.")}</ul></div>
+    <h2 class="sec-t">Da tenere d'occhio</h2>
+    <div class="sigs">${sigHtml}</div>
 
     <div class="city">
       <h2>🏠 E quindi… dove?</h2>
       <p>La città non era una scelta del gioco. È una conseguenza delle priorità che avete appena espresso.</p>
-      <div class="tiles">${tiles}</div>
-      ${needs.length ? `<p class="needs-h">Il luogo dovrebbe permettervi:</p><div class="needs">${needs.map(n => `<span>${esc(n)}</span>`).join("")}</div>` : ""}
+      ${needs.length ? `<div class="needs">${needs.map(n => `<span>${esc(n)}</span>`).join("")}</div>` : ""}
       <p class="q">Quale tipo di città ci permette di far funzionare meglio questa combinazione?</p>
       <div class="field"><label for="city">La prima città che ci viene in mente:</label>
         <input id="city" maxlength="80" autocomplete="off" value="${esc(state.cityNote)}"></div>
     </div>
-    <div class="center" style="padding-top:36px"><button class="btn ghost" data-action="ask-reset">Ricomincia</button></div>
+    <div class="center" style="padding-top:32px"><button class="btn ghost" data-action="ask-reset">Ricomincia</button></div>
   </section>`;
 }
 
@@ -932,7 +939,7 @@ function bump(el) { if (!el) return; el.classList.remove("bump"); void el.offset
 
 function confirmRound() {
   const who = turnKey();
-  if (!who || state.step !== "round" || !state.draft || sum(state.draft) === 0) return;
+  if (!who || state.step !== "round" || !state.draft) return;
   const area = AREAS[state.currentRound];
   state.players[who].rounds[area.id] = state.draft.slice();   // da qui l'area è congelata
   state.draft = null;
@@ -985,6 +992,13 @@ document.addEventListener("click", e => {
     case "confirm": confirmRound(); break;
     case "handoff": state.phase = "player2"; state.step = "intro"; state.currentRound = 0; render(); break;
     case "reveal": state.phase = "results"; render(); break;
+    case "goto": {
+      const el = document.getElementById("rw-" + t.dataset.k);
+      if (el) { el.open = true; el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
+      break;
+    }
+    case "goto-area": { const el = document.getElementById("area-" + t.dataset.k); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); break; }
     case "ask-reset": openResetDialog(); break;
     case "cancel-reset": closeDialog(); break;
     case "do-reset": resetAll(); break;

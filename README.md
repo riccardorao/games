@@ -13,8 +13,12 @@ nessuna rete: lo stato vive solo in memoria e "Ricomincia" lo azzera del tutto.
 - Ogni voce ha una scala da 0 a 10 pallini (massimo 10 per voce). I pallini sono un valore concreto:
   per esempio *Vicinanza alle famiglie* va da «Oltre 3 ore di viaggio» (0) a «Nello stesso quartiere» (10).
   Cinque livelli descrivono la scala: 0 · 1–3 · 4–6 · 7–9 · 10.
-- Non c'è un limite ai pallini sul totale: il segnale sta nelle combinazioni. Per andare avanti
-  basta muovere almeno un pallino nell'area.
+- Non c'è un limite ai pallini sul totale e si può sempre andare avanti: il segnale sta nelle combinazioni.
+
+**La dashboard finale**: sei riquadri con una barra colorata per area, una sintesi a etichette (allineati,
+differenza, da discutere; toccandole si apre la voce), poi la mappa: una riga per voce con i due pallini
+su una scala 0–10 e la barra colorata dall'esito. I dettagli si aprono al tocco. In fondo, i segnali
+da tenere d'occhio e la domanda sul luogo.
 
 **Come si leggono i risultati** (soglie in `T`, funzione `classify`)
 - distanza ≤ 2: in sintonia (pilastro condiviso se entrambi ≥ 6); nessuno dei due oltre 2: poco in gioco
