@@ -1,12 +1,12 @@
 # Giochi
 
-## Metà Strada
+## Halfway
 
 Gioco da tavolo digitale per due persone sullo stesso dispositivo. In ciascuna delle sei tappe della
 vita (Famiglia, Figli, Amici, Soldi, Carriera, Tempo Libero) ognuno risponde su otto voci, senza
 vedere le scelte dell'altro. Alla fine la mappa mostra dove vi incontrate a metà strada.
 
-**Avvio:** apri `meta-strada/index.html` in un browser. Nessuna installazione, nessun server,
+**Avvio:** apri `halfway/index.html` in un browser. Nessuna installazione, nessun server,
 nessuna rete: lo stato vive solo in memoria e "Ricomincia" lo azzera del tutto.
 
 **Come funzionano le voci**

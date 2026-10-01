@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Metà Strada</title>
+<title>Halfway</title>
 <style>
 /* Layout: una colonna centrata da "tavolo da gioco"; carte con bordo pieno e ombra netta, pallini come gettoni. */
 :root {
@@ -471,7 +471,7 @@ function confetti() {
 function header(who) {
   const inRound = who && state.step === "round";
   const chip = who ? `<span class="who"><i></i><span>${esc(nameOf(who))}</span></span>` : "";
-  return `<header class="top"><div class="brand">${logo()}Metà Strada</div>
+  return `<header class="top"><div class="brand">${logo()}Halfway</div>
     ${inRound ? `<div class="pips pips-h" aria-hidden="true">${pipsHtml()}</div>` : ""}
     <div class="top-r">${chip}<button class="link" data-action="ask-reset">Ricomincia</button></div></header>`;
 }
@@ -479,7 +479,7 @@ function header(who) {
 function viewSetup() {
   return `<section class="screen center">
     ${logo("big")}
-    <h1>Metà Strada</h1>
+    <h1>Halfway</h1>
     <p class="tag">Scoprite dove vi incontrate</p>
     <div class="steps" aria-hidden="true"><span><b>🎲</b>Rispondi</span><span><b>🤫</b>In Segreto</span><span><b>🧭</b>Incontratevi</span></div>
     <div class="names">
