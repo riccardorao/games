@@ -258,6 +258,35 @@ h2 { font-size: clamp(26px, 5.5vw, 34px); }
 .vc-i p { margin: 0; }
 .vc-i .why { color: var(--ink-2); }
 
+/* giudizio di sezione */
+.ov-t .pc { font-size: 13px; font-weight: 700; }
+.pc.ok, .vd.ok { color: #3d6a47; } .pc.mid, .vd.mid { color: #7d5a0c; } .pc.talk, .vd.talk { color: #9a3720; }
+.vd { font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 99px; white-space: nowrap; }
+.vd.ok { background: var(--ok-soft); } .vd.mid { background: var(--mid-soft); } .vd.talk { background: var(--talk-soft); }
+.vp { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 3ch; text-align: right; }
+.map-area > .an { margin: -2px 4px 10px; font-size: 13px; color: var(--ink-2); line-height: 1.4; }
+.map-area > .an b { color: var(--ink); font-weight: 600; }
+.vc-x { justify-self: start; font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); }
+.vc-x.cross { color: #9a3720; }
+
+/* analisi conclusiva */
+.qd { margin-top: 10px; background: var(--surface); border: 2px solid var(--line); border-radius: 20px; padding: 16px; display: grid; gap: 14px; }
+.qd-h { display: flex; gap: 16px; align-items: center; }
+.qd-score { flex: none; width: 92px; height: 92px; border-radius: 50%; display: grid; place-content: center; text-align: center;
+  background: conic-gradient(var(--c) calc(var(--s) * 1%), var(--line) 0); position: relative; }
+.qd-score::before { content: ""; position: absolute; inset: 8px; border-radius: 50%; background: var(--surface); }
+.qd-score b, .qd-score span { position: relative; }
+.qd-score b { font-family: var(--display); font-size: 26px; line-height: 1; }
+.qd-score span { font-size: 11px; font-weight: 600; color: var(--ink-2); }
+.qd-t { display: grid; gap: 4px; min-width: 0; }
+.qd-t h3 { font-size: clamp(20px, 4.5vw, 26px); }
+.qd-t p { margin: 0; font-size: 14px; color: var(--ink-2); }
+.qd-l { margin: 0; display: grid; gap: 0; }
+.qd-l > div { display: grid; grid-template-columns: 130px 1fr; gap: 12px; padding: 10px 0; border-top: 1.5px solid var(--line); }
+.qd-l dt { font-size: 13px; font-weight: 700; }
+.qd-l dd { margin: 0; font-size: 14px; line-height: 1.45; }
+@media (max-width: 440px) { .qd-l > div { grid-template-columns: 1fr; gap: 2px; } }
+
 /* ---------- modale ---------- */
 .scrim { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; background: rgba(36,29,25,.55); animation: fade .2s both; }
 @keyframes fade { from { opacity: 0; } }
@@ -571,7 +600,6 @@ const KIND = {
   negotiate: { cls: "mid",  label: "Da negoziare" },
   knot:      { cls: "talk", label: "Punto da discutere" }
 };
-const AREA_LABEL = { ok: "Molto allineati", mid: "Sfumature diverse", talk: "Da scoprire insieme" };
 
 /* Quando una voce è ok e quando no. a, b = pallini (0–10) dei due giocatori sulla stessa voce.
    - poco in gioco : nessuno dei due supera T.quiet
@@ -596,10 +624,8 @@ function analyse() {
       return { item, area, i, a, b, lo: Math.min(a, b), hi: Math.max(a, b), diff: Math.abs(a - b),
                avg: (a + b) / 2, total: a + b, kind: classify(a, b) };
     });
-    const has = k => cats.some(c => c.kind === k);
-    const nuances = cats.filter(c => c.kind === "nuance").length;
-    return { ...area, cats: [...cats].sort((x, y) => y.total - x.total || x.i - y.i),
-             level: has("knot") ? "talk" : has("negotiate") || nuances >= 3 ? "mid" : "ok" };
+    return { ...area, cats: [...cats].sort((x, y) => y.total - x.total || x.i - y.i), intesa: intesa(cats),
+             ta: sum(cats.map(c => c.a)), tb: sum(cats.map(c => c.b)), verdict: areaVerdict(cats) };
   });
   const all = areas.flatMap(a => a.cats);
   const get = (id, i) => all.find(c => c.area.id === id && c.i === i);
@@ -610,8 +636,38 @@ function analyse() {
     .sort((x, y) => (y.kind === "knot") - (x.kind === "knot") || y.item.crit - x.item.crit || y.diff - x.diff || y.hi - x.hi).slice(0, 3);
   const different = all.filter(c => ["nuance", "negotiate", "knot"].includes(c.kind) && !discuss.includes(c))
     .sort((x, y) => y.diff - x.diff || y.hi - x.hi).slice(0, 3);
-  return { areas, all, get, aligned, discuss, different, validity: validityCheck(get) };
+  return { areas, all, get, aligned, discuss, different, validity: validityCheck(get), intesa: intesa(all) };
 }
+
+/* Intesa (0–100%): quanto sono vicine le risposte, pesando di più le voci che contano per almeno
+   uno dei due (pallini alti) e i temi di fondo (crit). Le voci poco in gioco pesano poco. */
+function intesa(cats) {
+  let num = 0, den = 0;
+  for (const c of cats) {
+    const w = (c.item.crit ? 1.5 : 1) * (0.4 + c.hi / 10);
+    num += w * (1 - c.diff / 10); den += w;
+  }
+  return den ? Math.round(100 * num / den) : 100;
+}
+/* Giudizio complessivo di una sezione */
+function areaVerdict(cats) {
+  const knots = cats.filter(c => c.kind === "knot"), neg = cats.filter(c => c.kind === "negotiate").length;
+  const score = intesa(cats);
+  if (knots.length >= 2 || knots.some(c => c.item.crit) || score < 60) return { cls: "talk", label: "Da Discutere" };
+  if (!knots.length && !neg && score >= 80) return { cls: "ok", label: "In Sintonia" };
+  if (knots.length === 1) return { cls: "mid", label: "Un Nodo da Sciogliere" };
+  return { cls: "mid", label: "Qualche Differenza" };
+}
+/* Profilo di coppia: la sezione a cui insieme date più peso */
+const PROFILE = {
+  family:   { name: "Coppia Radicata",    line: "le radici e le famiglie d'origine" },
+  children: { name: "Coppia Famiglia",    line: "i figli e la famiglia che costruirete" },
+  friends:  { name: "Coppia Sociale",     line: "gli amici e la vita sociale" },
+  money:    { name: "Coppia Previdente",  line: "la sicurezza economica" },
+  career:   { name: "Coppia Ambiziosa",   line: "il lavoro e la crescita professionale" },
+  freeTime: { name: "Coppia Esploratrice", line: "il tempo libero e le esperienze" }
+};
+const GLOBAL = s => s >= 80 ? "Strada Comune" : s >= 65 ? "A Metà Strada" : s >= 50 ? "Strade da Avvicinare" : "Strade Diverse";
 
 /* Validity check: incongruenze GRAVI nelle risposte della stessa persona, cioè due risposte che si
    escludono a vicenda (es. nessun desiderio di figli ma figli subito).
@@ -641,14 +697,14 @@ const CONFLICTS = [
     when: v => v("family", 2) >= 7 && v("family", 0) <= 3,
     refs: [["family", 2], ["family", 0]],
     why: "Aiuto costante ai genitori, ma lontano da loro." },
-  { title: "Stesso Quartiere, ma Ovunque",
+  { title: "Vicini alle Famiglie, ma All'Estero",
     when: v => v("family", 0) >= 9 && v("career", 5) >= 9,
     refs: [["family", 0], ["career", 5]],
-    why: "Vicinissimo alle famiglie, ma pronto a trasferirti ovunque." },
+    why: "A pochi minuti dalle famiglie, ma pronto a trasferirti all'estero." },
   { title: "Presenza e Ore di Lavoro",
     when: v => v("children", 3) >= 7 && v("career", 3) <= 3,
     refs: [["children", 3], ["career", 3]],
-    why: "Sempre presente con i figli, ma oltre 50 ore di lavoro a settimana." },
+    why: "Molto presente con i figli, ma circa 50 ore di lavoro a settimana o più." },
   { title: "Vertice e Pausa dal Lavoro",
     when: v => v("career", 0) >= 9 && v("career", 7) >= 9,
     refs: [["career", 0], ["career", 7]],
@@ -656,7 +712,68 @@ const CONFLICTS = [
   { title: "Smettere Presto, Zero Risparmi",
     when: v => v("money", 5) >= 9 && v("money", 1) <= 1,
     refs: [["money", 5], ["money", 1]],
-    why: "Smettere di lavorare presto senza mettere da parte nulla." }
+    why: "Smettere di lavorare verso i 50 anni o prima, risparmiando quasi nulla." },
+  { title: "Figli al Centro, Vita Uguale",
+    when: v => v("children", 0) >= 9 && v("children", 7) === 0,
+    refs: [["children", 0], ["children", 7]],
+    why: "Desideri molto i figli, ma la tua vita non cambierebbe in nulla." },
+  { title: "Reddito Doppio, Poche Ore",
+    when: v => v("career", 1) >= 9 && v("career", 3) === 10 && v("career", 0) <= 3,
+    refs: [["career", 1], ["career", 3]],
+    why: "Quasi raddoppiare il reddito lavorando meno di 35 ore, senza crescere di ruolo." },
+  { title: "Smettere di Lavorare, Reddito Doppio",
+    when: v => v("career", 7) >= 9 && v("career", 1) >= 9,
+    refs: [["career", 7], ["career", 1]],
+    why: "Una lunga pausa dal lavoro per la famiglia e insieme quasi raddoppiare il reddito." },
+  { title: "Casa a Breve, Nessun Risparmio",
+    when: v => v("money", 3) >= 9 && v("money", 1) <= 1 && v("money", 0) <= 1,
+    refs: [["money", 3], ["money", 1]],
+    why: "Comprare casa a breve risparmiando poco o nulla, quasi senza cuscinetto." },
+  /* --- tra sezioni diverse --- */
+  { title: "Nessun Figlio, Fondo per i Figli",
+    when: v => v("children", 0) === 0 && v("money", 6) >= 7,
+    refs: [["children", 0], ["money", 6]],
+    why: "Non vuoi figli, ma vuoi mettere da parte molto per il loro futuro." },
+  { title: "Nessun Figlio, Pausa per la Famiglia",
+    when: v => v("children", 0) === 0 && v("career", 7) >= 7 && v("family", 2) <= 3,
+    refs: [["children", 0], ["career", 7]],
+    why: "Lunga pausa dal lavoro per la famiglia, ma niente figli né genitori da accudire." },
+  { title: "Tanti Figli, Pensione Precoce",
+    when: v => v("children", 2) >= 7 && v("money", 5) >= 9 && v("money", 1) <= 3,
+    refs: [["children", 2], ["money", 5], ["money", 1]],
+    why: "Tre o più figli e smettere di lavorare verso i 50 anni o prima, risparmiando al massimo il 10%." },
+  { title: "Pensione Presto, Reddito Fermo",
+    when: v => v("money", 5) >= 9 && v("career", 1) <= 1 && v("money", 1) <= 6,
+    refs: [["money", 5], ["career", 1]],
+    why: "Smettere verso i 50 anni o prima senza far crescere il reddito né risparmiare oltre il 20%." },
+  { title: "Sempre a Casa, Cura al 50% e Lavoro Pieno",
+    when: v => v("children", 3) === 10 && v("children", 5) >= 9 && v("career", 7) <= 1,
+    refs: [["children", 3], ["children", 5], ["career", 7]],
+    why: "Un genitore sempre a casa e cura divisa a metà, ma non riduci il lavoro." },
+  { title: "Pausa dal Lavoro, Conti Separati",
+    when: v => v("career", 7) >= 7 && v("money", 7) === 0,
+    refs: [["career", 7], ["money", 7]],
+    why: "Lasciare a lungo il lavoro per la famiglia tenendo i conti del tutto separati." },
+  { title: "All'Estero, Genitori da Accudire",
+    when: v => v("career", 5) >= 9 && v("family", 2) >= 7,
+    refs: [["career", 5], ["family", 2]],
+    why: "Pronto a trasferirti all'estero, ma con un aiuto pratico costante ai genitori." },
+  { title: "All'Estero, Ogni Festa in Famiglia",
+    when: v => v("career", 5) >= 9 && v("family", 3) >= 9,
+    refs: [["career", 5], ["family", 3]],
+    why: "Pronto a trasferirti all'estero, ma con le famiglie quasi a ogni festa." },
+  { title: "Casa a Breve, Pronti a Partire",
+    when: v => v("money", 3) >= 9 && v("career", 5) >= 9,
+    refs: [["money", 3], ["career", 5]],
+    why: "Comprare casa a breve, ma pronto a trasferirti all'estero." },
+  { title: "Sere a Casa, Sere Fuori",
+    when: v => v("freeTime", 7) >= 9 && (v("friends", 3) >= 7 || v("friends", 5) >= 9),
+    refs: v => [["freeTime", 7], v("friends", 3) >= 7 ? ["friends", 3] : ["friends", 5]],
+    why: "Quattro o più sere a settimana a casa, ma anche molte serate fuori con gli amici." },
+  { title: "Settimana Impossibile",
+    when: v => v("career", 3) === 0 && [v("freeTime", 2) >= 7, v("freeTime", 5) >= 7, v("friends", 3) >= 7, v("children", 3) >= 7].filter(Boolean).length >= 2,
+    refs: v => [["career", 3], ...[["freeTime", 2], ["freeTime", 5], ["friends", 3], ["children", 3]].filter(([id, i]) => v(id, i) >= 7)],
+    why: "Oltre 55 ore di lavoro, più tanto tempo per sport, hobby, amici o figli: le ore non bastano." }
 ];
 
 function validityCheck(get) {
@@ -666,7 +783,8 @@ function validityCheck(get) {
     for (const r of CONFLICTS) {
       if (!r.when(v)) continue;
       const refs = (typeof r.refs === "function" ? r.refs(v) : r.refs).map(([id, i]) => get(id, i));
-      out[who].push({ title: r.title, why: r.why, refs, who });
+      const cross = new Set(refs.map(c => c.area.id)).size > 1;   // incongruenza tra sezioni diverse
+      out[who].push({ title: r.title, why: r.why, refs, who, cross });
     }
   }
   return out;
@@ -674,7 +792,7 @@ function validityCheck(get) {
 
 function viewResults() {
   const n1 = esc(nameOf("player1")), n2 = esc(nameOf("player2"));
-  const { areas, aligned, discuss, different, validity } = analyse();
+  const { areas, all, aligned, discuss, different, validity, intesa: score } = analyse();
   const key = c => `${c.area.id}-${c.i}`;
   const P = w => (w === "a" ? "p1" : "p2"), NM = w => (w === "a" ? n1 : n2);
   const phrase = (c, v) => esc(levelText(c.item, v));
@@ -713,7 +831,26 @@ function viewResults() {
   const byOrder = area => [...area.cats].sort((x, y) => x.i - y.i);
 
   const tiles = areas.map(a => `<button class="ov-t" data-action="goto-area" data-k="${a.id}">
-    <span class="e" aria-hidden="true">${a.emoji}</span><b>${esc(a.name)}</b></button>`).join("");
+    <span class="e" aria-hidden="true">${a.emoji}</span><b>${esc(a.name)}</b><span class="pc ${a.verdict.cls}">${a.intesa}%</span></button>`).join("");
+
+  /* giudizio complessivo di ogni sezione: esito, intesa e una riga di commento */
+  const critFirst = (x, y) => y.item.crit - x.item.crit || y.diff - x.diff;
+  const areaNote = a => {
+    const parts = [];
+    const pillar = a.cats.filter(c => c.kind === "pillar").sort((x, y) => y.lo - x.lo)[0]
+      || a.cats.filter(c => c.kind === "sync" && c.lo >= 4).sort((x, y) => y.lo - x.lo)[0];
+    const knot = a.cats.filter(c => c.kind === "knot").sort(critFirst)[0];
+    const neg = a.cats.filter(c => c.kind === "negotiate").sort(critFirst)[0];
+    if (pillar) parts.push(`<b>Forza</b> ${esc(pillar.item.t)}`);
+    if (knot) parts.push(`<b>Nodo</b> ${esc(knot.item.t)}`);
+    else if (neg) parts.push(`<b>Da Negoziare</b> ${esc(neg.item.t)}`);
+    if (Math.abs(a.ta - a.tb) >= 12) parts.push(`Pesa di più per ${a.ta > a.tb ? n1 : n2}`);
+    if (!parts.length) parts.push(a.cats.every(c => c.kind === "quiet") ? "Poco in gioco per entrambi" : "Nessuna voce che spicca");
+    return parts.join(" · ");
+  };
+  const areaHead = a => `<header><span class="em" aria-hidden="true">${a.emoji}</span><h3>${esc(a.name)}</h3>
+      <span class="vd ${a.verdict.cls}">${a.verdict.label}</span><span class="vp">${a.intesa}%</span></header>
+      <p class="an">${areaNote(a)}</p>`;
 
   const go = (arr, cls) => arr.map(c => `<button class="go ${cls}" data-action="goto" data-k="${key(c)}">${esc(c.item.t)}</button>`).join("");
   const sumRow = (cls, label, arr) => arr.length
@@ -727,7 +864,8 @@ function viewResults() {
     return `<div class="vc-p ${list.length ? "bad" : "good"}">
       <div class="vc-h"><i class="dot ${P(w)}"></i><b>${NM(w)}</b>
         <span class="vc-s">${list.length ? `${list.length} da rivedere` : "✓ Nessuna incongruenza grave"}</span></div>
-      ${list.map(f => `<div class="vc-i"><b>${esc(f.title)}</b>
+      ${list.map(f => `<div class="vc-i"><span class="vc-x${f.cross ? " cross" : ""}">${f.cross
+          ? `Tra Sezioni · ${[...new Set(f.refs.map(c => c.area.emoji))].join(" ↔ ")}` : `Stessa Sezione · ${f.refs[0].area.emoji}`}</span><b>${esc(f.title)}</b>
         ${f.refs.map(c => `<p class="ln"><i class="dot ${P(w)}"></i><span>${esc(c.item.t)}: «${phrase(c, c[w])}»</span></p>`).join("")}
         <p class="why">${esc(f.why)}</p></div>`).join("")}
     </div>`;
@@ -741,12 +879,74 @@ function viewResults() {
     <div class="ov">${tiles}</div>
     <div class="sum">${summary}</div>
     <div class="map">${areas.map((a, ai) => `<section class="map-area" id="area-${a.id}">
-      <header><span class="em" aria-hidden="true">${a.emoji}</span><h3>${esc(a.name)}</h3></header>
+      ${areaHead(a)}
       <div class="rws">${byOrder(a).map((c, i) => row(c, ai * 2 + i)).join("")}</div></section>`).join("")}</div>
 
     <h2 class="sec-t">Validity Check</h2>
     <div class="vc">${vcCard("a")}${vcCard("b")}</div>
+
+    <h2 class="sec-t">Il Vostro Quadro</h2>
+    ${viewQuadro({ areas, all, discuss, different, validity, score, n1, n2, mid })}
   </section>`;
+}
+
+/* Analisi conclusiva: profilo di coppia, intesa globale e sei osservazioni brevi */
+function viewQuadro({ areas, all, discuss, different, validity, score, n1, n2, mid }) {
+  const byInt = [...areas].sort((x, y) => y.intesa - x.intesa);
+  const best = byInt[0], worst = byInt[byInt.length - 1];
+  const top = [...areas].sort((x, y) => (y.ta + y.tb) - (x.ta + x.tb))[0];
+  const totA = sum(areas.map(a => a.ta)), totB = sum(areas.map(a => a.tb));
+  const prof = totA + totB ? PROFILE[top.id] : null;
+  const list = arr => arr.length > 1 ? `${arr.slice(0, -1).join(", ")} e ${arr[arr.length - 1]}` : arr[0];
+  const names = cs => list(cs.map(c => `<b>${esc(c.item.t)}</b>`));
+  const lines = [];
+
+  lines.push(["Il Quadro", worst.intesa >= 80
+    ? `Siete vicini in tutte le sezioni; il punto più alto è <b>${esc(best.name)}</b> (${best.intesa}%).`
+    : `Siete più vicini su <b>${esc(best.name)}</b> (${best.intesa}%) e più lontani su <b>${esc(worst.name)}</b> (${worst.intesa}%).`]);
+
+  const pillars = all.filter(c => c.kind === "pillar").sort((x, y) => y.lo - x.lo || y.item.crit - x.item.crit).slice(0, 3);
+  lines.push(["Le Fondamenta", pillars.length
+    ? `Condividete come ${pl(pillars.length, "pilastro", "pilastri")} ${names(pillars)}: è da qui che parte la vostra strada.`
+    : "Nessun pilastro forte in comune: sceglietene uno insieme da cui partire."]);
+
+  const deep = all.filter(c => c.item.crit && (c.kind === "knot" || c.kind === "negotiate")).sort((x, y) => y.diff - x.diff).slice(0, 3);
+  lines.push(["Temi di Fondo", deep.length
+    ? `${names(deep)} ${deep.length > 1 ? "sono temi di fondo" : "è un tema di fondo"} su cui siete lontani: ${deep.length > 1 ? "meritano" : "merita"} una conversazione prima del resto.`
+    : "Sui temi di fondo (figli, casa, famiglie, trasferimenti, lavoro) siete abbastanza vicini."]);
+
+  const fav = k => [...areas].sort((x, y) => y[k] - x[k])[0];
+  const fa = fav("ta"), fb = fav("tb");
+  let prio = !totA && !totB ? "Nessuno dei due ha messo pallini: la mappa è ancora tutta da scrivere."
+    : fa.id === fb.id ? `Entrambi mettete al centro <b>${esc(fa.name)}</b>.`
+    : `${n1} mette al centro <b>${esc(fa.name)}</b>, ${n2} <b>${esc(fb.name)}</b>.`;
+  const hiT = Math.max(totA, totB);
+  if (hiT && Math.abs(totA - totB) >= hiT * 0.25)
+    prio += ` ${totA > totB ? n1 : n2} chiede di più in generale (${Math.max(totA, totB)} pallini contro ${Math.min(totA, totB)}).`;
+  lines.push(["Le Priorità", prio]);
+
+  const vcTxt = w => {
+    const l = validity[w], x = l.filter(f => f.cross).length, nm = w === "a" ? n1 : n2;
+    return `${nm} ha ${l.length} ${pl(l.length, "incongruenza", "incongruenze")} da rivedere${x ? ` (${x} tra sezioni diverse)` : ""}`;
+  };
+  const va = validity.a.length, vb = validity.b.length;
+  lines.push(["La Coerenza", !va && !vb ? "Le risposte di entrambi sono coerenti, anche tra sezioni diverse."
+    : `${[va && vcTxt("a"), vb && vcTxt("b")].filter(Boolean).join("; ")}: chiaritele prima di confrontarvi.`]);
+
+  const first = discuss[0] || different[0];
+  lines.push(["Il Primo Passo", first
+    ? `Partite da <b>${esc(first.item.t)}</b> (${first.area.emoji} ${esc(first.area.name)}): il punto d'incontro è ${mid(first)}.`
+    : "C'è poco da negoziare: godetevi i vostri pilastri."]);
+
+  return `<div class="qd">
+    <div class="qd-h">
+      <div class="qd-score" style="--s:${score};--c:var(${score >= 80 ? "--ok" : score >= 50 ? "--mid" : "--talk"})"><b>${score}%</b><span>Intesa</span></div>
+      <div class="qd-t"><span class="eyebrow">${GLOBAL(score)}</span>
+        <h3>${prof ? `${top.emoji} ${prof.name}` : "Mappa Vuota"}</h3>
+        ${prof ? `<p>Al centro per entrambi: ${prof.line}.</p>` : ""}</div>
+    </div>
+    <dl class="qd-l">${lines.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl>
+  </div>`;
 }
 
 /* =====================================================================
