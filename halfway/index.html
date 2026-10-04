@@ -102,7 +102,11 @@ h2 { font-size: clamp(26px, 5.5vw, 34px); }
 .btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 2px var(--line-2); }
 .btn.danger { background: var(--talk); color: #fff; }
 
-.names { display: grid; gap: 12px; width: 100%; text-align: left; }
+.names { display: grid; gap: 10px; width: 100%; max-width: 20rem; text-align: left; }
+.name { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 16px; border-radius: 99px; border: 2px solid var(--line); background: var(--surface); transition: border-color .15s; }
+.name.p1:focus-within { border-color: var(--p1); } .name.p2:focus-within { border-color: var(--p2); }
+.name input { flex: 1; min-width: 0; border: 0; background: none; padding: 0; font-size: 17px; font-weight: 600; outline: none; }
+.name input::placeholder { color: #a99a87; font-weight: 500; }
 .field { display: grid; gap: 6px; }
 .field label { font-size: 13px; font-weight: 600; color: var(--ink-2); }
 .field input, .field textarea { width: 100%; min-height: 48px; padding: 10px 14px; border-radius: 14px; border: 2px solid var(--line); background: var(--surface); }
@@ -502,6 +506,11 @@ function viewSetup() {
   return `<section class="screen center">
     ${logo("big")}
     <h1>Halfway</h1>
+    <div class="names">
+      ${["player1", "player2"].map((k, i) => `<label class="name ${i ? "p2" : "p1"}"><i class="dot ${i ? "p2" : "p1"}"></i>
+        <input id="name-${k}" type="text" maxlength="20" autocomplete="off" autocapitalize="words" spellcheck="false"
+          placeholder="${DEFAULT_NAMES[k]}" aria-label="Nome ${DEFAULT_NAMES[k]}" value="${esc(state.players[k].name)}"></label>`).join("")}
+    </div>
     <button class="btn" data-action="start">Inizia!</button>
   </section>`;
 }
@@ -1028,7 +1037,10 @@ document.addEventListener("click", e => {
   if (!t) return;
   const i = +t.dataset.i;
   switch (t.dataset.action) {
-    case "start": state.phase = "player1"; state.step = "intro"; render(); break;
+    case "start":
+      /* nomi facoltativi: se restano vuoti si usano quelli di default */
+      for (const k of ["player1", "player2"]) { const el = document.getElementById("name-" + k); if (el) state.players[k].name = el.value.trim().slice(0, 20); }
+      state.phase = "player1"; state.step = "intro"; render(); break;
     case "add": addDot(i); break;
     case "sub": subDot(i); break;
     case "confirm": confirmRound(); break;
@@ -1049,6 +1061,9 @@ document.addEventListener("click", e => {
 });
 document.addEventListener("keydown", e => {
   if (e.key === "Escape") closeDialog();
+  /* Invio nel primo nome passa al secondo, nel secondo fa partire il gioco */
+  if (e.key === "Enter" && e.target.id === "name-player1") { e.preventDefault(); document.getElementById("name-player2").focus(); }
+  else if (e.key === "Enter" && e.target.id === "name-player2") { e.preventDefault(); document.querySelector('[data-action="start"]').click(); }
 });
 
 render();

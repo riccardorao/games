@@ -11,7 +11,7 @@ nessuna rete: lo stato vive solo in memoria e "Azzera" (in alto a destra, su ogn
 
 **Flusso:** Inizia! → transizione "Tocca a [nome]" (2s) → sei aree con Indietro/Avanti (niente Indietro sulla prima) → "Ci siamo
 quasi..." → transizione per il secondo giocatore (2s) → sei aree → "Fatto!" → Scopri → mappa.
-I nomi sono "Giocatore 1" e "Giocatore 2" (modificabili in `DEFAULT_NAMES`).
+Nella home si possono scrivere i nomi dei due giocatori (facoltativi, max 20 caratteri); se restano vuoti si usano "Giocatore 1" e "Giocatore 2" (`DEFAULT_NAMES`).
 
 **Come funzionano le voci**
 - Ogni voce ha una domanda esplicita e una scala da 0 a 10 pallini (massimo 10 per voce).
