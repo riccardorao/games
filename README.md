@@ -7,9 +7,9 @@ vita (Famiglia, Figli, Amici, Soldi, Carriera, Tempo Libero) ognuno risponde su 
 vedere le scelte dell'altro. Alla fine la mappa mostra dove vi incontrate a metà strada.
 
 **Avvio:** apri `halfway/index.html` in un browser. Nessuna installazione, nessun server,
-nessuna rete: lo stato vive solo in memoria e "Ricomincia" lo azzera del tutto.
+nessuna rete: lo stato vive solo in memoria e "Azzera" (in alto a destra, su ogni schermata) lo cancella del tutto.
 
-**Flusso:** Inizia! → transizione "Tocca a [nome]" (2s) → sei aree con Indietro/Avanti → "Ci siamo
+**Flusso:** Inizia! → transizione "Tocca a [nome]" (2s) → sei aree con Indietro/Avanti (niente Indietro sulla prima) → "Ci siamo
 quasi..." → transizione per il secondo giocatore (2s) → sei aree → "Fatto!" → Scopri → mappa.
 I nomi sono "Giocatore 1" e "Giocatore 2" (modificabili in `DEFAULT_NAMES`).
 
