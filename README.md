@@ -7,32 +7,47 @@ vita (Famiglia, Figli, Amici, Soldi, Carriera, Tempo Libero) ognuno risponde su 
 vedere le scelte dell'altro. Alla fine la mappa mostra dove vi incontrate a metà strada.
 
 **Avvio:** apri `halfway/index.html` in un browser. Nessuna installazione, nessun server,
-nessuna rete: lo stato vive solo in memoria e "Ricomincia" lo azzera del tutto.
+nessuna rete: lo stato vive solo in memoria e "Azzera" (in alto a destra, su ogni schermata) lo cancella del tutto.
+
+**Lingua:** nella home si sceglie italiano o inglese; tutto il gioco, la dashboard e il PDF seguono la
+lingua scelta (che resta anche dopo "Azzera").
+
+**Flusso:** Inizia! → transizione "Tocca a [nome]" (2s) → sei aree con Indietro/Avanti (niente Indietro sulla prima) → "Ci siamo
+quasi..." → transizione per il secondo giocatore (2s) → sei aree → "Fatto!" → Scopri → mappa.
+Nella home si possono scrivere i nomi dei due giocatori (facoltativi, max 20 caratteri); se restano vuoti si usano "Giocatore 1" e "Giocatore 2" (o "Player 1" e "Player 2").
 
 **Come funzionano le voci**
-- Ogni voce ha un'icona, una domanda breve e una scala da 0 a 10 pallini (massimo 10 per voce).
-  I pallini sono un valore concreto: per esempio *Vicinanza alle Famiglie* va da «Oltre 3 ore di
-  viaggio» (0) a «Nello stesso quartiere» (10). Cinque livelli descrivono la scala: 0 · 1–3 · 4–6 · 7–9 · 10.
-- Non c'è un limite ai pallini sul totale e si può sempre andare avanti: il segnale sta nelle combinazioni.
-- Piccole ricompense: spunta sulle tappe completate, stella a 10 pallini, avviso a ogni tappa,
-  coriandoli al passaggio del dispositivo.
+- Ogni voce ha una domanda esplicita e una scala da 0 a 5 pallini, e **ogni valore ha la sua risposta**:
+  per esempio *Vicinanza alle Famiglie* va da «Oltre 3 ore di viaggio» (0) a «2–3 ore», «Circa un'ora»,
+  «Entro 30 minuti», «Nella stessa città» fino a «Nello stesso quartiere» (5).
+- Non c'è un limite ai pallini sul totale e si può sempre andare avanti. Con Indietro si torna
+  alle aree già compilate del proprio turno e si ritrovano i valori.
 
-**La dashboard finale**: sei riquadri con una barra colorata per area, una sintesi a etichette (allineati,
-differenza, da discutere; toccandole si apre la voce), poi la mappa: una riga per voce con i due pallini
-su una scala 0–10 e la barra colorata dall'esito. I dettagli si aprono al tocco. In fondo, "Sfide e Badge".
+**La dashboard finale**: sei riquadri per area con la percentuale di intesa, una sintesi a etichette
+(allineati, differenza, da discutere; toccandole si apre la voce), poi la mappa: per ogni sezione un
+giudizio complessivo (In Sintonia, Qualche Differenza, Un Nodo da Sciogliere, Da Discutere), l'intesa
+e una riga di commento (Forza, Nodo, per chi pesa di più), poi una riga per voce con i due pallini su
+una scala 0–5. In fondo il *Validity Check* e *Il Vostro Quadro*, l'analisi conclusiva: intesa globale,
+profilo di coppia (la sezione a cui insieme date più peso) e sei osservazioni (Il Quadro, Le Fondamenta,
+Temi di Fondo, Le Priorità, La Coerenza, Il Primo Passo).
+
+**Esporta PDF**: in cima e in fondo alla dashboard. Genera un PDF A4 di una pagina (senza librerie
+esterne) con intesa e profilo di coppia, la sintesi di ogni sezione (esito, intesa, commento e le otto voci
+con i due pallini) e le sei osservazioni finali. Nella pagina pubblicata il salvataggio passa dalla
+conferma di download di claude.ai; aperto come file locale è un normale download.
 
 **Come si leggono i risultati** (soglie in `T`, funzione `classify`)
-- distanza ≤ 2: allineati (pilastro condiviso se entrambi ≥ 6); nessuno dei due oltre 2: poco in gioco
-- distanza 3–4: sfumatura, ciascuno si sposta al massimo di 2 pallini per incontrarsi
-- distanza 5–6: da negoziare
-- distanza ≥ 7: da discutere (i temi di fondo, `crit`, hanno la precedenza)
-- **Da Chiarire / Da Conciliare** (`CONFLICTS`, `internalConflicts`): incrocia le risposte della stessa
-  persona. *Da chiarire* se si escludono (nessun desiderio di figli ma un numero di figli), *da
-  conciliare* se tirano in direzioni opposte (vivere accanto alle famiglie e trasferirsi ovunque), più i
-  controlli «il tempo/il budget non basta per tutto» e le aree con molte voci al massimo.
-- **Sfide** (`crossings`): combinazioni tra voi due che mettono in tensione le scelte
-  (es. uno vuole restare vicino alle famiglie, l'altro spostarsi per lavoro).
-- **Badge**: punti di forza condivisi (es. Radici Condivise, Vita in Movimento).
+- distanza ≤ 1: allineati (pilastro condiviso se entrambi ≥ 3); nessuno dei due oltre 1: poco in gioco
+- distanza 2: sfumatura, ciascuno si sposta di un pallino per incontrarsi
+- distanza 3: da negoziare
+- distanza ≥ 4: da discutere (i temi di fondo, `crit`, hanno la precedenza)
+- **Validity Check** (`CONFLICTS`, `validityCheck`): per ciascun giocatore, incongruenze gravi tra
+  le sue risposte, cioè risposte che si escludono (es. nessun desiderio di figli ma figli subito,
+  contatto quotidiano con i genitori a più di 3 ore di distanza), anche **tra sezioni diverse** (es. nessun
+  desiderio di figli ma un fondo per il loro futuro, oltre 55 ore di lavoro più sport e hobby quasi ogni
+  giorno). Ogni incongruenza indica se è nella stessa sezione o tra sezioni. Le voci coinvolte hanno un "!" nella mappa.
+- **Intesa** (`intesa`): media della vicinanza delle risposte, pesata di più sulle voci che contano per
+  almeno uno dei due e sui temi di fondo.
 
-**Personalizzazione:** in cima allo `<script>` ci sono `MAX_PER_ITEM`, `AREAS` (aree, voci, icona,
-domanda e cinque livelli di scala) e le soglie `T`. I nomi si inseriscono nella schermata iniziale.
+**Personalizzazione:** in cima allo `<script>` ci sono `MAX_PER_ITEM`, `AREAS` (aree, voci, domanda e
+sei risposte, in italiano e inglese), le soglie `T` e i testi dell'interfaccia in `STR`.
