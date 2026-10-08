@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="it">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Segnapicche</title>
+<title>Spades Scorer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Karla:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -50,7 +50,7 @@ button{font:inherit; color:inherit}
   text-transform:uppercase; color:var(--ink-3)}
 .wrap{max-width:780px; margin:0 auto; padding:18px 16px 48px; display:flex; flex-direction:column; gap:14px}
 
-/* barra */
+/* bar */
 .bar{display:flex; align-items:center; justify-content:space-between; gap:10px}
 .brand{display:flex; align-items:center; gap:10px; min-width:0}
 .pip{width:34px; height:34px; flex:none; border-radius:10px; background:var(--felt); color:var(--felt-ink);
@@ -74,7 +74,7 @@ h1{font-size:21px; letter-spacing:-.01em}
 .menu-pop button.danger{color:var(--red)}
 .menu-pop hr{border:0; border-top:1px solid var(--line); margin:4px 2px}
 
-/* punteggi */
+/* scores */
 .board{display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr))}
 .tile{position:relative; overflow:hidden; background:var(--surface); border:1px solid var(--line);
   border-radius:14px; padding:11px 14px 10px; box-shadow:var(--shadow);
@@ -99,7 +99,7 @@ h1{font-size:21px; letter-spacing:-.01em}
 .tag.win{background:var(--felt); color:var(--felt-ink)}
 .tag.risk{background:var(--red-soft); color:var(--red)}
 
-/* schede */
+/* cards */
 .card{background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow)}
 .card-head{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 14px}
 .card-head h2{font-size:17px}
@@ -108,7 +108,7 @@ h1{font-size:21px; letter-spacing:-.01em}
 .count.ok{border-color:var(--felt); background:var(--felt-soft); color:var(--felt)}
 .count.over{border-color:var(--red); background:var(--red-soft); color:var(--red)}
 
-/* inserimento */
+/* entry */
 .entry{padding:0 14px 6px}
 .erow{display:grid; grid-template-columns:minmax(0,1fr) var(--cw) var(--cw) 42px; gap:8px;
   align-items:center; padding:3px 0}
@@ -152,7 +152,7 @@ h1{font-size:21px; letter-spacing:-.01em}
 .btn.danger{color:var(--red); border-color:var(--red)}
 :focus-visible{outline:2px solid var(--felt); outline-offset:2px}
 
-/* registro */
+/* ledger */
 .tblwrap{overflow-x:auto; border-top:1px solid var(--line)}
 table{border-collapse:collapse; width:100%; font-size:14px}
 th,td{padding:7px 12px; text-align:left; border-bottom:1px solid var(--line); white-space:nowrap}
@@ -173,7 +173,7 @@ td.n{font-family:"IBM Plex Mono",monospace; color:var(--ink-3); font-variant-num
 .empty{padding:16px 14px 20px; color:var(--ink-3); font-size:13.5px; text-align:center}
 .foot{max-width:780px; margin:0 auto; padding:6px 16px 32px; color:var(--ink-3); font-size:12px}
 
-/* dialoghi */
+/* dialogs */
 dialog{border:1px solid var(--line); border-radius:14px; background:var(--surface); color:var(--ink);
   padding:0; width:min(540px,calc(100vw - 28px)); box-shadow:0 24px 60px -20px rgba(0,0,0,.5)}
 dialog::backdrop{background:rgba(10,16,14,.55)}
@@ -209,58 +209,58 @@ textarea{font-family:"IBM Plex Mono",monospace; font-size:12px; min-height:150px
   <header class="bar">
     <div class="brand">
       <span class="pip" aria-hidden="true">&#9824;</span>
-      <h1>Segnapicche</h1>
+      <h1>Spades Scorer</h1>
     </div>
     <div class="bar-right">
-      <button class="chipbtn" id="btnSetup" title="Giocatori, modalita' e obiettivo">Partita</button>
+      <button class="chipbtn" id="btnSetup" title="Players, mode and target">Game</button>
       <div class="menu">
-        <button class="dots-btn" id="btnMenu" aria-haspopup="true" aria-expanded="false" aria-label="Altre azioni">&#8943;</button>
+        <button class="dots-btn" id="btnMenu" aria-haspopup="true" aria-expanded="false" aria-label="More actions">&#8943;</button>
         <div class="menu-pop" id="menuPop" hidden>
-          <button type="button" data-act="setup">Giocatori e partita</button>
-          <button type="button" data-act="rules">Regole del punteggio</button>
+          <button type="button" data-act="setup">Players and game</button>
+          <button type="button" data-act="rules">Scoring rules</button>
           <button type="button" data-act="data">Backup</button>
           <hr>
-          <button type="button" data-act="undo">Annulla ultima mano</button>
-          <button type="button" data-act="reset" class="danger">Azzera registro</button>
+          <button type="button" data-act="undo">Undo last hand</button>
+          <button type="button" data-act="reset" class="danger">Clear the ledger</button>
         </div>
       </div>
     </div>
   </header>
 
-  <section class="board" id="board" aria-label="Punteggi"></section>
+  <section class="board" id="board" aria-label="Scores"></section>
 
   <section class="card">
     <div class="card-head">
-      <h2 id="entryTitle">Mano 1</h2>
-      <span class="count" id="count">13 prese</span>
+      <h2 id="entryTitle">Hand 1</h2>
+      <span class="count" id="count">13 tricks</span>
     </div>
     <div class="entry" id="entry"></div>
     <div class="entry-foot">
       <div class="prev" id="prev"></div>
       <div class="acts">
-        <button class="btn ghost" id="btnCancel" hidden>Annulla</button>
-        <button class="btn primary" id="btnSave">Registra</button>
+        <button class="btn ghost" id="btnCancel" hidden>Cancel</button>
+        <button class="btn primary" id="btnSave">Record</button>
       </div>
     </div>
   </section>
 
   <section class="card">
-    <div class="card-head"><h2>Registro</h2><span class="lbl" id="handCount"></span></div>
+    <div class="card-head"><h2>Ledger</h2><span class="lbl" id="handCount"></span></div>
     <div class="tblwrap" id="tblwrap"><table><thead id="lhead"></thead><tbody id="lbody"></tbody></table></div>
-    <p class="empty" id="lempty">Nessuna mano registrata.</p>
+    <p class="empty" id="lempty">No hands recorded yet.</p>
   </section>
 </div>
-<p class="foot">Punteggi salvati in questo browser. Backup e regole nel menu &#8943;</p>
+<p class="foot">Scores are saved in this browser. Backup and rules are in the &#8943; menu</p>
 
 <dialog id="dlgSetup">
   <form method="dialog">
-    <div class="dh"><h2>Giocatori e partita</h2></div>
+    <div class="dh"><h2>Players and game</h2></div>
     <div class="db">
       <fieldset>
-        <legend>Modalita'</legend>
+        <legend>Mode</legend>
         <div class="seg" id="segMode">
-          <button type="button" data-mode="teams" aria-pressed="true">A coppie</button>
-          <button type="button" data-mode="solo" aria-pressed="false">Individuale</button>
+          <button type="button" data-mode="teams" aria-pressed="true">Partners</button>
+          <button type="button" data-mode="solo" aria-pressed="false">Individual</button>
         </div>
         <div class="seg" id="segCount" hidden>
           <button type="button" data-count="3" aria-pressed="false">3</button>
@@ -269,47 +269,47 @@ textarea{font-family:"IBM Plex Mono",monospace; font-size:12px; min-height:150px
         </div>
       </fieldset>
       <fieldset>
-        <legend>Nomi</legend>
+        <legend>Names</legend>
         <div class="fields" id="nameFields"></div>
         <div class="fields" id="teamFields"></div>
       </fieldset>
       <fieldset>
-        <legend>Partita</legend>
+        <legend>Game</legend>
         <div class="fields">
-          <div class="stack"><label for="inpTarget">Obiettivo</label><input type="number" id="inpTarget" min="10" step="10"></div>
-          <div class="stack"><label for="inpTricks">Prese per mano</label><input type="number" id="inpTricks" min="1" max="26"></div>
+          <div class="stack"><label for="inpTarget">Target score</label><input type="number" id="inpTarget" min="10" step="10"></div>
+          <div class="stack"><label for="inpTricks">Tricks per hand</label><input type="number" id="inpTricks" min="1" max="26"></div>
         </div>
       </fieldset>
     </div>
-    <div class="df"><button class="btn ghost" value="cancel">Annulla</button>
-      <button class="btn primary" id="btnSetupSave" value="save">Salva</button></div>
+    <div class="df"><button class="btn ghost" value="cancel">Cancel</button>
+      <button class="btn primary" id="btnSetupSave" value="save">Save</button></div>
   </form>
 </dialog>
 
 <dialog id="dlgRules">
   <form method="dialog">
-    <div class="dh"><h2>Regole del punteggio</h2></div>
+    <div class="dh"><h2>Scoring rules</h2></div>
     <div class="db">
-      <p class="legenda"><b>Contratto</b> 10 pt a presa dichiarata &middot; <b>sacco</b> 1 pt, &minus;100 ogni 10 &middot;
-        <b>Nil</b> &plusmn;100, al buio &plusmn;200</p>
+      <p class="legenda"><b>Contract</b> 10 pts per trick bid &middot; <b>bag</b> 1 pt, &minus;100 every 10 &middot;
+        <b>Nil</b> &plusmn;100, blind &plusmn;200</p>
       <div class="fields">
-        <div class="stack"><label for="rPerTrick">Punti per presa</label><input type="number" id="rPerTrick" min="0"></div>
-        <div class="stack"><label for="rBagPoint">Punti per sacco</label><input type="number" id="rBagPoint" min="0"></div>
+        <div class="stack"><label for="rPerTrick">Points per trick</label><input type="number" id="rPerTrick" min="0"></div>
+        <div class="stack"><label for="rBagPoint">Points per bag</label><input type="number" id="rBagPoint" min="0"></div>
       </div>
       <div class="fields">
-        <div class="stack"><label for="rBagLimit">Sacchi prima della penalita' (0 = mai)</label><input type="number" id="rBagLimit" min="0"></div>
-        <div class="stack"><label for="rBagPenalty">Penalita' sacchi</label><input type="number" id="rBagPenalty" min="0"></div>
+        <div class="stack"><label for="rBagLimit">Bags before the penalty (0 = never)</label><input type="number" id="rBagLimit" min="0"></div>
+        <div class="stack"><label for="rBagPenalty">Bag penalty</label><input type="number" id="rBagPenalty" min="0"></div>
       </div>
       <div class="fields">
         <div class="stack"><label for="rNil">Nil</label><input type="number" id="rNil" min="0"></div>
-        <div class="stack"><label for="rBlind">Nil al buio</label><input type="number" id="rBlind" min="0"></div>
+        <div class="stack"><label for="rBlind">Blind nil</label><input type="number" id="rBlind" min="0"></div>
       </div>
-      <label class="check"><input type="checkbox" id="rNilBags"> Prese del Nil fallito = sacchi della squadra</label>
-      <label class="check"><input type="checkbox" id="rNilContract"> Prese del Nil fallito valide per il contratto</label>
+      <label class="check"><input type="checkbox" id="rNilBags"> Tricks from a failed nil = the team's bags</label>
+      <label class="check"><input type="checkbox" id="rNilContract"> Tricks from a failed nil count towards the contract</label>
     </div>
-    <div class="df"><button class="btn ghost" value="cancel">Annulla</button>
+    <div class="df"><button class="btn ghost" value="cancel">Cancel</button>
       <button class="btn ghost" type="button" id="btnRulesDefault">Standard</button>
-      <button class="btn primary" id="btnRulesSave" value="save">Salva</button></div>
+      <button class="btn primary" id="btnRulesSave" value="save">Save</button></div>
   </form>
 </dialog>
 
@@ -317,22 +317,22 @@ textarea{font-family:"IBM Plex Mono",monospace; font-size:12px; min-height:150px
   <form method="dialog">
     <div class="dh"><h2>Backup</h2></div>
     <div class="db">
-      <p class="legenda">Copia il testo per conservare la partita, o incollane uno salvato e premi Carica.</p>
-      <textarea id="dataArea" spellcheck="false" aria-label="Dati della partita"></textarea>
+      <p class="legenda">Copy the text to keep the game, or paste a saved one and press Load.</p>
+      <textarea id="dataArea" spellcheck="false" aria-label="Game data"></textarea>
       <p class="legenda" id="dataMsg"></p>
     </div>
-    <div class="df"><button class="btn ghost" value="cancel">Chiudi</button>
-      <button class="btn ghost" type="button" id="btnCopy">Copia</button>
-      <button class="btn primary" type="button" id="btnLoad">Carica</button></div>
+    <div class="df"><button class="btn ghost" value="cancel">Close</button>
+      <button class="btn ghost" type="button" id="btnCopy">Copy</button>
+      <button class="btn primary" type="button" id="btnLoad">Load</button></div>
   </form>
 </dialog>
 
 <dialog id="dlgConfirm">
   <form method="dialog">
-    <div class="dh"><h2 id="cTitle">Confermi?</h2></div>
+    <div class="dh"><h2 id="cTitle">Are you sure?</h2></div>
     <div class="db"><p class="legenda" id="cText"></p></div>
-    <div class="df"><button class="btn ghost" value="cancel">Annulla</button>
-      <button class="btn danger" value="ok" id="btnOk">Conferma</button></div>
+    <div class="df"><button class="btn ghost" value="cancel">Cancel</button>
+      <button class="btn danger" value="ok" id="btnOk">Confirm</button></div>
   </form>
 </dialog>
 <script>
@@ -343,16 +343,16 @@ const KEY = "segnapicche/v1";
 const OLD_KEY = "sacchi-e-picche/v1";
 const DEFAULT_RULES = {perTrick:10, bagPoint:1, bagLimit:10, bagPenalty:100, nil:100, blindNil:200,
                        nilBags:true, nilContract:false};
-const SEATS = ["Nord","Est","Sud","Ovest","Quinto","Sesto"];
+const SEATS = ["North","East","South","West","Fifth","Sixth"];
 function defaultState(){
-  return {mode:"teams", players:["Nord","Est","Sud","Ovest"], teamNames:["Noi","Loro"],
+  return {mode:"teams", players:["North","East","South","West"], teamNames:["Us","Them"],
           tricks:13, target:500, rules:Object.assign({}, DEFAULT_RULES), hands:[], seq:1, fresh:true};
 }
 let S = defaultState();
 let draft = null;
 let confirmCb = null;
 
-/* ---------------- persistenza ---------------- */
+/* ---------------- storage ---------------- */
 function save(){
   try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){}
 }
@@ -386,10 +386,10 @@ function sanitize(o){
   if(st.mode === "teams") st.players = st.players.slice(0,4);
   st.players = st.players.slice(0,6);
   while(st.players.length < (st.mode === "teams" ? 4 : 3)){
-    st.players.push(SEATS[st.players.length] || ("Giocatore " + (st.players.length + 1)));
+    st.players.push(SEATS[st.players.length] || ("Player " + (st.players.length + 1)));
   }
-  st.players = st.players.map(function(n,i){ return n || SEATS[i] || ("Giocatore " + (i+1)); });
-  while(st.teamNames.length < 2) st.teamNames.push(st.teamNames.length ? "Loro" : "Noi");
+  st.players = st.players.map(function(n,i){ return n || SEATS[i] || ("Player " + (i+1)); });
+  while(st.teamNames.length < 2) st.teamNames.push(st.teamNames.length ? "Them" : "Us");
   ["perTrick","bagPoint","bagLimit","bagPenalty","nil","blindNil"].forEach(function(k){
     st.rules[k] = clampInt(st.rules[k], 0, 100000, DEFAULT_RULES[k]);
   });
@@ -413,20 +413,20 @@ function sanitize(o){
   return st;
 }
 
-/* ---------------- squadre ---------------- */
+/* ---------------- teams ---------------- */
 function teams(){
   if(S.mode === "teams") return [[0,2],[1,3]];
   return S.players.map(function(_,i){ return [i]; });
 }
 function teamLabel(ti){
-  if(S.mode === "teams") return S.teamNames[ti] || ("Squadra " + (ti+1));
-  return S.players[ti] || ("Giocatore " + (ti+1));
+  if(S.mode === "teams") return S.teamNames[ti] || ("Team " + (ti+1));
+  return S.players[ti] || ("Player " + (ti+1));
 }
 function teamMembers(ti){
   return teams()[ti].map(function(i){ return esc(S.players[i]); }).join(" &middot; ");
 }
 
-/* ---------------- motore di punteggio ---------------- */
+/* ---------------- scoring engine ---------------- */
 function scoreHand(entries, carried){
   const R = S.rules;
   return teams().map(function(idxs, ti){
@@ -479,7 +479,7 @@ function computeAll(){
   return {rows:rows, totals:totals, bags:bags, winner: decided ? winner : -1, leader: tie ? -1 : winner};
 }
 
-/* ---------------- bozza della mano ---------------- */
+/* ---------------- hand draft ---------------- */
 function blankDraft(){
   return {entries: S.players.map(function(){ return {type:"num", value:0, tricks:0}; }), editingId:null};
 }
@@ -504,7 +504,7 @@ function fmt(n){ return (n > 0 ? "+" : "") + n; }
 
 /* ---------------- render ---------------- */
 function renderChip(){
-  const who = S.mode === "teams" ? "Coppie" : (S.players.length + " gioc.");
+  const who = S.mode === "teams" ? "Partners" : (S.players.length + " players");
   $("#btnSetup").textContent = who + " · " + S.target;
 }
 
@@ -523,8 +523,8 @@ function renderBoard(c){
     }
     const delta = last ? last.res[ti].points : null;
     let tag = "";
-    if(c.winner === ti) tag = '<span class="tag win">vittoria</span>';
-    else if(limit > 0 && bags >= limit - 1) tag = '<span class="tag risk">sacco pieno</span>';
+    if(c.winner === ti) tag = '<span class="tag win">winner</span>';
+    else if(limit > 0 && bags >= limit - 1) tag = '<span class="tag risk">bags nearly full</span>';
     const el = document.createElement("article");
     el.className = "tile" + (c.leader === ti && c.rows.length ? " lead" : "") + (c.winner === ti ? " win" : "");
     el.innerHTML =
@@ -533,7 +533,7 @@ function renderBoard(c){
         (delta === null ? "" : '<span class="delta ' + (delta >= 0 ? "pos" : "neg") + '">' + fmt(delta) + '</span>') +
       '</div>' +
       '<div class="bags"><span class="dots">' + dots + '</span>' +
-        '<span class="lbl">' + (limit > 0 ? bags + " / " + limit : bags + " sacchi") + '</span></div>';
+        '<span class="lbl">' + (limit > 0 ? bags + " / " + limit : bags + " bags") + '</span></div>';
     box.appendChild(el);
   });
 }
@@ -542,26 +542,26 @@ function entrySig(){ return S.mode + "|" + S.players.join("~") + "|" + S.tricks;
 
 function ctl(field, name, label){
   return '<div class="ctl">' +
-    '<button type="button" data-f="' + field + '" data-d="-1" aria-label="' + label + ' meno per ' + name + '">&minus;</button>' +
-    '<input data-v="' + field + '" inputmode="numeric" autocomplete="off" value="0" aria-label="' + label + ' di ' + name + '">' +
-    '<button type="button" data-f="' + field + '" data-d="1" aria-label="' + label + ' piu per ' + name + '">+</button>' +
+    '<button type="button" data-f="' + field + '" data-d="-1" aria-label="' + label + ' down for ' + name + '">&minus;</button>' +
+    '<input data-v="' + field + '" inputmode="numeric" autocomplete="off" value="0" aria-label="' + label + ' for ' + name + '">' +
+    '<button type="button" data-f="' + field + '" data-d="1" aria-label="' + label + ' up for ' + name + '">+</button>' +
     '</div>';
 }
 
 function buildEntry(){
   const box = $("#entry");
   const tms = teams();
-  let html = '<div class="erow ehead"><span class="lbl">Giocatore</span>' +
-    '<span class="lbl">Dichiara</span><span class="lbl">Prese</span><span class="lbl">Nil</span></div>';
+  let html = '<div class="erow ehead"><span class="lbl">Player</span>' +
+    '<span class="lbl">Bid</span><span class="lbl">Tricks</span><span class="lbl">Nil</span></div>';
   tms.forEach(function(idxs, ti){
     if(S.mode === "teams") html += '<div class="grp lbl">' + esc(teamLabel(ti)) + '</div>';
     idxs.forEach(function(i){
       const name = esc(S.players[i]);
       html += '<div class="erow" data-i="' + i + '">' +
         '<span class="nm">' + name + '</span>' +
-        ctl("bid", name, "Dichiarazione") +
-        ctl("tricks", name, "Prese") +
-        '<button type="button" class="nilbtn" data-nil title="Tocca per Nil, ancora per Nil al buio">nil</button>' +
+        ctl("bid", name, "Bid") +
+        ctl("tricks", name, "Tricks") +
+        '<button type="button" class="nilbtn" data-nil title="Tap for nil, again for blind nil">nil</button>' +
         '</div>';
     });
   });
@@ -578,14 +578,14 @@ function syncEntry(){
     const isNil = e.type !== "num";
     const bidEl = row.querySelector('[data-v="bid"]');
     const trEl = row.querySelector('[data-v="tricks"]');
-    const txt = e.type === "nil" ? "Nil" : (e.type === "blind" ? "Buio" : String(e.value));
+    const txt = e.type === "nil" ? "Nil" : (e.type === "blind" ? "Blind" : String(e.value));
     if(document.activeElement !== bidEl || isNil) bidEl.value = txt;
     bidEl.readOnly = isNil;
     bidEl.classList.toggle("word", isNil);
     if(document.activeElement !== trEl) trEl.value = String(e.tricks);
     Array.prototype.forEach.call(row.querySelectorAll('[data-f="bid"]'), function(b){ b.disabled = isNil; });
     const nb = row.querySelector("[data-nil]");
-    nb.textContent = e.type === "nil" ? "NIL" : (e.type === "blind" ? "BUIO" : "nil");
+    nb.textContent = e.type === "nil" ? "NIL" : (e.type === "blind" ? "BLIND" : "nil");
     nb.classList.toggle("on", isNil);
   });
 }
@@ -594,8 +594,8 @@ function renderEntry(c){
   const tot = draftTricks();
   const cnt = $("#count");
   if(tot === S.tricks){ cnt.textContent = S.tricks + " / " + S.tricks; cnt.className = "count ok"; }
-  else if(tot > S.tricks){ cnt.textContent = (tot - S.tricks) + " di troppo"; cnt.className = "count over"; }
-  else { cnt.textContent = "restano " + (S.tricks - tot); cnt.className = "count"; }
+  else if(tot > S.tricks){ cnt.textContent = (tot - S.tricks) + " too many"; cnt.className = "count over"; }
+  else { cnt.textContent = (S.tricks - tot) + " left"; cnt.className = "count"; }
 
   const touched = tot > 0 || draft.entries.some(function(e){ return e.type !== "num" || e.value > 0; });
   const res = scoreHand(draft.entries, carriedBags(c));
@@ -605,9 +605,9 @@ function renderEntry(c){
   }).join("");
 
   const editIdx = draft.editingId == null ? -1 : S.hands.findIndex(function(h){ return h.id === draft.editingId; });
-  $("#entryTitle").textContent = editIdx >= 0 ? ("Mano " + (editIdx + 1)) : ("Mano " + (S.hands.length + 1));
+  $("#entryTitle").textContent = editIdx >= 0 ? ("Hand " + (editIdx + 1)) : ("Hand " + (S.hands.length + 1));
   $("#btnSave").disabled = tot !== S.tricks;
-  $("#btnSave").textContent = editIdx >= 0 ? "Salva" : "Registra";
+  $("#btnSave").textContent = editIdx >= 0 ? "Save" : "Record";
   $("#btnCancel").hidden = editIdx < 0;
 }
 
@@ -618,22 +618,22 @@ function renderLedger(c){
   $("#lbody").innerHTML = c.rows.map(function(row){
     const cells = row.res.map(function(r, ti){
       const bits = [r.bid + "→" + r.tricks];
-      r.nils.forEach(function(n){ bits.push((n.blind ? "buio " : "nil ") + (n.ok ? "ok" : "ko")); });
+      r.nils.forEach(function(n){ bits.push((n.blind ? "blind " : "nil ") + (n.ok ? "made" : "failed")); });
       if(r.penalty) bits.push("−" + r.penalty);
       return '<td><span class="pts ' + (r.points >= 0 ? "pos" : "neg") + '">' + fmt(r.points) + '</span>' +
              '<span class="sub d">' + bits.join(" · ") + '</span>' +
-             '<span class="sub t">tot ' + row.totals[ti] + '</span></td>';
+             '<span class="sub t">total ' + row.totals[ti] + '</span></td>';
     }).join("");
-    return '<tr data-id="' + row.hand.id + '" title="Tocca per correggere"' +
+    return '<tr data-id="' + row.hand.id + '" title="Tap to correct"' +
       (draft.editingId === row.hand.id ? ' class="editing"' : "") + '>' +
       '<td class="n">' + row.index + '</td>' + cells +
       '<td style="text-align:right"><button type="button" class="x" data-del="' + row.hand.id +
-      '" aria-label="Elimina mano ' + row.index + '">&times;</button></td></tr>';
+      '" aria-label="Delete hand ' + row.index + '">&times;</button></td></tr>';
   }).join("");
   const none = c.rows.length === 0;
   $("#lempty").hidden = !none;
   $("#tblwrap").hidden = none;
-  $("#handCount").textContent = none ? "" : (c.rows.length === 1 ? "1 mano" : c.rows.length + " mani");
+  $("#handCount").textContent = none ? "" : (c.rows.length === 1 ? "1 hand" : c.rows.length + " hands");
 }
 
 function render(){
@@ -645,7 +645,7 @@ function render(){
   renderLedger(c);
 }
 
-/* ---------------- inserimento ---------------- */
+/* ---------------- entry ---------------- */
 const entryBox = $("#entry");
 entryBox.addEventListener("click", function(ev){
   const row = ev.target.closest(".erow[data-i]");
@@ -739,7 +739,7 @@ $("#lbody").addEventListener("click", function(ev){
     const id = Number(del.dataset.del);
     const idx = S.hands.findIndex(function(x){ return x.id === id; });
     if(idx < 0) return;
-    askConfirm("Eliminare la mano " + (idx + 1) + "?", "Le mani successive vengono rinumerate e i punteggi ricalcolati.", function(){
+    askConfirm("Delete hand " + (idx + 1) + "?", "The hands after it are renumbered and the scores recalculated.", function(){
       S.hands.splice(idx, 1);
       if(draft.editingId === id) draft = blankDraft();
       save(); render();
@@ -778,20 +778,20 @@ pop.addEventListener("click", function(ev){
   else if(act === "data"){ $("#dataArea").value = JSON.stringify(S, null, 1); $("#dataMsg").textContent = ""; $("#dlgData").showModal(); }
   else if(act === "undo"){
     if(!S.hands.length) return;
-    askConfirm("Annullare l'ultima mano?", "La mano " + S.hands.length + " viene eliminata.", function(){
+    askConfirm("Undo the last hand?", "Hand " + S.hands.length + " will be deleted.", function(){
       S.hands.pop();
       if(draft.editingId != null && !S.hands.some(function(h){ return h.id === draft.editingId; })) draft = blankDraft();
       save(); render();
     });
   }
   else if(act === "reset"){
-    askConfirm("Azzerare il registro?", "Si cancellano tutte le mani; nomi e regole restano.", function(){
+    askConfirm("Clear the ledger?", "Every hand is deleted; names and rules stay.", function(){
       S.hands = []; draft = blankDraft(); save(); render();
     });
   }
 });
 
-/* ---------------- dialoghi ---------------- */
+/* ---------------- dialogs ---------------- */
 function askConfirm(title, text, cb){
   $("#cTitle").textContent = title;
   $("#cText").textContent = text;
@@ -821,11 +821,11 @@ function renderSetup(){
     b.setAttribute("aria-pressed", Number(b.dataset.count) === setupDraft.players.length ? "true" : "false");
   });
   $("#nameFields").innerHTML = setupDraft.players.map(function(n, i){
-    return '<div class="stack"><label for="pn' + i + '">Giocatore ' + (i + 1) + '</label>' +
+    return '<div class="stack"><label for="pn' + i + '">Player ' + (i + 1) + '</label>' +
       '<input type="text" id="pn' + i + '" data-pn="' + i + '" maxlength="24" value="' + esc(n) + '"></div>';
   }).join("");
   $("#teamFields").innerHTML = setupDraft.mode !== "teams" ? "" : [0,1].map(function(i){
-    return '<div class="stack"><label for="tn' + i + '">Squadra ' + esc(setupDraft.players[i]) +
+    return '<div class="stack"><label for="tn' + i + '">Team ' + esc(setupDraft.players[i]) +
       " + " + esc(setupDraft.players[i + 2]) + '</label>' +
       '<input type="text" id="tn' + i + '" data-tn="' + i + '" maxlength="24" value="' +
       esc(setupDraft.teamNames[i] || "") + '"></div>';
@@ -843,7 +843,7 @@ $("#segMode").addEventListener("click", function(ev){
 $("#segCount").addEventListener("click", function(ev){
   const b = ev.target.closest("[data-count]"); if(!b) return;
   const n = Number(b.dataset.count);
-  while(setupDraft.players.length < n) setupDraft.players.push(SEATS[setupDraft.players.length] || ("Giocatore " + (setupDraft.players.length + 1)));
+  while(setupDraft.players.length < n) setupDraft.players.push(SEATS[setupDraft.players.length] || ("Player " + (setupDraft.players.length + 1)));
   setupDraft.players = setupDraft.players.slice(0, n);
   renderSetup();
 });
@@ -853,13 +853,13 @@ $("#dlgSetup").addEventListener("input", function(ev){
   if(t.dataset.tn != null) setupDraft.teamNames[Number(t.dataset.tn)] = t.value;
 });
 $("#btnSetupSave").addEventListener("click", function(){
-  const players = setupDraft.players.map(function(n, i){ return (n || "").trim() || SEATS[i] || ("Giocatore " + (i + 1)); });
+  const players = setupDraft.players.map(function(n, i){ return (n || "").trim() || SEATS[i] || ("Player " + (i + 1)); });
   const reshape = (setupDraft.mode !== S.mode) || (players.length !== S.players.length);
   const tricks = clampInt($("#inpTricks").value, 1, 26, S.tricks);
   const apply = function(){
     S.mode = setupDraft.mode;
     S.players = players;
-    S.teamNames = setupDraft.teamNames.map(function(n, i){ return (n || "").trim() || (i ? "Loro" : "Noi"); });
+    S.teamNames = setupDraft.teamNames.map(function(n, i){ return (n || "").trim() || (i ? "Them" : "Us"); });
     S.target = clampInt($("#inpTarget").value, 10, 100000, S.target);
     S.tricks = tricks;
     if(reshape) S.hands = [];
@@ -869,8 +869,8 @@ $("#btnSetupSave").addEventListener("click", function(){
   };
   if(reshape && S.hands.length){
     setTimeout(function(){
-      askConfirm("Il registro verra' azzerato",
-        "Cambiando modalita' o numero di giocatori le " + S.hands.length + " mani registrate vengono eliminate.", apply);
+      askConfirm("The ledger will be cleared",
+        "Changing the mode or the number of players deletes the " + S.hands.length + " recorded hands.", apply);
     }, 120);
   }else{
     apply();
@@ -901,30 +901,30 @@ $("#btnCopy").addEventListener("click", function(){
   try{ done = document.execCommand("copy"); }catch(e){}
   if(!done && navigator.clipboard){
     navigator.clipboard.writeText(ta.value).then(
-      function(){ $("#dataMsg").textContent = "Copiato."; },
-      function(){ $("#dataMsg").textContent = "Copia manualmente il testo selezionato."; });
+      function(){ $("#dataMsg").textContent = "Copied."; },
+      function(){ $("#dataMsg").textContent = "Copy the selected text by hand."; });
     return;
   }
-  $("#dataMsg").textContent = done ? "Copiato." : "Copia manualmente il testo selezionato.";
+  $("#dataMsg").textContent = done ? "Copied." : "Copy the selected text by hand.";
 });
 $("#btnLoad").addEventListener("click", function(){
   let parsed = null;
   try{ parsed = JSON.parse($("#dataArea").value); }catch(e){
-    $("#dataMsg").textContent = "Testo non valido: incolla un backup completo.";
+    $("#dataMsg").textContent = "That text is not valid: paste a complete backup.";
     return;
   }
   if(!parsed || !Array.isArray(parsed.players)){
-    $("#dataMsg").textContent = "Non sembra un backup di questa app.";
+    $("#dataMsg").textContent = "That does not look like a backup from this app.";
     return;
   }
   S = sanitize(parsed);
   draft = blankDraft();
   save(); render();
-  $("#dataMsg").textContent = "Caricata: " + S.hands.length + (S.hands.length === 1 ? " mano." : " mani.");
+  $("#dataMsg").textContent = "Loaded: " + S.hands.length + (S.hands.length === 1 ? " hand." : " hands.");
 });
 $("#btnSetup").addEventListener("click", openSetup);
 
-/* ---------------- avvio ---------------- */
+/* ---------------- start ---------------- */
 const had = loadStored();
 draft = blankDraft();
 render();
