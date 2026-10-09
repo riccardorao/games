@@ -582,7 +582,8 @@ const STR = {
     qClean: "Le risposte di entrambi sono coerenti, anche tra sezioni diverse.",
     qFirst: (t, area, m) => `Partite da <b>${t}</b> (${area}): il punto d'incontro è ${m}.`, qNoFirst: "C'è poco da negoziare: godetevi i vostri pilastri.",
     export: "Esporta PDF", exporting: "Preparo il PDF...", saved: "PDF salvato", exportFail: "Non è stato possibile salvare il PDF",
-    pdfScale: "Intesa: 100% = stesse risposte · colori = giudizio per sezione", pdfFile: "halfway-mappa",
+    pdfScale: "Un raggio per voce (0–5): cerchio rosso = Giocatore 1, blu = Giocatore 2 · il colore della sezione è il suo giudizio", pdfFile: "halfway-mappa",
+    pdfShared: "Insieme", pdfMeet: "Incontro", pdfFirst: "Primo Passo", pdfCoherence: "Coerenza", pdfIncons: n => n === 1 ? "incongruenza" : "incongruenze",
     pdfRadar: "Compatibilità per Sezione", pdfBuild: "Su Cosa Poggiare le Fondamenta", pdfWork: "Dove Lavorare", pdfNotes: "Da Tenere Presente",
     pdfPillar: "Pilastro condiviso", pdfClose: "Scelte vicine", pdfNoWork: "Nessun nodo da sciogliere: concentratevi sui vostri pilastri.",
     langLabel: "Lingua"
@@ -624,7 +625,8 @@ const STR = {
     qClean: "Both sets of answers are consistent, across sections too.",
     qFirst: (t, area, m) => `Start from <b>${t}</b> (${area}): the meeting point is ${m}.`, qNoFirst: "There's little to negotiate: enjoy your pillars.",
     export: "Export PDF", exporting: "Preparing the PDF...", saved: "PDF saved", exportFail: "The PDF could not be saved",
-    pdfScale: "Match: 100% = identical answers · colours = verdict per section", pdfFile: "halfway-map",
+    pdfScale: "One spoke per item (0–5): red dot = Player 1, blue = Player 2 · a section's colour is its verdict", pdfFile: "halfway-map",
+    pdfShared: "Together", pdfMeet: "Meet at", pdfFirst: "First Step", pdfCoherence: "Consistency", pdfIncons: n => n === 1 ? "inconsistency" : "inconsistencies",
     pdfRadar: "Compatibility by Section", pdfBuild: "What to Build On", pdfWork: "Where to Work", pdfNotes: "Worth Keeping in Mind",
     pdfPillar: "Shared pillar", pdfClose: "Close choices", pdfNoWork: "Nothing to untie: focus on your pillars.",
     langLabel: "Language"
@@ -1143,6 +1145,7 @@ const HELV = {
   r: [278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584],
   b: [278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584]
 };
+const TIMB = [250,333,555,500,500,1000,833,278,333,333,500,570,250,333,250,278,500,500,500,500,500,500,500,500,500,500,333,333,570,570,570,500,930,722,667,722,722,667,611,778,778,389,500,778,667,944,722,778,611,778,722,556,667,722,722,1000,722,722,667,333,278,333,581,500,333,500,556,444,556,444,333,500,556,278,333,556,278,833,556,500,556,556,444,389,333,556,500,722,500,500,444,394,220,394,520];
 const WIN = { "€": 0x80, "‚": 0x82, "„": 0x84, "…": 0x85, "‘": 0x91, "’": 0x92, "“": 0x93, "”": 0x94, "•": 0x95, "–": 0x96, "—": 0x97 };
 const PDF_SUB = { "↔": "-", "→": ">", "←": "<", "✓": "", "−": "-", " ": " " };
 /* testo pronto per il PDF: niente emoji, solo caratteri WinAnsi */
@@ -1156,8 +1159,8 @@ function pdfText(str) {
   }
   return out.replace(/\s+/g, " ").replace(/\(\s+/g, "(").trim();
 }
-function charW(ch, bold) {
-  const c = ch.charCodeAt(0), t = bold ? HELV.b : HELV.r;
+function charW(ch, bold) {            // bold: false | true | "t" (Times Bold, per i titoli)
+  const c = ch.charCodeAt(0), t = bold === "t" ? TIMB : bold ? HELV.b : HELV.r;
   if (c >= 32 && c <= 126) return t[c - 32];
   if ("–«»€".includes(ch)) return 556;
   if ("—…".includes(ch)) return 1000;
@@ -1204,162 +1207,178 @@ function ellipsize(s, width, size, bold) {
 }
 
 function buildPdf() {
-  const s = S(), W = 595.28, H = 841.89, M = 36;
+  const s = S(), W = 595.28, H = 841.89, M = 36, CW = W - 2 * M;
   const n1 = esc(nameOf("player1")), n2 = esc(nameOf("player2"));
   const A = analyse(), q = quadroData(A, n1, n2);
   const css = getComputedStyle(document.documentElement);
   const hex = v => { const h = (css.getPropertyValue(v).trim() || "#000000").replace("#", ""); return [0, 2, 4].map(i => (parseInt(h.slice(i, i + 2), 16) / 255).toFixed(3)).join(" "); };
-  const C = { ink: hex("--ink"), ink2: hex("--ink-2"), line: hex("--line"), line2: hex("--line-2"), surface: hex("--surface"), bg: hex("--bg"),
+  const C = { ink: hex("--ink"), ink2: hex("--ink-2"), line: hex("--line"), line2: hex("--line-2"), surface: hex("--surface"), bg: hex("--bg"), white: "1 1 1",
     p1: hex("--p1"), p2: hex("--p2"), ok: hex("--ok"), mid: hex("--mid"), talk: hex("--talk"),
     okT: "0.239 0.416 0.278", midT: "0.490 0.353 0.047", talkT: "0.604 0.216 0.125", okS: hex("--ok-soft"), midS: hex("--mid-soft"), talkS: hex("--talk-soft") };
   const o = [];
-  const Y = y => (H - y).toFixed(2);
-  const text = (str, x, y, size, { bold = false, color = C.ink } = {}) => {
+  const Y = y => (H - y).toFixed(2), f2 = v => v.toFixed(2);
+  const rad = d => d * Math.PI / 180;
+  const fontKey = opt => opt.serif ? "F3" : opt.bold ? "F2" : "F1";
+  const wOf = (t, size, opt = {}) => textW(t, size, opt.serif ? "t" : !!opt.bold) + (opt.track || 0) * t.length;
+  /* testo; angle (in gradi sullo schermo, orario) lo ruota attorno al punto di partenza */
+  const text = (str, x, y, size, opt = {}) => {
     const t = pdfText(str); if (!t) return;
-    o.push(`BT ${color} rg /${bold ? "F2" : "F1"} ${size} Tf ${x.toFixed(2)} ${Y(y)} Td ${pdfStr(t)} Tj ET`);
+    const col = opt.color || C.ink, tc = `${opt.track || 0} Tc `;   // Tc resta nello stato grafico: va sempre reimpostato
+    if (opt.angle) { const a = rad(opt.angle), c = Math.cos(a), sn = Math.sin(a);
+      o.push(`BT ${col} rg /${fontKey(opt)} ${size} Tf ${tc}${f2(c)} ${f2(-sn)} ${f2(sn)} ${f2(c)} ${f2(x)} ${Y(y)} Tm ${pdfStr(t)} Tj ET`); }
+    else o.push(`BT ${col} rg /${fontKey(opt)} ${size} Tf ${tc}${f2(x)} ${Y(y)} Td ${pdfStr(t)} Tj ET`);
   };
-  const textR = (str, xr, y, size, opt = {}) => text(str, xr - textW(pdfText(str), size, opt.bold), y, size, opt);
+  const textR = (str, xr, y, size, opt = {}) => text(str, xr - wOf(pdfText(str), size, opt), y, size, opt);
+  const textC = (str, xc, y, size, opt = {}) => text(str, xc - wOf(pdfText(str), size, opt) / 2, y, size, opt);
   const rich = (lines, x, y, size, lh, color = C.ink) => lines.forEach((ln, k) =>
     ln.forEach(wd => text(wd.w, x + wd.x, y + k * lh, size, { bold: wd.bold, color })));
-  const rrect = (x, y, w, h, r, fill, stroke) => {
+  const rrect = (x, y, w, h, r, fill, stroke, sw = 0.8) => {
     const k = 0.5523 * r, x2 = x + w, y2 = y + h;
-    o.push(`${fill ? fill + " rg " : ""}${stroke ? stroke + " RG 0.8 w " : ""}${(x + r).toFixed(2)} ${Y(y)} m ${(x2 - r).toFixed(2)} ${Y(y)} l ` +
-      `${(x2 - r + k).toFixed(2)} ${Y(y)} ${x2.toFixed(2)} ${Y(y + r - k)} ${x2.toFixed(2)} ${Y(y + r)} c ${x2.toFixed(2)} ${Y(y2 - r)} l ` +
-      `${x2.toFixed(2)} ${Y(y2 - r + k)} ${(x2 - r + k).toFixed(2)} ${Y(y2)} ${(x2 - r).toFixed(2)} ${Y(y2)} c ${(x + r).toFixed(2)} ${Y(y2)} l ` +
-      `${(x + r - k).toFixed(2)} ${Y(y2)} ${x.toFixed(2)} ${Y(y2 - r + k)} ${x.toFixed(2)} ${Y(y2 - r)} c ${x.toFixed(2)} ${Y(y + r)} l ` +
-      `${x.toFixed(2)} ${Y(y + r - k)} ${(x + r - k).toFixed(2)} ${Y(y)} ${(x + r).toFixed(2)} ${Y(y)} c ${fill && stroke ? "B" : fill ? "f" : "S"}`);
+    o.push(`${fill ? fill + " rg " : ""}${stroke ? stroke + " RG " + sw + " w " : ""}${f2(x + r)} ${Y(y)} m ${f2(x2 - r)} ${Y(y)} l ` +
+      `${f2(x2 - r + k)} ${Y(y)} ${f2(x2)} ${Y(y + r - k)} ${f2(x2)} ${Y(y + r)} c ${f2(x2)} ${Y(y2 - r)} l ` +
+      `${f2(x2)} ${Y(y2 - r + k)} ${f2(x2 - r + k)} ${Y(y2)} ${f2(x2 - r)} ${Y(y2)} c ${f2(x + r)} ${Y(y2)} l ` +
+      `${f2(x + r - k)} ${Y(y2)} ${f2(x)} ${Y(y2 - r + k)} ${f2(x)} ${Y(y2 - r)} c ${f2(x)} ${Y(y + r)} l ` +
+      `${f2(x)} ${Y(y + r - k)} ${f2(x + r - k)} ${Y(y)} ${f2(x + r)} ${Y(y)} c ${fill && stroke ? "B" : fill ? "f" : "S"}`);
   };
-  const circle = (cx, cy, r, fill, stroke) => {
-    const k = 0.5523 * r, X = v => v.toFixed(2);
-    o.push(`${fill} rg ${stroke ? stroke + " RG 0.9 w " : ""}${X(cx + r)} ${Y(cy)} m ${X(cx + r)} ${Y(cy - k)} ${X(cx + k)} ${Y(cy - r)} ${X(cx)} ${Y(cy - r)} c ` +
-      `${X(cx - k)} ${Y(cy - r)} ${X(cx - r)} ${Y(cy - k)} ${X(cx - r)} ${Y(cy)} c ${X(cx - r)} ${Y(cy + k)} ${X(cx - k)} ${Y(cy + r)} ${X(cx)} ${Y(cy + r)} c ` +
-      `${X(cx + k)} ${Y(cy + r)} ${X(cx + r)} ${Y(cy + k)} ${X(cx + r)} ${Y(cy)} c ${stroke ? "B" : "f"}`);
+  const circle = (cx, cy, r, fill, stroke, sw = 0.9) => {
+    const k = 0.5523 * r;
+    o.push(`${fill ? fill + " rg " : ""}${stroke ? stroke + " RG " + sw + " w " : ""}${f2(cx + r)} ${Y(cy)} m ${f2(cx + r)} ${Y(cy - k)} ${f2(cx + k)} ${Y(cy - r)} ${f2(cx)} ${Y(cy - r)} c ` +
+      `${f2(cx - k)} ${Y(cy - r)} ${f2(cx - r)} ${Y(cy - k)} ${f2(cx - r)} ${Y(cy)} c ${f2(cx - r)} ${Y(cy + k)} ${f2(cx - k)} ${Y(cy + r)} ${f2(cx)} ${Y(cy + r)} c ` +
+      `${f2(cx + k)} ${Y(cy + r)} ${f2(cx + r)} ${Y(cy + k)} ${f2(cx + r)} ${Y(cy)} c ${fill && stroke ? "B" : fill ? "f" : "S"}`);
   };
-  const line = (x1, y1, x2, y2, color, w) => o.push(`${color} RG ${w} w 1 J ${x1.toFixed(2)} ${Y(y1)} m ${x2.toFixed(2)} ${Y(y2)} l S`);
+  const line = (x1, y1, x2, y2, color, w, cap = 1) => o.push(`${color} RG ${w} w ${cap} J ${f2(x1)} ${Y(y1)} m ${f2(x2)} ${Y(y2)} l S`);
+  const poly = (pts, op, fill, stroke, w = 0.6) => o.push(`${fill ? fill + " rg " : ""}${stroke ? stroke + " RG " + w + " w 1 j 1 J " : ""}` +
+    pts.map(([x, y], i) => `${f2(x)} ${Y(y)} ${i ? "l" : "m"}`).join(" ") + ` ${op}`);
+  const alpha = (gs, fn) => { o.push(`q /${gs} gs`); fn(); o.push("Q"); };
   const tone = cls => ({ ok: [C.ok, C.okT, C.okS], mid: [C.mid, C.midT, C.midS], talk: [C.talk, C.talkT, C.talkS], none: [C.line2, C.ink2, C.line] }[cls]);
+  const chip = (x, y, v, col, r = 5.2) => { circle(x, y, r, col); textC(String(v), x, y + r * 0.46, r * 1.3, { bold: true, color: C.white }); };
 
   // sfondo
   o.push(`${C.bg} rg 0 0 ${W} ${H} re f`);
-  const CW = W - 2 * M;
 
-  // intestazione: logo, titolo, nomi, data
-  line(M + 5, M + 6, M + 25, M + 6, C.mid, 3.2);
-  circle(M + 5, M + 6, 5, C.p1); circle(M + 25, M + 6, 5, C.p2);
-  text("Halfway", M + 36, M + 11, 16, { bold: true });
-  textR(new Date().toLocaleDateString(LANG === "it" ? "it-IT" : "en-GB", { day: "numeric", month: "long", year: "numeric" }), W - M, M + 10, 8.5, { color: C.ink2 });
-  text(s.mapTitle, M, M + 40, 20, { bold: true });
-  let lx = M; const ly = M + 56;
+  // ---- intestazione: marchio, nomi e intesa complessiva in grande
+  const level = q.score >= 80 ? "ok" : q.score >= 50 ? "mid" : "talk", [lcol, ltxt] = tone(level);
+  line(M + 6, M + 8, M + 30, M + 8, C.mid, 4);
+  circle(M + 6, M + 8, 6.5, C.p1); circle(M + 30, M + 8, 6.5, C.p2);
+  text("Halfway", M + 44, M + 20, 31, { serif: true });
+  text(s.mapTitle.toUpperCase(), M + 1, M + 41, 8, { bold: true, color: C.ink2, track: 1.6 });
+  let lx = M; const ly = M + 60;
   for (const [k, col] of [["player1", C.p1], ["player2", C.p2]]) {
-    circle(lx + 4, ly - 3, 3.6, col);
-    const nm = pdfText(nameOf(k)); text(nm, lx + 12, ly, 9.5, { bold: true }); lx += 12 + textW(nm, 9.5, true) + 18;
+    circle(lx + 5, ly - 3.4, 5, col);
+    const nm = pdfText(nameOf(k)); text(nm, lx + 14, ly, 11, { bold: true }); lx += 14 + wOf(nm, 11, { bold: true }) + 20;
   }
-  const heading = (str, x, y, col) => { rrect(x, y - 9, 3.5, 12, 1.7, col); text(str, x + 9, y, 10.5, { bold: true }); };
+  const hp = `${q.score}`;
+  text("%", W - M - wOf("%", 24, { serif: true }), M + 31, 24, { serif: true, color: ltxt });
+  textR(hp, W - M - wOf("%", 24, { serif: true }) - 1, M + 31, 50, { serif: true, color: ltxt });
+  textR(q.global.toUpperCase(), W - M, M + 46, 7.5, { bold: true, color: C.ink2, track: 1.2 });
+  textR(q.prof ? q.prof.name : s.empty, W - M, M + 61, 12, { serif: true });
 
-  // ---- sinistra: ragnatela della compatibilità per sezione
-  const top = M + 72, leftW = 262, xr = M + leftW + 16, rightW = CW - leftW - 16;
-  heading(s.pdfRadar, M, top + 8, C.mid);
-  const n = A.areas.length, R = 86, cx = M + leftW / 2, cy = top + 24 + 24 + R;
-  const ang = i => -Math.PI / 2 + i * 2 * Math.PI / n;
-  const pt = (i, r) => [cx + r * Math.cos(ang(i)), cy + r * Math.sin(ang(i))];
-  const poly = (pts, op, fill, stroke, w = 0.6) => o.push(`${fill ? fill + " rg " : ""}${stroke ? stroke + " RG " + w + " w 1 j " : ""}` +
-    pts.map(([x, y], i) => `${x.toFixed(2)} ${Y(y)} ${i ? "l" : "m"}`).join(" ") + ` h ${op}`);
-  const ring = f => Array.from({ length: n }, (_, i) => pt(i, R * f));
-  poly(ring(1), "B", C.surface, C.line2, 0.8);
-  for (const f of [0.75, 0.5, 0.25]) poly(ring(f), "S", null, C.line, 0.5);
-  for (let i = 0; i < n; i++) { const [x, y] = pt(i, R); line(cx, cy, x, y, C.line, 0.5); }
-  for (const f of [0.5, 1]) textR(`${f * 100}`, cx - 2.5, cy - R * f + 6.5, 5.5, { color: C.ink2 });
-  const level = q.score >= 80 ? "ok" : q.score >= 50 ? "mid" : "talk";
-  const vals = A.areas.map((a, i) => pt(i, R * Math.max(a.intesa, 4) / 100));
-  o.push(`q /GS1 gs`); poly(vals, "f", tone(level)[0]); o.push(`Q`);
-  poly(vals, "S", null, tone(level)[1], 1.5);
-  A.areas.forEach((a, i) => {
-    const [x, y] = vals[i]; circle(x, y, 3.3, tone(a.verdict.cls)[0], C.surface);
-    const [lx0, ly0] = pt(i, R + 11), c = Math.cos(ang(i)), sn = Math.sin(ang(i));
-    const nm = pdfText(tx(a.name)), pc = `${a.intesa}%`, wN = textW(nm, 8.2, true), wP = textW(pc, 8.2, true);
-    const lines = [[nm, wN, true, C.ink], [pc, wP, true, tone(a.verdict.cls)[1]]];
-    const y0 = sn < -0.5 ? ly0 - 12 : sn > 0.5 ? ly0 + 6 : ly0 - 3;
-    lines.forEach(([t, w, b, col], k) => text(t, c > 0.3 ? lx0 : c < -0.3 ? lx0 - w : lx0 - w / 2, y0 + k * 10, 8.2, { bold: b, color: col }));
+  // ---- la ragnatela: 48 raggi (8 voci x 6 sezioni), punteggio 0-5 di ciascuno
+  const items = A.areas.flatMap((a, si) => [...a.cats].sort((x, y) => x.i - y.i).map(c => ({ c, si })));
+  const N = items.length, R = 96, cx = W / 2, cy = M + 72 + 212, step = 360 / N;
+  const aOf = i => -90 + (i + 0.5) * step;                       // gradi, schermo
+  const P = (deg, r) => [cx + r * Math.cos(rad(deg)), cy + r * Math.sin(rad(deg))];
+  const arc = (d0, d1, r, stepDeg = 3) => { const pts = []; for (let d = d0; d < d1 + 0.01; d += stepDeg) pts.push(P(d, r)); return pts; };
+  circle(cx, cy, R, C.surface, C.line2, 0.9);
+  A.areas.forEach((a, si) => {                                    // spicchi colorati dal giudizio
+    const d0 = -90 + si * 8 * step, d1 = d0 + 8 * step;
+    alpha("GS2", () => poly([[cx, cy], ...arc(d0, d1, R, 1.5)], "f", tone(a.verdict.cls)[0]));
   });
-  rich(wrapRich(q.lines[0][1], leftW, 7.8).slice(0, 3), M, cy + R + 40, 7.8, 10, C.ink2);
-
-  // ---- destra: intesa globale, profilo e giudizio per sezione
-  const [scol] = tone(level);
-  rrect(xr, top, rightW, 66, 10, C.surface, C.line);
-  const sx = xr + 36, sy = top + 33;
-  circle(sx, sy, 24, scol); circle(sx, sy, 19, C.surface);
-  const sc = `${q.score}%`; text(sc, sx - textW(sc, 14, true) / 2, sy + 3, 14, { bold: true });
-  text(s.match, sx - textW(pdfText(s.match), 6.5, false) / 2, sy + 11.5, 6.5, { color: C.ink2 });
-  text(q.global.toUpperCase(), xr + 72, top + 19, 7, { bold: true, color: C.ink2 });
-  text(q.prof ? q.prof.name : s.empty, xr + 72, top + 35, 13.5, { bold: true });
-  if (q.prof) rich(wrapRich(esc(s.heart(q.prof.line)), rightW - 82, 7.6).slice(0, 2), xr + 72, top + 47, 7.6, 9, C.ink2);
-  const rowH = 36, r0 = top + 80;
-  A.areas.forEach((a, i) => {
-    const y = r0 + i * rowH, [col, tcol] = tone(a.verdict.cls);
-    if (i) line(xr, y - 5, xr + rightW, y - 5, C.line, 0.5);
-    circle(xr + 4, y + 5, 3.4, col);
-    text(tx(a.name), xr + 13, y + 8, 8.8, { bold: true });
-    text(s.verdict[a.verdict.key], xr + 13, y + 19.5, 7, { bold: true, color: tcol });
-    const bx = xr + 112, bw = rightW - 112 - 34;
-    rrect(bx, y + 3, bw, 5.5, 2.7, C.line); rrect(bx, y + 3, Math.max(5.5, bw * a.intesa / 100), 5.5, 2.7, col);
-    textR(`${a.intesa}%`, xr + rightW, y + 8.4, 8.8, { bold: true });
+  for (let v = 1; v <= 5; v++) circle(cx, cy, R * v / 5, null, v === 5 ? C.line2 : C.line, 0.5);
+  for (let i = 0; i < N; i++) line(cx, cy, ...P(aOf(i), R), C.line, 0.35);
+  A.areas.forEach((a, si) => {                                    // separatori e arco del giudizio
+    const d0 = -90 + si * 8 * step;
+    line(...P(d0, R * 0.12), ...P(d0, R + 90), C.line2, 0.6);
+    poly(arc(d0 + 1.2, d0 + 8 * step - 1.2, R + 3.2, 1.5), "S", null, tone(a.verdict.cls)[0], 3.6);
   });
+  for (let v = 1; v <= 5; v++) textC(String(v), cx, cy - R * v / 5 + 1.8, 5, { bold: true, color: C.ink2 });
+  const pl1 = items.map(({ c }, i) => P(aOf(i), R * c.a / MAX_PER_ITEM)), pl2 = items.map(({ c }, i) => P(aOf(i), R * c.b / MAX_PER_ITEM));
+  alpha("GS1", () => { poly(pl1, "f", C.p1); poly(pl2, "f", C.p2); });
+  poly(pl1, "s", null, C.p1, 1.4); poly(pl2, "s", null, C.p2, 1.4);
+  pl1.forEach(([x, y]) => circle(x, y, 1.8, C.p1, C.surface, 0.5)); pl2.forEach(([x, y]) => circle(x, y, 1.8, C.p2, C.surface, 0.5));
+  items.forEach(({ c }, i) => {                                   // punteggi e nome di ogni voce, lungo il raggio
+    const a = aOf(i), flip = Math.cos(rad(a)) < 0, size = 6, name = ellipsize(tx(c.item.t), 64, size, false);
+    chip(...P(a, R + 11), c.a, C.p1, 3.9); chip(...P(a, R + 20.4), c.b, C.p2, 3.9);
+    const r0 = R + 27, w = wOf(name, size), ang = flip ? a + 180 : a, sa = Math.sin(rad(ang)), ca = Math.cos(rad(ang));
+    const [bx, by] = P(a, flip ? r0 + w : r0);
+    text(name, bx - sa * size * 0.35, by + ca * size * 0.35, size, { angle: ang, color: C.ink });
+  });
+  const LAB = R + 27 + 64;                                        // badge di sezione: nome e intesa in grande
+  A.areas.forEach((a, si) => {
+    const deg = -90 + si * 8 * step + 4 * step, ca = Math.cos(rad(deg)), sa = Math.sin(rad(deg)), bw = 66, bh = 30;
+    const d = LAB + 6 + (bw / 2) * Math.abs(ca) + (bh / 2) * Math.abs(sa), [bx, by] = P(deg, d), [col, tcol, soft] = tone(a.verdict.cls);
+    rrect(bx - bw / 2, by - bh / 2, bw, bh, 9, soft, col, 1.1);
+    textC(`${a.intesa}%`, bx, by + 2.5, 15, { serif: true, color: tcol });
+    textC(ellipsize(tx(a.name), bw - 8, 6.4, true), bx, by + 11.5, 6.4, { bold: true, color: C.ink });
+  });
+  circle(cx, cy, 2, C.ink2);
 
-  // ---- su cosa poggiare le fondamenta / dove lavorare
+  // ---- su cosa poggiare le fondamenta / dove lavorare, in forma di righe visive
   const { foundations, work } = coachData(A);
-  const colW = (CW - 18) / 2, y2 = Math.max(cy + R + 40 + 3 * 10, r0 + 6 * rowH) + 6;
-  const col2 = M + colW + 18;
-  heading(s.pdfBuild, M, y2, C.ok); heading(s.pdfWork, col2, y2, C.talk);
-  const card = (c, x, y, w, good) => {
-    const [, tcol] = tone(good ? "ok" : c.kind === "knot" ? "talk" : "mid");
-    text(ellipsize(tx(c.item.t), w - 62, 8.8, true), x, y + 9, 8.8, { bold: true });
-    textR(tx(c.area.name), x + w, y + 9, 6.8, { color: C.ink2 });
-    [["player1", c.a, C.p1], ["player2", c.b, C.p2]].forEach(([k, v, col], r) => {
-      circle(x + 3, y + 17.4 + r * 9.6, 2.6, col);
-      text(ellipsize(`${nameOf(k)}: «${levelText(c.item, v)}»`, w - 12, 7.4, false), x + 10, y + 20 + r * 9.6, 7.4);
+  const yP = cy + 214 + 6, colW = (CW - 20) / 2, col2 = M + colW + 20;
+  const panel = (title, x, color, items2, good, empty) => {
+    rrect(x, yP, 4, 15, 2, color); text(title, x + 11, yP + 12.5, 13, { serif: true });
+    let y = yP + 26;
+    if (!items2.length) { rich(wrapRich(esc(empty), colW, 7.8), x, y + 10, 7.8, 10, C.ink2); return; }
+    items2.forEach(c => {
+      const [col, tcol] = tone(good ? "ok" : c.kind === "knot" ? "talk" : "mid");
+      line(x, y - 4, x + colW, y - 4, C.line, 0.5);
+      text(ellipsize(tx(c.item.t), 104, 8.6, true), x, y + 9, 8.6, { bold: true });
+      chip(x + 118, y + 6, c.a, C.p1); chip(x + 130.5, y + 6, c.b, C.p2);
+      const t0 = x + 150, t1 = x + colW - 8, px = v => t0 + (t1 - t0) * v / MAX_PER_ITEM;
+      line(t0, y + 6, t1, y + 6, C.line2, 1);
+      for (let v = 0; v <= MAX_PER_ITEM; v++) line(px(v), y + 3, px(v), y + 9, C.line2, 0.6);
+      if (c.diff) line(px(c.lo), y + 6, px(c.hi), y + 6, col, 3.4);
+      const e = c.a === c.b ? 2.2 : 0;
+      circle(px(c.a) - e, y + 6, 3.7, C.p1, C.surface, 0.8); circle(px(c.b) + e, y + 6, 3.7, C.p2, C.surface, 0.8);
+      const pre = good ? s.pdfShared : s.pdfMeet, pw = wOf(pre, 6.6) + 4;
+      text(pre, x, y + 21.5, 6.6, { color: C.ink2 });
+      text(ellipsize(`«${levelText(c.item, Math.round(c.avg))}»`, colW - pw, 7.4, true), x + pw, y + 21.5, 7.4, { bold: true, color: tcol });
+      y += 34;
     });
-    let h = 40;
-    if (good) { text(c.kind === "pillar" ? s.pdfPillar : s.pdfClose, x + 10, y + 39, 7.4, { bold: true, color: tcol }); h += 9; }
-    else { const ls = wrapRich(outcomeOf(c), w - 10, 7.4).slice(0, 2); rich(ls, x + 10, y + 39, 7.4, 9, tcol); h += ls.length * 9; }
-    return h + 6;
   };
-  const column = (items, x, good, empty) => {
-    let y = y2 + 14;
-    if (!items.length) { rich(wrapRich(esc(empty), colW, 7.8), x, y + 10, 7.8, 10, C.ink2); return y + 30; }
-    items.forEach(c => { line(x, y, x + colW, y, C.line, 0.5); y += 4 + card(c, x, y + 4, colW, good) - 4; });
-    return y;
-  };
-  const yEnd = Math.max(column(foundations, M, true, s.qNoPillars), column(work, col2, false, s.pdfNoWork));
+  panel(s.pdfBuild, M, C.ok, foundations, true, s.qNoPillars);
+  panel(s.pdfWork, col2, C.talk, work, false, s.pdfNoWork);
 
-  // ---- da tenere presente
-  let y = yEnd + 10;
-  heading(s.pdfNotes, M, y, C.mid); y += 8;
-  const labW = 84, bodyW = CW - labW, fs = 7.6;
-  for (const [label, html] of q.lines.slice(2)) {
-    const ls = wrapRich(html, bodyW, fs);
-    line(M, y, W - M, y, C.line, 0.6);
-    text(label, M, y + 11, fs, { bold: true });
-    rich(ls, M + labW, y + 11, fs, 9.6);
-    y += 7 + ls.length * 9.6;
-  }
-  text(s.pdfScale, M, H - M + 14, 7, { color: C.ink2 });
-  textR("Halfway", W - M, H - M + 14, 7, { bold: true, color: C.ink2 });
+  // ---- primo passo e coerenza
+  const yB = yP + 26 + 4 * 34 + 8, first = A.discuss[0] || A.different[0], fw = 336;
+  rrect(M, yB, fw, 58, 12, C.ink);
+  text(s.pdfFirst.toUpperCase(), M + 16, yB + 18, 7.5, { bold: true, color: C.mid, track: 1.4 });
+  if (first) {
+    text(ellipsize(tx(first.item.t), fw - 32, 19, false), M + 16, yB + 40, 19, { serif: true, color: C.bg });
+    textR(`«${ellipsize(levelText(first.item, Math.round(first.avg)), 150, 8, true)}»`, M + fw - 16, yB + 18, 8, { bold: true, color: C.mid });
+    textR(tx(first.area.name), M + fw - 16, yB + 40, 8, { color: C.line2 });
+  } else text(s.qNoFirst, M + 16, yB + 38, 9, { color: C.bg });
+  const bx2 = M + fw + 12, bw2 = CW - fw - 12, v1 = A.validity.a.length, v2 = A.validity.b.length;
+  rrect(bx2, yB, bw2, 58, 12, C.surface, C.line2, 1);
+  text(s.pdfCoherence.toUpperCase(), bx2 + 14, yB + 18, 7.5, { bold: true, color: C.ink2, track: 1.4 });
+  [[v1, C.p1, "player1"], [v2, C.p2, "player2"]].forEach(([n, col, k], i) => {
+    const xx = bx2 + 14 + i * (bw2 - 28) / 2;
+    text(String(n), xx, yB + 46, 26, { serif: true, color: n ? col : C.ok });
+    text(ellipsize(nameOf(k), (bw2 - 28) / 2 - 22, 6.8, true), xx + wOf(String(n), 26, { serif: true }) + 5, yB + 36, 6.8, { bold: true, color: C.ink });
+    text(s.pdfIncons(n), xx + wOf(String(n), 26, { serif: true }) + 5, yB + 45.5, 6.4, { color: C.ink2 });
+  });
+
+  text(s.pdfScale, M, H - M + 14, 6.8, { color: C.ink2 });
+  textR("Halfway", W - M, H - M + 14, 9, { serif: true, color: C.ink2 });
 
   // assemblaggio del file PDF
   const content = o.join("\n");
   const objs = [
     "<< /Type /Catalog /Pages 2 0 R >>",
     "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-    `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> /ExtGState << /GS1 << /ca 0.3 >> >> >> /Contents 4 0 R >>`,
+    `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /F1 5 0 R /F2 6 0 R /F3 7 0 R >> /ExtGState << /GS1 << /ca 0.2 >> /GS2 << /ca 0.13 >> >> >> /Contents 4 0 R >>`,
     `<< /Length ${content.length} >>\nstream\n${content}\nendstream`,
     "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>",
     "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>",
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Times-Bold /Encoding /WinAnsiEncoding >>",
     `<< /Title ${pdfStr("Halfway - " + pdfText(s.mapTitle))} /Producer (Halfway) >>`
   ];
   let out = "%PDF-1.4\n%âãÏÓ\n";
   const offs = objs.map((body, i) => { const at = out.length; out += `${i + 1} 0 obj\n${body}\nendobj\n`; return at; });
   const xref = out.length;
   out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n` + offs.map(n => String(n).padStart(10, "0") + " 00000 n \n").join("");
-  out += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R /Info 7 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+  out += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R /Info 8 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
   const bytes = new Uint8Array(out.length);
   for (let i = 0; i < out.length; i++) bytes[i] = out.charCodeAt(i) & 255;
   return bytes;

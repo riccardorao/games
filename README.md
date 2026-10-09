@@ -32,11 +32,13 @@ profilo di coppia (la sezione a cui insieme date più peso) e sei osservazioni (
 Temi di Fondo, Le Priorità, La Coerenza, Il Primo Passo).
 
 **Esporta PDF**: in cima e in fondo alla dashboard. Genera un PDF A4 di una pagina (senza librerie
-esterne) con: la **ragnatela** della compatibilità per sezione, l'intesa complessiva e il profilo di coppia,
-il giudizio di ogni sezione, **Su cosa poggiare le fondamenta** (pilastri e scelte vicine, con le risposte
-di ciascuno), **Dove lavorare** (nodi e compromessi, con la risposta di ciascuno e il punto d'incontro
-suggerito) e *Da tenere presente* (temi di fondo, priorità, coerenza, primo passo). Nella pagina pubblicata il
-salvataggio passa dalla conferma di download di claude.ai; aperto come file locale è un normale download.
+esterne), pensato per essere letto a colpo d'occhio: in alto l'intesa complessiva e il profilo di coppia;
+al centro una **ragnatela a 48 raggi** (una per voce, scala 0–5) con i due poligoni dei giocatori, il
+punteggio di ciascuno su ogni raggio, e per ogni sezione un badge con la percentuale di intesa, uno spicchio
+e un arco colorati dal giudizio; sotto **Su cosa poggiare le fondamenta** e **Dove lavorare** (punteggi,
+mini-grafico a manubrio e punto d'incontro), poi il *Primo passo* e le incongruenze di ciascuno. Titoli e
+cifre in Times Bold, etichette in Helvetica Bold. Nella pagina pubblicata il salvataggio passa dalla
+conferma di download di claude.ai; aperto come file locale è un normale download.
 
 **Come si leggono i risultati** (soglie in `T`, funzione `classify`)
 - distanza ≤ 1: allineati (pilastro condiviso se entrambi ≥ 3); nessuno dei due oltre 1: poco in gioco
