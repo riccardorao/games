@@ -582,7 +582,9 @@ const STR = {
     qClean: "Le risposte di entrambi sono coerenti, anche tra sezioni diverse.",
     qFirst: (t, area, m) => `Partite da <b>${t}</b> (${area}): il punto d'incontro è ${m}.`, qNoFirst: "C'è poco da negoziare: godetevi i vostri pilastri.",
     export: "Esporta PDF", exporting: "Preparo il PDF...", saved: "PDF salvato", exportFail: "Non è stato possibile salvare il PDF",
-    pdfScale: "Scala 0–5 · i due pallini indicano le risposte di ciascuno", pdfFile: "halfway-mappa",
+    pdfScale: "Intesa: 100% = stesse risposte · colori = giudizio per sezione", pdfFile: "halfway-mappa",
+    pdfRadar: "Compatibilità per Sezione", pdfBuild: "Su Cosa Poggiare le Fondamenta", pdfWork: "Dove Lavorare", pdfNotes: "Da Tenere Presente",
+    pdfPillar: "Pilastro condiviso", pdfClose: "Scelte vicine", pdfNoWork: "Nessun nodo da sciogliere: concentratevi sui vostri pilastri.",
     langLabel: "Lingua"
   },
   en: {
@@ -622,7 +624,9 @@ const STR = {
     qClean: "Both sets of answers are consistent, across sections too.",
     qFirst: (t, area, m) => `Start from <b>${t}</b> (${area}): the meeting point is ${m}.`, qNoFirst: "There's little to negotiate: enjoy your pillars.",
     export: "Export PDF", exporting: "Preparing the PDF...", saved: "PDF saved", exportFail: "The PDF could not be saved",
-    pdfScale: "Scale 0–5 · the two dots show each person's answer", pdfFile: "halfway-map",
+    pdfScale: "Match: 100% = identical answers · colours = verdict per section", pdfFile: "halfway-map",
+    pdfRadar: "Compatibility by Section", pdfBuild: "What to Build On", pdfWork: "Where to Work", pdfNotes: "Worth Keeping in Mind",
+    pdfPillar: "Shared pillar", pdfClose: "Close choices", pdfNoWork: "Nothing to untie: focus on your pillars.",
     langLabel: "Language"
   }
 };
@@ -967,6 +971,24 @@ function validityCheck(get) {
 }
 
 const mid = c => `«${esc(levelText(c.item, Math.round(c.avg)))}»`;
+/* esito di una voce in una frase (HTML), per la mappa e per il PDF */
+function outcomeOf(c) {
+  const s = S(), loName = esc(nameOf(c.a >= c.b ? "player2" : "player1"));
+  if (c.kind === "quiet") return s.outQuiet;
+  if (c.kind === "pillar") return s.outPillar;
+  if (c.kind === "sync") return s.outSync;
+  if (c.kind === "nuance") return s.outNuance(mid(c));
+  if (c.kind === "negotiate") return c.lo <= 1 ? s.outEasy(loName) : s.outHalf(mid(c));
+  return s.outKnot(c.item.crit, mid(c));
+}
+/* per il PDF: su cosa poggiare le fondamenta (pilastri e scelte vicine) e dove lavorare (nodi e compromessi) */
+function coachData(A) {
+  const foundations = A.all.filter(c => c.kind === "pillar" || (c.kind === "sync" && c.lo >= 2))
+    .sort((x, y) => (y.kind === "pillar") - (x.kind === "pillar") || y.item.crit - x.item.crit || y.lo - x.lo || y.hi - x.hi).slice(0, 4);
+  const work = A.all.filter(c => c.kind === "knot" || c.kind === "negotiate" || (c.kind === "nuance" && c.item.crit))
+    .sort((x, y) => (y.kind === "knot") - (x.kind === "knot") || y.item.crit - x.item.crit || y.diff - x.diff || y.hi - x.hi).slice(0, 4);
+  return { foundations, work };
+}
 /* commento di una sezione (HTML): punto di forza, nodo, per chi pesa di più */
 function areaNote(a, n1, n2) {
   const s = S(), parts = [], critFirst = (x, y) => y.item.crit - x.item.crit || y.diff - x.diff;
@@ -988,15 +1010,7 @@ function viewResults() {
   const key = c => `${c.area.id}-${c.i}`;
   const P = w => (w === "a" ? "p1" : "p2"), NM = w => (w === "a" ? n1 : n2);
   const phrase = (c, v) => esc(levelText(c.item, v));
-  const loName = c => esc(nameOf(c.a >= c.b ? "player2" : "player1"));
-  const outcome = c => {
-    if (c.kind === "quiet") return s.outQuiet;
-    if (c.kind === "pillar") return s.outPillar;
-    if (c.kind === "sync") return s.outSync;
-    if (c.kind === "nuance") return s.outNuance(mid(c));
-    if (c.kind === "negotiate") return c.lo <= 1 ? s.outEasy(loName(c)) : s.outHalf(mid(c));
-    return s.outKnot(c.item.crit, mid(c));
-  };
+  const outcome = outcomeOf;
 
   /* voci coinvolte in un'incongruenza grave: segnate con un "!" nel colore della persona */
   const flags = {};
@@ -1226,6 +1240,7 @@ function buildPdf() {
 
   // sfondo
   o.push(`${C.bg} rg 0 0 ${W} ${H} re f`);
+  const CW = W - 2 * M;
 
   // intestazione: logo, titolo, nomi, data
   line(M + 5, M + 6, M + 25, M + 6, C.mid, 3.2);
@@ -1238,54 +1253,93 @@ function buildPdf() {
     circle(lx + 4, ly - 3, 3.6, col);
     const nm = pdfText(nameOf(k)); text(nm, lx + 12, ly, 9.5, { bold: true }); lx += 12 + textW(nm, 9.5, true) + 18;
   }
+  const heading = (str, x, y, col) => { rrect(x, y - 9, 3.5, 12, 1.7, col); text(str, x + 9, y, 10.5, { bold: true }); };
 
-  // riquadro intesa + profilo
-  const bandY = M + 68, bandH = 62;
-  rrect(M, bandY, W - 2 * M, bandH, 10, C.surface, C.line);
-  const [scol] = tone(q.score >= 80 ? "ok" : q.score >= 50 ? "mid" : "talk");
-  const cx = M + 40, cy = bandY + bandH / 2;
-  circle(cx, cy, 24, scol); circle(cx, cy, 19, C.surface);
-  const sc = `${q.score}%`; text(sc, cx - textW(sc, 14, true) / 2, cy + 3, 14, { bold: true });
-  text(s.match, cx - textW(pdfText(s.match), 6.5, false) / 2, cy + 11.5, 6.5, { color: C.ink2 });
-  text(q.global.toUpperCase(), M + 80, bandY + 20, 7.5, { bold: true, color: C.ink2 });
-  text(q.prof ? q.prof.name : s.empty, M + 80, bandY + 37, 15, { bold: true });
-  if (q.prof) text(s.heart(q.prof.line), M + 80, bandY + 51, 8.5, { color: C.ink2 });
+  // ---- sinistra: ragnatela della compatibilità per sezione
+  const top = M + 72, leftW = 262, xr = M + leftW + 16, rightW = CW - leftW - 16;
+  heading(s.pdfRadar, M, top + 8, C.mid);
+  const n = A.areas.length, R = 86, cx = M + leftW / 2, cy = top + 24 + 24 + R;
+  const ang = i => -Math.PI / 2 + i * 2 * Math.PI / n;
+  const pt = (i, r) => [cx + r * Math.cos(ang(i)), cy + r * Math.sin(ang(i))];
+  const poly = (pts, op, fill, stroke, w = 0.6) => o.push(`${fill ? fill + " rg " : ""}${stroke ? stroke + " RG " + w + " w 1 j " : ""}` +
+    pts.map(([x, y], i) => `${x.toFixed(2)} ${Y(y)} ${i ? "l" : "m"}`).join(" ") + ` h ${op}`);
+  const ring = f => Array.from({ length: n }, (_, i) => pt(i, R * f));
+  poly(ring(1), "B", C.surface, C.line2, 0.8);
+  for (const f of [0.75, 0.5, 0.25]) poly(ring(f), "S", null, C.line, 0.5);
+  for (let i = 0; i < n; i++) { const [x, y] = pt(i, R); line(cx, cy, x, y, C.line, 0.5); }
+  for (const f of [0.5, 1]) textR(`${f * 100}`, cx - 2.5, cy - R * f + 6.5, 5.5, { color: C.ink2 });
+  const level = q.score >= 80 ? "ok" : q.score >= 50 ? "mid" : "talk";
+  const vals = A.areas.map((a, i) => pt(i, R * Math.max(a.intesa, 4) / 100));
+  o.push(`q /GS1 gs`); poly(vals, "f", tone(level)[0]); o.push(`Q`);
+  poly(vals, "S", null, tone(level)[1], 1.5);
+  A.areas.forEach((a, i) => {
+    const [x, y] = vals[i]; circle(x, y, 3.3, tone(a.verdict.cls)[0], C.surface);
+    const [lx0, ly0] = pt(i, R + 11), c = Math.cos(ang(i)), sn = Math.sin(ang(i));
+    const nm = pdfText(tx(a.name)), pc = `${a.intesa}%`, wN = textW(nm, 8.2, true), wP = textW(pc, 8.2, true);
+    const lines = [[nm, wN, true, C.ink], [pc, wP, true, tone(a.verdict.cls)[1]]];
+    const y0 = sn < -0.5 ? ly0 - 12 : sn > 0.5 ? ly0 + 6 : ly0 - 3;
+    lines.forEach(([t, w, b, col], k) => text(t, c > 0.3 ? lx0 : c < -0.3 ? lx0 - w : lx0 - w / 2, y0 + k * 10, 8.2, { bold: b, color: col }));
+  });
+  rich(wrapRich(q.lines[0][1], leftW, 7.8).slice(0, 3), M, cy + R + 40, 7.8, 10, C.ink2);
 
-  // sei sezioni (2 colonne x 3 righe): esito, intesa, commento e le 8 voci con i due pallini
-  const gap = 10, colW = (W - 2 * M - gap) / 2, top0 = bandY + bandH + 12, rowH = 11.2, blockH = 46 + 8 * rowH + 6;
-  A.areas.forEach((a, k) => {
-    const x = M + (k % 2) * (colW + gap), y = top0 + Math.floor(k / 2) * (blockH + 8);
-    const [, vT, vS] = tone(a.verdict.cls);
-    rrect(x, y, colW, blockH, 9, C.surface, C.line);
-    text(tx(a.name), x + 10, y + 17, 11, { bold: true });
-    const pc = `${a.intesa}%`; textR(pc, x + colW - 10, y + 17, 11, { bold: true });
-    const vl = s.verdict[a.verdict.key], vw = textW(pdfText(vl), 7, true) + 12, vx = x + colW - 16 - textW(pc, 11, true) - vw;
-    rrect(vx, y + 8.5, vw, 12, 6, vS); text(vl, vx + 6, y + 17, 7, { bold: true, color: vT });
-    const note = wrapRich(areaNote(a, n1, n2), colW - 20, 7.3).slice(0, 2);
-    rich(note, x + 10, y + 29, 7.3, 9, C.ink2);
-    const tx0 = x + 116, tx1 = x + colW - 12, px = v => tx0 + (tx1 - tx0) * v / MAX_PER_ITEM;
-    [...a.cats].sort((p, r) => p.i - r.i).forEach((c, r) => {
-      const ry = y + 48 + r * rowH;
-      line(x + 10, ry - 7.4, x + colW - 10, ry - 7.4, C.line, 0.5);
-      text(ellipsize(tx(c.item.t), 100, 7, false), x + 10, ry, 7, { color: C.ink });
-      line(tx0, ry - 2.4, tx1, ry - 2.4, C.line, 0.8);
-      line((tx0 + tx1) / 2, ry - 5, (tx0 + tx1) / 2, ry + 0.2, C.line2, 0.6);
-      if (c.diff) line(px(c.lo), ry - 2.4, px(c.hi), ry - 2.4, tone(KIND_CLS[c.kind])[0], 2.6);
-      const off = c.a === c.b ? 2 : 0;
-      circle(px(c.a) - off, ry - 2.4, 3, C.p1, C.surface); circle(px(c.b) + off, ry - 2.4, 3, C.p2, C.surface);
-    });
+  // ---- destra: intesa globale, profilo e giudizio per sezione
+  const [scol] = tone(level);
+  rrect(xr, top, rightW, 66, 10, C.surface, C.line);
+  const sx = xr + 36, sy = top + 33;
+  circle(sx, sy, 24, scol); circle(sx, sy, 19, C.surface);
+  const sc = `${q.score}%`; text(sc, sx - textW(sc, 14, true) / 2, sy + 3, 14, { bold: true });
+  text(s.match, sx - textW(pdfText(s.match), 6.5, false) / 2, sy + 11.5, 6.5, { color: C.ink2 });
+  text(q.global.toUpperCase(), xr + 72, top + 19, 7, { bold: true, color: C.ink2 });
+  text(q.prof ? q.prof.name : s.empty, xr + 72, top + 35, 13.5, { bold: true });
+  if (q.prof) rich(wrapRich(esc(s.heart(q.prof.line)), rightW - 82, 7.6).slice(0, 2), xr + 72, top + 47, 7.6, 9, C.ink2);
+  const rowH = 36, r0 = top + 80;
+  A.areas.forEach((a, i) => {
+    const y = r0 + i * rowH, [col, tcol] = tone(a.verdict.cls);
+    if (i) line(xr, y - 5, xr + rightW, y - 5, C.line, 0.5);
+    circle(xr + 4, y + 5, 3.4, col);
+    text(tx(a.name), xr + 13, y + 8, 8.8, { bold: true });
+    text(s.verdict[a.verdict.key], xr + 13, y + 19.5, 7, { bold: true, color: tcol });
+    const bx = xr + 112, bw = rightW - 112 - 34;
+    rrect(bx, y + 3, bw, 5.5, 2.7, C.line); rrect(bx, y + 3, Math.max(5.5, bw * a.intesa / 100), 5.5, 2.7, col);
+    textR(`${a.intesa}%`, xr + rightW, y + 8.4, 8.8, { bold: true });
   });
 
-  // Il Vostro Quadro: le sei osservazioni
-  let y = top0 + 3 * blockH + 2 * 8 + 22;
-  text(s.quadro, M, y, 13, { bold: true }); y += 8;
-  const labW = 84, bodyW = W - 2 * M - labW, fs = 8;
-  for (const [label, html] of q.lines) {
+  // ---- su cosa poggiare le fondamenta / dove lavorare
+  const { foundations, work } = coachData(A);
+  const colW = (CW - 18) / 2, y2 = Math.max(cy + R + 40 + 3 * 10, r0 + 6 * rowH) + 6;
+  const col2 = M + colW + 18;
+  heading(s.pdfBuild, M, y2, C.ok); heading(s.pdfWork, col2, y2, C.talk);
+  const card = (c, x, y, w, good) => {
+    const [, tcol] = tone(good ? "ok" : c.kind === "knot" ? "talk" : "mid");
+    text(ellipsize(tx(c.item.t), w - 62, 8.8, true), x, y + 9, 8.8, { bold: true });
+    textR(tx(c.area.name), x + w, y + 9, 6.8, { color: C.ink2 });
+    [["player1", c.a, C.p1], ["player2", c.b, C.p2]].forEach(([k, v, col], r) => {
+      circle(x + 3, y + 17.4 + r * 9.6, 2.6, col);
+      text(ellipsize(`${nameOf(k)}: «${levelText(c.item, v)}»`, w - 12, 7.4, false), x + 10, y + 20 + r * 9.6, 7.4);
+    });
+    let h = 40;
+    if (good) { text(c.kind === "pillar" ? s.pdfPillar : s.pdfClose, x + 10, y + 39, 7.4, { bold: true, color: tcol }); h += 9; }
+    else { const ls = wrapRich(outcomeOf(c), w - 10, 7.4).slice(0, 2); rich(ls, x + 10, y + 39, 7.4, 9, tcol); h += ls.length * 9; }
+    return h + 6;
+  };
+  const column = (items, x, good, empty) => {
+    let y = y2 + 14;
+    if (!items.length) { rich(wrapRich(esc(empty), colW, 7.8), x, y + 10, 7.8, 10, C.ink2); return y + 30; }
+    items.forEach(c => { line(x, y, x + colW, y, C.line, 0.5); y += 4 + card(c, x, y + 4, colW, good) - 4; });
+    return y;
+  };
+  const yEnd = Math.max(column(foundations, M, true, s.qNoPillars), column(work, col2, false, s.pdfNoWork));
+
+  // ---- da tenere presente
+  let y = yEnd + 10;
+  heading(s.pdfNotes, M, y, C.mid); y += 8;
+  const labW = 84, bodyW = CW - labW, fs = 7.6;
+  for (const [label, html] of q.lines.slice(2)) {
     const ls = wrapRich(html, bodyW, fs);
     line(M, y, W - M, y, C.line, 0.6);
     text(label, M, y + 11, fs, { bold: true });
-    rich(ls, M + labW, y + 11, fs, 10.2);
-    y += 6 + ls.length * 10.2 + 2;
+    rich(ls, M + labW, y + 11, fs, 9.6);
+    y += 7 + ls.length * 9.6;
   }
   text(s.pdfScale, M, H - M + 14, 7, { color: C.ink2 });
   textR("Halfway", W - M, H - M + 14, 7, { bold: true, color: C.ink2 });
@@ -1295,7 +1349,7 @@ function buildPdf() {
   const objs = [
     "<< /Type /Catalog /Pages 2 0 R >>",
     "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-    `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 4 0 R >>`,
+    `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> /ExtGState << /GS1 << /ca 0.3 >> >> >> /Contents 4 0 R >>`,
     `<< /Length ${content.length} >>\nstream\n${content}\nendstream`,
     "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>",
     "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>",
