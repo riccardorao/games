@@ -41,24 +41,28 @@ the last download and work offline. `-v` before the command logs every request.
 
 ## What you get
 
-- **My team**: position, league and fantasy points, average, best round, all-play win rate, score per
-  round against the league average, win/draw/loss record.
-- **Standings**: sortable table and fantasy-points bar chart.
-- **Squads**: every squad grouped by role with what each player cost, credits spent per team.
-- **Results**: any team's round-by-round scores, rank in the round, difference from the average, opponent and result; all fixtures.
-- **Stats**: highest and lowest scores, best and worst rounds, most consistent and most erratic team,
-  all-play table (your record if you'd played everyone every round), luck (table position vs. all-play
-  position), rounds as top and bottom scorer, 66+ rounds, and a heat map of every team's round against the average.
-- **Raw data**: everything downloaded (API replies, data embedded in the league pages, line-ups,
-  page tables) browsable as tables, so nothing the site gives you is hidden.
+The dashboard has a menu for the league and, where a league has more than one (e.g. a cup), the competition.
+
+- **My team**: position, points, fantasy points, average, all-play win rate, credits left, last result and
+  next opponent, form, score per round against the league average, your players in and out of form.
+- **Standings**: the table (by group for cups) with form, and fantasy points per team.
+- **Fixtures**: any team's full calendar with results, fantasy points and rank in each round; every match of every round.
+- **Squads**: every squad with what each player cost and is worth now, appearances, average vote,
+  fanta-average, goals, assists and cards; squad value and credits left per team.
+- **Players**: every player in the league in one sortable, searchable table.
+- **Stats**: highest and lowest scores, biggest thrashing and closest match, most consistent and most
+  erratic team, all-play table (your record if you'd played everyone every round), luck (table position vs.
+  all-play position), a heat map of every round against the average, and player trivia: top scorer, most
+  assists, best fanta-average, most cards, most expensive buy, biggest value rise, bargain of the season,
+  leakiest goalkeeper.
+
+Classic and Mantra leagues both work (Mantra roles are grouped into goalkeepers, defenders, midfielders
+and forwards for sorting). Player figures are Serie A season statistics as Fantacalcio reports them.
 
 ## What it downloads
 
-After logging in (`PUT /api/v1/v1_utente/login`), `sync` reads the league pages (home, classifica,
-calendario, rose, formazioni, hall of fame, competitions), pulling the data each page embeds and its
-HTML tables, then calls the league services: round list (`V1_LegheCalcolo/Giornate`), overall and
-per-round standings (`V1_LegheCompetizione/ClassificaGiornate`), statistics and top team
-(`V1_LegheStatistiche`), roll of honour (`V1_LegheAlbo/Storico`), live and your line-up each round
-(`V1_LegheFormazioni/Visualizza`). Everything is read-only.
-
-`data/` holds your league's data and is git-ignored.
+After logging in (`PUT /api/v1/v1_utente/login`), `sync` reads, for each league, the standings page of
+every competition (`<alias>/classifica?id=<competition>`, which embeds the league info, teams, table and
+full calendar with results), the squads page (`<alias>/rose`) and each team's player statistics
+(`servizi/V1_LegheStatistiche/Statistiche`). Everything is read-only. Account tokens and your email are
+dropped before anything is saved; `data/` holds your leagues' data and is git-ignored.
