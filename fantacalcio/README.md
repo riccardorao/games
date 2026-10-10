@@ -29,6 +29,7 @@ export FANTA_PASSWORD="your-password"
 python3 fanta.py leagues                    # your leagues and their short names
 python3 fanta.py sync                       # download all your leagues (or: sync --league NAME for one)
 python3 fanta.py dashboard                  # data/dashboard.html, with a league switcher
+python3 fanta.py share                      # data/share.html: just the standings and your squad, to share
 python3 fanta.py standings --league NAME    # the table (your team marked ▶)
 python3 fanta.py squad --league NAME        # your squad by role and cost; add a team name for another squad
 python3 fanta.py results --league NAME      # your score every round, rank in the round, opponent and result

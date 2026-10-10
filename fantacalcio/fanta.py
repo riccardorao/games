@@ -717,6 +717,40 @@ def cmd_dashboard(args):
         webbrowser.open(out.resolve().as_uri())
 
 
+def cmd_share(args):
+    """A read-only page with just the standings and your squad, for sharing."""
+    aliases = args.league or list(synced_leagues())
+    leagues = []
+    found = synced_leagues()
+    order = lambda a: json.loads(found[a].read_text())["league"].get("ordine") or 0 if a in found else 0
+    for a in sorted(aliases, key=order):  # same order as on the Leghe site
+        m = load_model(args, a)["model"]
+        main = next((c for c in m["competitions"] if c["id"] == m["main"]), None)
+        squad = next((s for s in m["squads"] if s["team_id"] == m["my_team"]), None)
+        if not main or not main["standings"] or not squad:
+            print(f"  skipping {m['league']['name']}: no standings or squad yet")
+            continue
+        form = {k: v["form"] for k, v in compute_stats(m, main)["per_team"].items()}
+        leagues.append({
+            "name": m["league"]["name"], "alias": m["league"]["alias"], "type": m["league"]["type"],
+            "competition": main["name"], "rounds_played": len(main["scores"]),
+            "my_team": m["my_team"], "fetched_at": m["fetched_at"],
+            "standings": [{k: s[k] for k in ("id", "pos", "team", "played", "w", "d", "l", "gf", "ga", "pts", "fp")}
+                          | {"form": form.get(s["id"], "")} for s in sorted(main["standings"], key=lambda s: s["pos"])],
+            "squad": {"team": squad["team"], "credits_left": squad["credits_left"],
+                      "players": [{"role": p["role"], "line": line_of(p["role"]), "name": p["name"], "club": p["club"],
+                                   "paid": p["paid"], "fanta": p.get("fanta"), "apps": p.get("apps"),
+                                   "goals": p.get("goals"), "assists": p.get("assists")} for p in squad["players"]]},
+        })
+    if not leagues:
+        raise FantaError("Nothing to share yet: no league has both standings and your squad.")
+    blob = json.dumps(leagues, ensure_ascii=False).replace("</", "<\\/")
+    page = (HERE / "share_template.html").read_text().replace("/*__DATA__*/null", blob)
+    out = Path(args.out) if args.out else DATA_DIR / "share.html"
+    out.write_text(page)
+    print(f"Share page with {', '.join(l['name'] for l in leagues)} written to {out}")
+
+
 def dashboard_model(raw):
     model = raw["model"]
     model["stats"] = {c["id"]: compute_stats(model, c) for c in model["competitions"]}
@@ -743,6 +777,10 @@ def main():
     add("squad", cmd_squad, "a team's squad").add_argument("team", nargs="?", help="team name (default: yours)")
     add("results", cmd_results, "round-by-round scores").add_argument("team", nargs="?")
     add("stats", cmd_stats, "records and trivia")
+    s = sub.add_parser("share", help="a page with just the standings and your squad, to share")
+    s.add_argument("--league", action="append", help="league to include (repeatable; default: every league that has started)")
+    s.add_argument("--out")
+    s.set_defaults(fn=cmd_share)
     s = add("dashboard", cmd_dashboard, "build the HTML dashboard")
     s.add_argument("--out")
     s.add_argument("--no-open", action="store_true")
