@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fantacalcio League</title>
+<style>
+:root {
+  --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f22; --muted: #6b6f76; --line: #e3e1da;
+  --accent: #0f6b4f; --accent-soft: #e2f1eb; --me: #c2410c; --me-soft: #fdeee4;
+  --good: #15803d; --bad: #b91c1c; --bar: #9cc9b7;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141517; --panel: #1c1e21; --ink: #e9e8e4; --muted: #9a9ea6; --line: #2d3035;
+    --accent: #4fbf96; --accent-soft: #1d3029; --me: #fb923c; --me-soft: #3a2518;
+    --good: #4ade80; --bad: #f87171; --bar: #2f6b55;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141517; --panel: #1c1e21; --ink: #e9e8e4; --muted: #9a9ea6; --line: #2d3035;
+  --accent: #4fbf96; --accent-soft: #1d3029; --me: #fb923c; --me-soft: #3a2518;
+  --good: #4ade80; --bad: #f87171; --bar: #2f6b55;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+header { padding: 20px 16px 0; max-width: 1100px; margin: 0 auto; }
+header h1 { margin: 0; font-size: 26px; letter-spacing: -.01em; }
+header .sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+nav { display: flex; gap: 4px; overflow-x: auto; padding: 14px 16px 0; max-width: 1100px; margin: 0 auto; border-bottom: 1px solid var(--line); }
+nav button { background: none; border: 0; color: var(--muted); font: inherit; padding: 8px 12px; border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; }
+nav button.on { color: var(--ink); border-color: var(--accent); font-weight: 600; }
+main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+section { display: none; } section.on { display: block; }
+.grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+.card h3 { margin: 0 0 10px; font-size: 14px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+.kpi .v { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.kpi .l { color: var(--muted); font-size: 12px; }
+.stack > * + * { margin-top: 12px; }
+.scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { padding: 7px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; cursor: pointer; user-select: none; }
+th:first-child, td:first-child, th.l, td.l { text-align: left; }
+tr.me td { background: var(--me-soft); }
+tr.me td.team { color: var(--me); font-weight: 600; }
+.pill { display: inline-block; min-width: 22px; padding: 1px 6px; border-radius: 6px; font-size: 12px; font-weight: 600; text-align: center; background: var(--accent-soft); color: var(--accent); }
+.pos { color: var(--good); } .neg { color: var(--bad); }
+.muted { color: var(--muted); }
+select, input { font: inherit; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); max-width: 100%; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.roles { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.role-P { background: #f59e0b22; color: #b45309; } .role-D { background: #16a34a22; color: #15803d; }
+.role-C { background: #2563eb22; color: #1d4ed8; } .role-A { background: #dc262622; color: #b91c1c; }
+.res-w { background: #15803d22; color: var(--good); } .res-l { background: #b91c1c22; color: var(--bad); } .res-d { background: var(--line); color: var(--muted); }
+code { font-size: 13px; background: var(--line); padding: 1px 5px; border-radius: 4px; }
+svg text { fill: var(--muted); font-size: 11px; }
+.empty { color: var(--muted); padding: 24px; text-align: center; }
+details { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+details + details { margin-top: 8px; }
+summary { cursor: pointer; font-weight: 600; }
+pre { white-space: pre-wrap; word-break: break-word; font-size: 12px; max-height: 420px; overflow: auto; }
+.theme { position: absolute; top: 18px; right: 16px; }
+@media (max-width: 600px) { header h1 { font-size: 21px; } .kpi .v { font-size: 22px; } }
+</style>
+</head>
+<body>
+<header style="position:relative">
+  <h1 id="title">Fantacalcio</h1>
+  <div class="sub" id="subtitle"></div>
+  <button class="theme" id="theme" title="Toggle theme" style="background:none;border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:4px 8px;cursor:pointer">◐</button>
+</header>
+<nav id="tabs"></nav>
+<main id="main"></main>
+
+<script>
+const ALL = /*__DATA__*/null;
+// URL hash: #<league alias>/<competition id>
+const [HASH_LEAGUE, HASH_COMP] = decodeURIComponent(location.hash.slice(1)).split("/");
+const LEAGUE_IX = Math.max(0, ALL.findIndex(m => m.league.alias === HASH_LEAGUE));
+const D = ALL[LEAGUE_IX];
+const C = D.competitions.find(c => c.id === HASH_COMP) || D.competitions.find(c => c.id === D.main) || null;
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = v => v == null || v === "" ? "" : typeof v === "number" ? (Number.isInteger(v) ? v : +v.toFixed(2)) : v;
+const teamName = k => D.teams[k]?.name ?? k;
+const ME = D.my_team;
+const SCORES = C ? C.scores : {};
+const rounds = Object.keys(SCORES).map(Number).sort((a, b) => a - b);
+const st = (C && D.stats[C.id]) || {per_team: {}, records: []};
+const go = (alias, comp) => { location.hash = encodeURIComponent(alias + (comp ? "/" + comp : "")); location.reload(); };
+
+document.getElementById("theme").onclick = () => {
+  const r = document.documentElement, dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  const cur = r.dataset.theme || (dark ? "dark" : "light");
+  r.dataset.theme = cur === "dark" ? "light" : "dark";
+};
+
+$("#title").textContent = D.league.name || D.league.alias;
+$("#subtitle").textContent = [D.league.type, D.league.serie_a_round ? `Serie A round ${D.league.serie_a_round}` : "", `data from ${D.fetched_at}`].filter(Boolean).join(" · ");
+{
+  const pickers = document.createElement("div"); pickers.className = "row"; pickers.style.margin = "10px 0 0";
+  if (ALL.length > 1) {
+    const sel = document.createElement("select"); sel.setAttribute("aria-label", "League");
+    sel.innerHTML = ALL.map((m, i) => `<option value="${esc(m.league.alias)}" ${i === LEAGUE_IX ? "selected" : ""}>${esc(m.league.name || m.league.alias)}</option>`).join("");
+    sel.onchange = () => go(sel.value); pickers.append(sel);
+  }
+  if (D.competitions.length > 1) {
+    const sel = document.createElement("select"); sel.setAttribute("aria-label", "Competition");
+    sel.innerHTML = D.competitions.map(c => `<option value="${esc(c.id)}" ${c === C ? "selected" : ""}>${esc(c.name)} · ${esc(c.kind)}</option>`).join("");
+    sel.onchange = () => go(D.league.alias, sel.value); pickers.append(sel);
+  }
+  if (pickers.children.length) $("#subtitle").after(pickers);
+}
+
+const TABS = [["overview", "My team"], ["standings", "Standings"], ["results", "Fixtures"], ["squads", "Squads"], ["players", "Players"], ["stats", "Stats"]];
+const nav = $("#tabs"), main = $("#main");
+for (const [id, label] of TABS) {
+  const b = document.createElement("button"); b.textContent = label; b.dataset.tab = id;
+  b.onclick = () => show(id); nav.append(b);
+  const s = document.createElement("section"); s.id = id; main.append(s);
+}
+function show(id) {
+  for (const b of nav.children) b.classList.toggle("on", b.dataset.tab === id);
+  for (const s of main.children) s.classList.toggle("on", s.id === id);
+  try { localStorage.setItem("fanta-tab", id); } catch (e) {}
+}
+
+// ---------- helpers
+function sortable(tbl) {
+  tbl.querySelectorAll("th").forEach((th, i) => th.onclick = () => {
+    const rows = [...tbl.tBodies[0].rows], asc = th.dataset.dir !== "asc";
+    tbl.querySelectorAll("th").forEach(t => delete t.dataset.dir); th.dataset.dir = asc ? "asc" : "desc";
+    const val = r => { const t = r.cells[i]?.dataset.v ?? r.cells[i]?.textContent ?? ""; const n = parseFloat(t); return isNaN(n) ? t.toLowerCase() : n; };
+    rows.sort((a, b) => (val(a) > val(b) ? 1 : val(a) < val(b) ? -1 : 0) * (asc ? 1 : -1));
+    rows.forEach(r => tbl.tBodies[0].append(r));
+  });
+  return tbl;
+}
+function htmlTable(headers, rows, opts = {}) {
+  const t = document.createElement("table");
+  t.innerHTML = `<thead><tr>${headers.map((h, i) => `<th class="${opts.left?.includes(i) ? "l" : ""}" ${opts.titles?.[i] ? `title="${esc(opts.titles[i])}"` : ""}>${esc(h)}</th>`).join("")}</tr></thead><tbody></tbody>`;
+  for (const r of rows) {
+    const tr = document.createElement("tr");
+    if (r.me) tr.className = "me";
+    tr.innerHTML = r.cells.map((c, i) => {
+      const o = typeof c === "object" && c !== null ? c : {t: c};
+      return `<td class="${opts.left?.includes(i) ? "l " : ""}${o.cls || ""}" data-v="${esc(o.v ?? (typeof o.t === "number" ? o.t : ""))}">${o.html ?? esc(fmt(o.t))}</td>`;
+    }).join("");
+    t.tBodies[0].append(tr);
+  }
+  const w = document.createElement("div"); w.className = "scroll"; w.append(sortable(t)); return w;
+}
+function lineChart(series, {height = 220, avg} = {}) {
+  const W = 680, H = height, P = {l: 34, r: 14, t: 10, b: 24};
+  const xs = rounds; if (!xs.length) return "";
+  const all = series.flatMap(s => s.values.filter(v => v != null)).concat(avg || []);
+  const lo = Math.floor(Math.min(...all) / 5) * 5, hi = Math.ceil(Math.max(...all) / 5) * 5 || 1;
+  const x = i => P.l + (xs.length === 1 ? (W - P.l - P.r) / 2 : i * (W - P.l - P.r) / (xs.length - 1));
+  const y = v => P.t + (hi - v) * (H - P.t - P.b) / (hi - lo || 1);
+  let g = "";
+  for (let v = lo; v <= hi; v += Math.max(5, Math.round((hi - lo) / 5 / 5) * 5)) g += `<line x1="${P.l}" x2="${W - P.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${P.l - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  xs.forEach((r, i) => { if (xs.length < 20 || i % 2 === 0) g += `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">R${r}</text>`; });
+  const path = vals => vals.map((v, i) => v == null ? null : `${x(i)},${y(v)}`).filter(Boolean).join(" ");
+  if (avg) g += `<polyline points="${path(avg)}" fill="none" stroke="var(--muted)" stroke-dasharray="4 4" stroke-width="1.5"/>`;
+  for (const s of series) {
+    g += `<polyline points="${path(s.values)}" fill="none" stroke="${s.color}" stroke-width="2.2"/>`;
+    s.values.forEach((v, i) => { if (v != null) g += `<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="${s.color}"><title>Round ${xs[i]}: ${v}</title></circle>`; });
+  }
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Scores by round">${g}</svg>`;
+}
+function bars(items, {color = "var(--bar)", highlight} = {}) {
+  if (!items.length) return "";
+  const max = Math.max(...items.map(i => i.v)), min = Math.min(0, ...items.map(i => i.v));
+  return `<div>${items.map(i => `
+    <div style="display:grid;grid-template-columns:minmax(90px,190px) 1fr 52px;gap:8px;align-items:center;margin-top:6px">
+      <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;${i.k === highlight ? "color:var(--me);font-weight:600" : ""}">${esc(i.label)}</div>
+      <div style="background:var(--line);border-radius:4px;height:12px;position:relative"><div style="position:absolute;inset:0 auto 0 0;width:${((i.v - min) / (max - min || 1)) * 100}%;background:${i.k === highlight ? "var(--me)" : color};border-radius:4px"></div></div>
+      <div style="text-align:right;font-variant-numeric:tabular-nums">${fmt(i.v)}</div></div>`).join("")}</div>`;
+}
+const card = (html, title) => { const c = document.createElement("div"); c.className = "card"; c.innerHTML = (title ? `<h3>${esc(title)}</h3>` : "") + (html || ""); return c; };
+const kpi = (v, l) => `<div class="card kpi"><div class="v">${v ?? "–"}</div><div class="l">${esc(l)}</div></div>`;
+const wdl = r => `<span class="pill ${r === "W" ? "res-w" : r === "L" ? "res-l" : "res-d"}">${r}</span>`;
+const avgByRound = rounds.map(r => { const v = Object.values(SCORES[r]); return +(v.reduce((a, b) => a + b, 0) / v.length).toFixed(2); });
+const ROLE_ORDER = {P: 0, D: 1, C: 2, A: 3};
+// Classic roles are P/D/C/A; Mantra roles (Por, Dc, B, E, M, W, T, Pc…) are grouped into the same four lines
+const MANTRA_LINE = {POR: "P", DD: "D", DS: "D", DC: "D", B: "D", E: "C", M: "C", C: "C", W: "A", T: "A", A: "A", PC: "A"};
+const roleOf = p => { const r = (p.role || "?").split(";")[0].trim().toUpperCase(); return MANTRA_LINE[r] || r.slice(0, 1); };
+const allPlayers = D.squads.flatMap(s => s.players.map(p => ({...p, team: s.team, team_id: s.team_id})));
+const mySquad = D.squads.find(s => s.team_id === ME);
+
+function matchFor(round, team) {
+  const m = round.matches.find(x => x.home === team || x.away === team); if (!m) return null;
+  const home = m.home === team;
+  return {opp: home ? m.away : m.home, mine: home ? m.home_fp : m.away_fp, theirs: home ? m.away_fp : m.home_fp,
+          gf: home ? m.home_goals : m.away_goals, ga: home ? m.away_goals : m.home_goals, home};
+}
+
+if (!C && !D.squads.length) {
+  main.innerHTML = `<div class="empty card">“${esc(D.league.name)}” has no competition or squads yet. Once the league starts, run <code>python3 fanta.py sync</code> again.</div>`;
+  nav.remove();
+} else {
+
+// ---------- My team
+(function overview() {
+  const s = $("#overview");
+  const me = C?.standings.find(r => r.id === ME) || {};
+  const ps = st.per_team[ME] || {};
+  const name = teamName(ME) || "My team";
+  const next = C?.rounds.find(r => !r.played && matchFor(r, ME));
+  const nm = next && matchFor(next, ME);
+  const last = C ? [...C.rounds].reverse().find(r => r.played && matchFor(r, ME)) : null;
+  const lm = last && matchFor(last, ME);
+  s.innerHTML = `<div class="stack">
+    <div class="card"><h3>${esc(name)}</h3><div class="muted">${esc(D.teams[ME]?.coach || "")}${C ? " · " + esc(C.name) : ""}</div>
+      ${ps.form ? `<div style="margin-top:8px">Form: ${[...ps.form].map(wdl).join(" ")}</div>` : ""}</div>
+    <div class="grid">
+      ${kpi(me.pos ? `${me.pos}°${me.group ? " " + me.group : ""}` : null, `position${me.group ? " in group" : ""} of ${C?.standings.filter(r => r.group === me.group).length || 0}`)}
+      ${kpi(fmt(me.pts), "points")}
+      ${kpi(fmt(me.fp), "fantasy points")}
+      ${kpi(ps.avg != null ? fmt(ps.avg) : null, "average per round")}
+      ${kpi(ps.allplay_pct != null ? ps.allplay_pct + "%" : null, "all-play win rate")}
+      ${kpi(D.teams[ME]?.credits_left, "credits left")}
+    </div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+      ${lm ? `<div class="card"><h3>Last result · round ${last.round}</h3><div style="font-size:18px">${wdl(lm.gf > lm.ga ? "W" : lm.gf < lm.ga ? "L" : "D")} <b>${lm.gf}–${lm.ga}</b> vs ${esc(teamName(lm.opp))}</div><div class="muted">${fmt(lm.mine)} – ${fmt(lm.theirs)} fantasy points</div></div>` : ""}
+      ${nm ? `<div class="card"><h3>Next · round ${next.round} (Serie A ${next.serie_a})</h3><div style="font-size:18px">${nm.home ? "Home" : "Away"} vs <b>${esc(teamName(nm.opp))}</b></div><div class="muted">${(() => { const o = C.standings.find(r => r.id === nm.opp); return o ? `${o.pos}° · ${fmt(o.pts)} pts · ${fmt(o.fp)} FP` : ""; })()}</div></div>` : ""}
+    </div>
+    ${rounds.length ? `<div class="card"><h3>Scores by round</h3>${lineChart([{values: rounds.map(r => SCORES[r][ME] ?? null), color: "var(--me)"}], {avg: avgByRound})}
+      <div class="muted" style="font-size:12px"><span style="color:var(--me)">●</span> ${esc(name)} &nbsp; - - - league average</div></div>` : ""}
+    <div id="ov-players"></div>
+  </div>`;
+  if (mySquad) {
+    const top = mySquad.players.filter(p => p.apps).sort((a, b) => (b.fanta ?? 0) - (a.fanta ?? 0)).slice(0, 5);
+    const flop = mySquad.players.filter(p => p.apps >= 2).sort((a, b) => (a.fanta ?? 0) - (b.fanta ?? 0)).slice(0, 3);
+    const row = p => `<tr><td class="l"><span class="pill role-${roleOf(p)}">${esc(p.role)}</span> ${esc(p.name)} <span class="muted">${esc(p.club)}</span></td><td>${fmt(p.fanta)}</td></tr>`;
+    $("#ov-players").innerHTML = `<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+      <div class="card"><h3>In form (fanta-average)</h3><table><tbody>${top.map(row).join("")}</tbody></table></div>
+      <div class="card"><h3>Struggling</h3><table><tbody>${flop.map(row).join("")}</tbody></table></div></div>`;
+  }
+})();
+
+// ---------- Standings
+(function standings() {
+  const s = $("#standings");
+  if (!C?.standings.length) { s.innerHTML = `<div class="empty">No standings for this competition.</div>`; return; }
+  const groups = [...new Set(C.standings.map(r => r.group))].sort();
+  for (const g of groups) {
+    const rows = C.standings.filter(r => r.group === g).sort((a, b) => a.pos - b.pos);
+    const c = card("", g ? `Group ${g}` : C.name);
+    c.append(htmlTable(["#", "Team", "P", "W", "D", "L", "GF", "GA", "Pts", "FP", "Form"], rows.map(r => ({me: r.id === ME, cells: [r.pos, {t: r.team, cls: "team"}, r.played, r.w, r.d, r.l, r.gf, r.ga, {html: `<b>${fmt(r.pts)}</b>`, v: r.pts}, r.fp,
+      {html: [...(st.per_team[r.id]?.form || "")].map(wdl).join(" "), v: ""}]})), {left: [1], titles: [, , "Played", "Won", "Drawn", "Lost", "Goals for", "Goals against", "Points", "Fantasy points"]}));
+    c.style.marginBottom = "12px"; s.append(c);
+  }
+  if (C.standings.some(r => r.fp)) s.append(card(bars([...C.standings].sort((a, b) => b.fp - a.fp).map(r => ({label: r.team, v: r.fp, k: r.id})), {highlight: ME}), "Fantasy points"));
+})();
+
+// ---------- Fixtures & results
+(function results() {
+  const s = $("#results");
+  if (!C?.rounds.length) { s.innerHTML = `<div class="empty">No fixtures for this competition yet.</div>`; return; }
+  const keys = Object.keys(D.teams).filter(k => C.rounds.some(r => matchFor(r, k)));
+  s.innerHTML = `<div class="row"><select id="rs-pick" aria-label="Team">${keys.map(k => `<option value="${esc(k)}" ${k === ME ? "selected" : ""}>${esc(teamName(k))}</option>`).join("")}</select></div><div id="rs-body" class="stack"></div>`;
+  const render = k => {
+    const body = $("#rs-body"); body.innerHTML = "";
+    const rows = C.rounds.map(r => { const m = matchFor(r, k); if (!m) return null;
+      if (!r.played) return {cells: [r.round, r.serie_a, {t: teamName(m.opp)}, m.home ? "H" : "A", "", "", "", ""]};
+      const res = m.gf > m.ga ? "W" : m.gf < m.ga ? "L" : "D", sc = Object.values(SCORES[r.round] || {}).sort((a, b) => b - a);
+      return {cells: [r.round, r.serie_a, {t: teamName(m.opp)}, m.home ? "H" : "A", {html: `${wdl(res)} ${m.gf}–${m.ga}`, v: m.gf - m.ga}, m.mine, m.theirs, sc.length ? `${sc.indexOf(m.mine) + 1}/${sc.length}` : ""]};
+    }).filter(Boolean);
+    const c = card(rounds.length ? lineChart([{values: rounds.map(r => SCORES[r][k] ?? null), color: k === ME ? "var(--me)" : "var(--accent)"}], {avg: avgByRound, height: 170}) : "", teamName(k));
+    c.append(htmlTable(["Rd", "Serie A", "Opponent", "", "Result", "FP", "Opp FP", "Rank"], rows, {left: [2], titles: ["League round", "Serie A round", , "Home/away", , "Fantasy points", "Opponent's fantasy points", "Rank among all teams that round"]}));
+    body.append(c);
+  };
+  $("#rs-pick").onchange = e => render(e.target.value);
+  render(keys.includes(ME) ? ME : keys[0]);
+  const all = document.createElement("details"); all.style.marginTop = "12px";
+  all.innerHTML = `<summary>Every round (${C.rounds.length})</summary>`;
+  all.append(htmlTable(["Rd", "Home", "FP", "Score", "FP", "Away"], C.rounds.flatMap(r => r.matches.map(m => ({me: m.home === ME || m.away === ME,
+    cells: [r.round, {t: teamName(m.home)}, r.played ? m.home_fp : "", r.played && m.home_goals != null ? `${m.home_goals}–${m.away_goals}` : (m.group ? "grp " + m.group : "v"), r.played ? m.away_fp : "", {t: teamName(m.away)}]}))), {left: [1, 5]}));
+  s.append(all);
+})();
+
+// ---------- Squads
+const PLAYER_COLS = [["Player", p => ({html: `<span class="pill role-${roleOf(p)}">${esc(p.role)}</span> ${esc(p.name)}`, v: p.name})], ["Club", p => ({t: p.club})],
+  ["Paid", p => p.paid], ["Value", p => p.value], ["Apps", p => p.apps], ["Vote", p => p.vote], ["Fanta", p => ({html: p.fanta == null ? "" : `<b>${fmt(p.fanta)}</b>`, v: p.fanta ?? -99})],
+  ["G", p => p.goals], ["A", p => p.assists], ["YC", p => p.yellow], ["RC", p => p.red]];
+const PLAYER_TITLES = [, , "Credits paid at auction", "Current quotation", "Serie A appearances", "Average vote", "Fanta-average (vote with bonus and malus)", "Goals (conceded, for goalkeepers: see Stats)", "Assists", "Yellow cards", "Red cards"];
+(function squads() {
+  const s = $("#squads");
+  if (!D.squads.length) { s.innerHTML = `<div class="empty">No squads found.</div>`; return; }
+  const mine = Math.max(0, D.squads.findIndex(q => q.team_id === ME));
+  s.innerHTML = `<div class="row"><select id="sq-pick" aria-label="Squad">${D.squads.map((q, i) => `<option value="${i}" ${i === mine ? "selected" : ""}>${esc(q.team)}</option>`).join("")}</select><span class="muted" id="sq-sum"></span></div><div id="sq-body"></div>`;
+  const render = i => {
+    const q = D.squads[i], spent = q.players.reduce((a, p) => a + (p.paid || 0), 0), value = q.players.reduce((a, p) => a + (p.value || 0), 0);
+    $("#sq-sum").textContent = `${q.coach} · ${q.players.length} players · ${spent} credits spent · ${q.credits_left ?? "?"} left · squad value ${value}`;
+    const ps = [...q.players].sort((a, b) => (ROLE_ORDER[roleOf(a)] ?? 9) - (ROLE_ORDER[roleOf(b)] ?? 9) || (b.paid || 0) - (a.paid || 0));
+    const c = card(); c.append(htmlTable(PLAYER_COLS.map(c => c[0]), ps.map(p => ({cells: PLAYER_COLS.map(c => c[1](p))})), {left: [0, 1], titles: PLAYER_TITLES}));
+    $("#sq-body").replaceChildren(c);
+  };
+  $("#sq-pick").onchange = e => render(+e.target.value);
+  render(mine);
+  const c2 = card(bars(D.squads.map(q => ({label: q.team, v: q.players.reduce((a, p) => a + (p.value || 0), 0), k: q.team_id})).sort((a, b) => b.v - a.v), {highlight: ME}), "Squad value (current quotations)");
+  c2.style.marginTop = "12px"; s.append(c2);
+  const c3 = card(bars(D.squads.map(q => ({label: q.team, v: q.credits_left ?? 0, k: q.team_id})).sort((a, b) => b.v - a.v), {highlight: ME}), "Credits left");
+  c3.style.marginTop = "12px"; s.append(c3);
+})();
+
+// ---------- Players: every player in the league, filterable
+(function players() {
+  const s = $("#players");
+  if (!allPlayers.length) { s.innerHTML = `<div class="empty">No players found.</div>`; return; }
+  s.innerHTML = `<div class="row"><input id="pl-q" type="search" placeholder="Search player or club" aria-label="Search">
+    <select id="pl-role" aria-label="Role"><option value="">All roles</option><option>P</option><option>D</option><option>C</option><option>A</option></select>
+    <label class="muted"><input type="checkbox" id="pl-played" checked> played only</label></div><div class="card" id="pl-body"></div>
+    <p class="muted" style="font-size:12px">Serie A statistics for this season, for every player in a squad in this league.</p>`;
+  const cols = [["Team", p => ({t: p.team, cls: p.team_id === ME ? "team" : ""})], ...PLAYER_COLS];
+  const render = () => {
+    const q = $("#pl-q").value.toLowerCase(), role = $("#pl-role").value, played = $("#pl-played").checked;
+    const ps = allPlayers.filter(p => (!q || (p.name + " " + p.club).toLowerCase().includes(q)) && (!role || roleOf(p) === role) && (!played || p.apps))
+      .sort((a, b) => (b.fanta ?? -99) - (a.fanta ?? -99));
+    $("#pl-body").replaceChildren(htmlTable(cols.map(c => c[0]), ps.map(p => ({me: p.team_id === ME, cells: cols.map(c => c[1](p))})), {left: [0, 1, 2], titles: [, ...PLAYER_TITLES]}));
+  };
+  ["pl-q", "pl-role", "pl-played"].forEach(id => $("#" + id).addEventListener("input", render));
+  render();
+})();
+
+// ---------- Stats
+(function stats() {
+  const s = $("#stats");
+  const pt = st.per_team;
+  const tiles = recs => `<div class="grid">${recs.map(([l, v, w]) => `<div class="card kpi"><div class="l">${esc(l)}</div><div class="v" style="font-size:20px">${esc(v)}</div><div class="l">${esc(w)}</div></div>`).join("")}</div>`;
+  if (st.records.length) s.append(card(tiles(st.records), `${C.name}: records`));
+  if (D.player_records.length) { const c = card(tiles(D.player_records), "Players"); c.style.marginTop = "12px"; s.append(c); }
+  if (Object.keys(pt).length) {
+    const c = card(`<p class="muted" style="margin:0 0 8px;font-size:13px">All-play: win rate if you had played every team every round. Luck: places gained (+) or lost (−) in the real table compared with the all-play ranking. Top/Bottom: rounds as the highest/lowest scorer.</p>`, "Team by team");
+    c.style.marginTop = "12px";
+    c.append(htmlTable(["Team", "Total", "Avg", "Best", "Worst", "σ", "All-play", "Luck", "Top", "Bottom", "66+"],
+      Object.entries(pt).sort((a, b) => b[1].total - a[1].total).map(([k, r]) => ({me: k === ME, cells: [{t: r.team, cls: "team"}, r.total, r.avg,
+        {t: `${fmt(r.best[1])} (R${r.best[0]})`, v: r.best[1]}, {t: `${fmt(r.worst[1])} (R${r.worst[0]})`, v: r.worst[1]}, r.stdev,
+        {t: r.allplay_pct + "%", v: r.allplay_pct}, {html: r.luck == null ? "" : `<span class="${r.luck > 0 ? "pos" : r.luck < 0 ? "neg" : ""}">${r.luck > 0 ? "+" : ""}${r.luck}</span>`, v: r.luck ?? 0},
+        r.top_scorer_rounds, r.wooden_spoon_rounds, r.over_66]})), {left: [0]}));
+    s.append(c);
+    const cell = v => { if (v == null) return `<td></td>`; const a = Math.max(-1, Math.min(1, v / 10));
+      return `<td title="${v.toFixed(1)} vs average" style="background:${a >= 0 ? `rgba(21,128,61,${a * .55})` : `rgba(185,28,28,${-a * .55})`};text-align:center">${(r => r > 0 ? "+" + r : r === 0 ? "0" : r)(Math.round(v))}</td>`; };
+    const h = card(`<div class="scroll"><table><thead><tr><th class="l">Team</th>${rounds.map(r => `<th style="text-align:center">R${r}</th>`).join("")}</tr></thead><tbody>${
+      Object.keys(pt).sort((a, b) => pt[b].total - pt[a].total).map(k => `<tr class="${k === ME ? "me" : ""}"><td class="l team">${esc(pt[k].team)}</td>${rounds.map((r, i) => cell(SCORES[r][k] != null ? SCORES[r][k] - avgByRound[i] : null)).join("")}</tr>`).join("")}</tbody></table></div>`, "Points above or below the round average");
+    h.style.marginTop = "12px"; s.append(h);
+  }
+  if (!s.children.length) s.innerHTML = `<div class="empty">Statistics appear once some rounds have been played.</div>`;
+})();
+
+}
+
+let start = "overview"; try { start = localStorage.getItem("fanta-tab") || start; } catch (e) {}
+if (nav.isConnected) show(TABS.some(t => t[0] === start) ? start : "overview");
+</script>
+</body>
+</html>

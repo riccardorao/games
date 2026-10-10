@@ -1,5 +1,8 @@
 # Giochi
 
+- [Halfway](#halfway): gioco da tavolo per due persone
+- [Fantacalcio](fantacalcio/README.md): la tua lega di Leghe Fantacalcio nel terminale e in una dashboard
+
 ## Halfway
 
 Gioco da tavolo digitale per due persone sullo stesso dispositivo. In ciascuna delle sei tappe della
