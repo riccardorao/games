@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fantacalcio League</title>
+<style>
+:root {
+  --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1f22; --muted: #6b6f76; --line: #e3e1da;
+  --accent: #0f6b4f; --accent-soft: #e2f1eb; --me: #c2410c; --me-soft: #fdeee4;
+  --good: #15803d; --bad: #b91c1c; --bar: #9cc9b7;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141517; --panel: #1c1e21; --ink: #e9e8e4; --muted: #9a9ea6; --line: #2d3035;
+    --accent: #4fbf96; --accent-soft: #1d3029; --me: #fb923c; --me-soft: #3a2518;
+    --good: #4ade80; --bad: #f87171; --bar: #2f6b55;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141517; --panel: #1c1e21; --ink: #e9e8e4; --muted: #9a9ea6; --line: #2d3035;
+  --accent: #4fbf96; --accent-soft: #1d3029; --me: #fb923c; --me-soft: #3a2518;
+  --good: #4ade80; --bad: #f87171; --bar: #2f6b55;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+header { padding: 20px 16px 0; max-width: 1100px; margin: 0 auto; }
+header h1 { margin: 0; font-size: 26px; letter-spacing: -.01em; }
+header .sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+nav { display: flex; gap: 4px; overflow-x: auto; padding: 14px 16px 0; max-width: 1100px; margin: 0 auto; border-bottom: 1px solid var(--line); }
+nav button { background: none; border: 0; color: var(--muted); font: inherit; padding: 8px 12px; border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; }
+nav button.on { color: var(--ink); border-color: var(--accent); font-weight: 600; }
+main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+section { display: none; } section.on { display: block; }
+.grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+.card h3 { margin: 0 0 10px; font-size: 14px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+.kpi .v { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.kpi .l { color: var(--muted); font-size: 12px; }
+.stack > * + * { margin-top: 12px; }
+.scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { padding: 7px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; cursor: pointer; user-select: none; }
+th:first-child, td:first-child, th.l, td.l { text-align: left; }
+tr.me td { background: var(--me-soft); }
+tr.me td.team { color: var(--me); font-weight: 600; }
+.pill { display: inline-block; min-width: 22px; padding: 1px 6px; border-radius: 6px; font-size: 12px; font-weight: 600; text-align: center; background: var(--accent-soft); color: var(--accent); }
+.pos { color: var(--good); } .neg { color: var(--bad); }
+.muted { color: var(--muted); }
+select, input { font: inherit; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); max-width: 100%; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.roles { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.role-P { background: #f59e0b22; color: #b45309; } .role-D { background: #16a34a22; color: #15803d; }
+.role-C { background: #2563eb22; color: #1d4ed8; } .role-A { background: #dc262622; color: #b91c1c; }
+svg text { fill: var(--muted); font-size: 11px; }
+.empty { color: var(--muted); padding: 24px; text-align: center; }
+details { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+details + details { margin-top: 8px; }
+summary { cursor: pointer; font-weight: 600; }
+pre { white-space: pre-wrap; word-break: break-word; font-size: 12px; max-height: 420px; overflow: auto; }
+.theme { position: absolute; top: 18px; right: 16px; }
+@media (max-width: 600px) { header h1 { font-size: 21px; } .kpi .v { font-size: 22px; } }
+</style>
+</head>
+<body>
+<header style="position:relative">
+  <h1 id="title">Fantacalcio</h1>
+  <div class="sub" id="subtitle"></div>
+  <button class="theme" id="theme" title="Toggle theme" style="background:none;border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:4px 8px;cursor:pointer">◐</button>
+</header>
+<nav id="tabs"></nav>
+<main id="main"></main>
+
+<script>
+const D = /*__DATA__*/null;
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = v => v == null || v === "" ? "" : typeof v === "number" ? (Number.isInteger(v) ? v : v.toFixed(1)) : v;
+const teamName = k => D.teams[k]?.name ?? k;
+const ME = D.my_team;
+const rounds = Object.keys(D.scores).map(Number).sort((a, b) => a - b);
+const st = D.stats || {per_team: {}, records: []};
+
+document.getElementById("theme").onclick = () => {
+  const r = document.documentElement, dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  const cur = r.dataset.theme || (dark ? "dark" : "light");
+  r.dataset.theme = cur === "dark" ? "light" : "dark";
+};
+
+$("#title").textContent = D.league.name || D.league.alias;
+$("#subtitle").textContent = [D.league.type, D.league.current_turn ? `round ${D.league.current_turn}` : "", `data from ${D.fetched_at}`].filter(Boolean).join(" · ");
+
+const TABS = [["overview", "My team"], ["standings", "Standings"], ["squads", "Squads"], ["results", "Results"], ["stats", "Stats"], ["data", "Raw data"]];
+const nav = $("#tabs"), main = $("#main");
+for (const [id, label] of TABS) {
+  const b = document.createElement("button"); b.textContent = label; b.dataset.tab = id;
+  b.onclick = () => show(id); nav.append(b);
+  const s = document.createElement("section"); s.id = id; main.append(s);
+}
+function show(id) {
+  for (const b of nav.children) b.classList.toggle("on", b.dataset.tab === id);
+  for (const s of main.children) s.classList.toggle("on", s.id === id);
+  try { localStorage.setItem("fanta-tab", id); } catch (e) {}
+}
+
+// ---------- helpers
+function sortable(tbl) {
+  tbl.querySelectorAll("th").forEach((th, i) => th.onclick = () => {
+    const rows = [...tbl.tBodies[0].rows], asc = th.dataset.dir !== "asc";
+    tbl.querySelectorAll("th").forEach(t => delete t.dataset.dir); th.dataset.dir = asc ? "asc" : "desc";
+    const val = r => { const t = r.cells[i]?.dataset.v ?? r.cells[i]?.textContent ?? ""; const n = parseFloat(t); return isNaN(n) ? t.toLowerCase() : n; };
+    rows.sort((a, b) => (val(a) > val(b) ? 1 : val(a) < val(b) ? -1 : 0) * (asc ? 1 : -1));
+    rows.forEach(r => tbl.tBodies[0].append(r));
+  });
+  return tbl;
+}
+function htmlTable(headers, rows, opts = {}) {
+  const t = document.createElement("table");
+  t.innerHTML = `<thead><tr>${headers.map((h, i) => `<th class="${opts.left?.includes(i) ? "l" : ""}">${esc(h)}</th>`).join("")}</tr></thead><tbody></tbody>`;
+  for (const r of rows) {
+    const tr = document.createElement("tr");
+    if (r.me) tr.className = "me";
+    tr.innerHTML = r.cells.map((c, i) => {
+      const o = typeof c === "object" && c !== null ? c : {t: c};
+      return `<td class="${opts.left?.includes(i) ? "l " : ""}${o.cls || ""}" data-v="${esc(o.v ?? (typeof o.t === "number" ? o.t : ""))}">${o.html ?? esc(fmt(o.t))}</td>`;
+    }).join("");
+    t.tBodies[0].append(tr);
+  }
+  const w = document.createElement("div"); w.className = "scroll"; w.append(sortable(t)); return w;
+}
+function lineChart(series, {height = 220, avg} = {}) {
+  const W = 680, H = height, P = {l: 34, r: 10, t: 10, b: 24};
+  const xs = rounds; if (!xs.length) return "";
+  const all = series.flatMap(s => s.values.filter(v => v != null)).concat(avg || []);
+  const lo = Math.floor(Math.min(...all) / 5) * 5, hi = Math.ceil(Math.max(...all) / 5) * 5 || 1;
+  const x = i => P.l + (xs.length === 1 ? 0 : i * (W - P.l - P.r) / (xs.length - 1));
+  const y = v => P.t + (hi - v) * (H - P.t - P.b) / (hi - lo || 1);
+  let g = "";
+  for (let v = lo; v <= hi; v += Math.max(5, Math.round((hi - lo) / 5 / 5) * 5)) g += `<line x1="${P.l}" x2="${W - P.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${P.l - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  xs.forEach((r, i) => { if (xs.length < 20 || i % 2 === 0) g += `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${r}</text>`; });
+  const path = vals => vals.map((v, i) => v == null ? null : `${x(i)},${y(v)}`).filter(Boolean).join(" ");
+  if (avg) g += `<polyline points="${path(avg)}" fill="none" stroke="var(--muted)" stroke-dasharray="4 4" stroke-width="1.5"/>`;
+  for (const s of series) {
+    g += `<polyline points="${path(s.values)}" fill="none" stroke="${s.color}" stroke-width="2.2"/>`;
+    s.values.forEach((v, i) => { if (v != null) g += `<circle cx="${x(i)}" cy="${y(v)}" r="3.2" fill="${s.color}"><title>Round ${xs[i]}: ${v}</title></circle>`; });
+  }
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Scores by round">${g}</svg>`;
+}
+function bars(items, {color = "var(--bar)", highlight} = {}) {
+  if (!items.length) return "";
+  const max = Math.max(...items.map(i => i.v)), min = Math.min(0, ...items.map(i => i.v));
+  return `<div class="stack" style="--g:6px">${items.map(i => `
+    <div style="display:grid;grid-template-columns:minmax(90px,170px) 1fr 52px;gap:8px;align-items:center;margin-top:6px">
+      <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;${i.k === highlight ? "color:var(--me);font-weight:600" : ""}">${esc(i.label)}</div>
+      <div style="background:var(--line);border-radius:4px;height:12px;position:relative"><div style="position:absolute;inset:0 auto 0 0;width:${((i.v - min) / (max - min || 1)) * 100}%;background:${i.k === highlight ? "var(--me)" : color};border-radius:4px"></div></div>
+      <div style="text-align:right;font-variant-numeric:tabular-nums">${fmt(i.v)}</div></div>`).join("")}</div>`;
+}
+const avgByRound = rounds.map(r => { const v = Object.values(D.scores[r]); return +(v.reduce((a, b) => a + b, 0) / v.length).toFixed(2); });
+
+// ---------- My team
+(function overview() {
+  const s = $("#overview");
+  const me = D.standings.find(r => r.id === ME) || {};
+  const ps = st.per_team[ME] || {};
+  const name = teamName(ME) || "My team";
+  const kpi = (v, l) => `<div class="card kpi"><div class="v">${v ?? "–"}</div><div class="l">${l}</div></div>`;
+  s.innerHTML = `<div class="stack">
+    <div class="card"><h3>${esc(name)}</h3><div class="muted">${esc(D.teams[ME]?.coach || "")}</div></div>
+    <div class="grid">
+      ${kpi(me.pos ? `${me.pos}°` : null, `position of ${D.standings.length}`)}
+      ${kpi(fmt(me.pts), "league points")}
+      ${kpi(fmt(me.fp ?? ps.total), "fantasy points")}
+      ${kpi(ps.avg, "average per round")}
+      ${kpi(ps.best ? `${fmt(ps.best[1])}` : null, ps.best ? `best (round ${ps.best[0]})` : "best round")}
+      ${kpi(ps.allplay_pct != null ? ps.allplay_pct + "%" : null, "all-play win rate")}
+    </div>
+    <div class="card"><h3>Scores by round</h3>${rounds.length ? lineChart([{values: rounds.map(r => D.scores[r][ME] ?? null), color: "var(--me)"}], {avg: avgByRound}) +
+      `<div class="muted" style="font-size:12px"><span style="color:var(--me)">●</span> ${esc(name)} &nbsp; <span>- - -</span> league average</div>` : `<div class="empty">No round scores yet.</div>`}</div>
+    ${me.w != null ? `<div class="card"><h3>Record</h3><div class="grid">${kpi(fmt(me.w), "won")}${kpi(fmt(me.d), "drawn")}${kpi(fmt(me.l), "lost")}${kpi(me.gf != null ? `${fmt(me.gf)}–${fmt(me.ga)}` : null, "goals for–against")}</div></div>` : ""}
+  </div>`;
+})();
+
+// ---------- Standings
+(function standings() {
+  const s = $("#standings");
+  if (!D.standings.length) { s.innerHTML = `<div class="empty">No standings found.</div>`; return; }
+  const has = k => D.standings.some(r => r[k] != null);
+  const cols = [["pos", "#"], ["team", "Team"], ["played", "P"], ["w", "W"], ["d", "D"], ["l", "L"], ["gf", "GF"], ["ga", "GA"], ["pts", "Pts"], ["fp", "FP"]].filter(([k]) => k === "team" || has(k));
+  const card = document.createElement("div"); card.className = "card";
+  card.append(htmlTable(cols.map(c => c[1]), D.standings.map(r => ({me: r.id === ME, cells: cols.map(([k]) => k === "team" ? {t: r.team, cls: "team"} : r[k])})), {left: [cols.findIndex(c => c[0] === "team")]}));
+  s.append(card);
+  if (has("fp")) {
+    const c2 = document.createElement("div"); c2.className = "card"; c2.style.marginTop = "12px";
+    c2.innerHTML = `<h3>Fantasy points</h3>` + bars([...D.standings].sort((a, b) => b.fp - a.fp).map(r => ({label: r.team, v: r.fp, k: r.id})), {highlight: ME});
+    s.append(c2);
+  }
+})();
+
+// ---------- Squads
+(function squads() {
+  const s = $("#squads");
+  if (!D.squads.length) { s.innerHTML = `<div class="empty">No squads found.</div>`; return; }
+  const mine = Math.max(0, D.squads.findIndex(q => q.team_id === ME || q.team.toLowerCase() === (teamName(ME) || "").toLowerCase()));
+  s.innerHTML = `<div class="row"><select id="sq-pick">${D.squads.map((q, i) => `<option value="${i}" ${i === mine ? "selected" : ""}>${esc(q.team)}</option>`).join("")}</select><span class="muted" id="sq-sum"></span></div><div id="sq-body"></div>
+    <div class="card" style="margin-top:12px"><h3>Credits spent per squad</h3>${bars(D.squads.map(q => ({label: q.team, v: q.players.reduce((a, p) => a + (p.cost || 0), 0), k: q.team_id})).sort((a, b) => b.v - a.v), {highlight: ME})}</div>`;
+  const render = i => {
+    const q = D.squads[i], groups = {};
+    for (const p of q.players) (groups[(p.role || "?").slice(0, 1).toUpperCase()] ??= []).push(p);
+    $("#sq-sum").textContent = `${q.players.length} players · ${q.players.reduce((a, p) => a + (p.cost || 0), 0)} credits`;
+    const order = ["P", "D", "C", "A"].filter(r => groups[r]).concat(Object.keys(groups).filter(r => !"PDCA".includes(r)));
+    const names = {P: "Goalkeepers", D: "Defenders", C: "Midfielders", A: "Forwards"};
+    $("#sq-body").innerHTML = `<div class="roles">${order.map(r => `<div class="card"><h3><span class="pill role-${r}">${r}</span> ${names[r] || "Other"}</h3>
+      <table><tbody>${groups[r].sort((a, b) => (b.cost || 0) - (a.cost || 0)).map(p => `<tr><td class="l">${esc(p.name)} <span class="muted">${esc(p.club)}</span></td><td>${fmt(p.cost)}</td></tr>`).join("")}</tbody></table></div>`).join("")}</div>`;
+  };
+  $("#sq-pick").onchange = e => render(+e.target.value);
+  render(mine);
+})();
+
+// ---------- Results
+(function results() {
+  const s = $("#results");
+  if (!rounds.length && !D.fixtures.length) { s.innerHTML = `<div class="empty">No results yet.</div>`; return; }
+  const keys = Object.keys(D.teams).filter(k => rounds.some(r => D.scores[r][k] != null));
+  s.innerHTML = `<div class="row"><select id="rs-pick">${keys.map(k => `<option value="${esc(k)}" ${k === ME ? "selected" : ""}>${esc(teamName(k))}</option>`).join("")}</select></div><div id="rs-body"></div>`;
+  const render = k => {
+    const nm = teamName(k);
+    const rows = rounds.map(r => {
+      const sc = D.scores[r], vals = Object.values(sc).sort((a, b) => b - a), v = sc[k];
+      const fx = D.fixtures.find(f => f.round === r && (f.home === nm || f.away === nm));
+      let opp = "", res = "";
+      if (fx) { const h = fx.home === nm; opp = h ? fx.away : fx.home;
+        if (fx.home_goals != null) { const a = h ? fx.home_goals : fx.away_goals, b = h ? fx.away_goals : fx.home_goals;
+          res = `<span class="${a > b ? "pos" : a < b ? "neg" : ""}">${a > b ? "W" : a < b ? "L" : "D"} ${a}–${b}</span>`; } }
+      const diff = v != null ? v - avgByRound[rounds.indexOf(r)] : null;
+      return {me: false, cells: [r, v, v != null ? `${vals.indexOf(v) + 1}/${vals.length}` : "", {t: diff, html: diff == null ? "" : `<span class="${diff >= 0 ? "pos" : "neg"}">${diff >= 0 ? "+" : ""}${diff.toFixed(1)}</span>`, v: diff}, {t: opp}, {html: res, v: res}]};
+    });
+    $("#rs-body").innerHTML = "";
+    const c = document.createElement("div"); c.className = "card stack";
+    c.innerHTML = `<h3>${esc(nm)}</h3>` + lineChart([{values: rounds.map(r => D.scores[r][k] ?? null), color: k === ME ? "var(--me)" : "var(--accent)"}], {avg: avgByRound, height: 180});
+    c.append(htmlTable(["Round", "FP", "Rank", "vs avg", "Opponent", "Result"], rows, {left: [4, 5]}));
+    $("#rs-body").append(c);
+    if (D.fixtures.length) {
+      const f = document.createElement("details"); f.style.marginTop = "12px";
+      f.innerHTML = `<summary>All fixtures (${D.fixtures.length})</summary>`;
+      f.append(htmlTable(["Round", "Home", "", "", "Away"], D.fixtures.map(x => ({cells: [x.round, {t: x.home}, x.home_goals, x.away_goals, {t: x.away}]})), {left: [1, 4]}));
+      $("#rs-body").append(f);
+    }
+  };
+  $("#rs-pick").onchange = e => render(e.target.value);
+  render(keys.includes(ME) ? ME : keys[0]);
+})();
+
+// ---------- Stats
+(function stats() {
+  const s = $("#stats");
+  const pt = st.per_team;
+  if (!st.records.length) { s.innerHTML = `<div class="empty">Statistics appear once some rounds have been scored.</div>`; return; }
+  s.innerHTML = `<div class="grid">${st.records.map(([l, v, w]) => `<div class="card kpi"><div class="l">${esc(l)}</div><div class="v" style="font-size:22px">${esc(v)}</div><div class="l">${esc(w)}</div></div>`).join("")}</div>`;
+  const c = document.createElement("div"); c.className = "card"; c.style.marginTop = "12px";
+  c.innerHTML = `<h3>Team by team</h3><p class="muted" style="margin:0 0 8px;font-size:13px">All-play: your win rate if you had played every team every round. Luck: places gained (+) or lost (−) in the real table compared with the all-play ranking. Top: rounds as the highest scorer.</p>`;
+  c.append(htmlTable(["Team", "Total", "Avg", "Best", "Worst", "σ", "All-play", "Luck", "Top", "Bottom", "66+"],
+    Object.entries(pt).sort((a, b) => b[1].total - a[1].total).map(([k, r]) => ({me: k === ME, cells: [{t: r.team, cls: "team"}, r.total, r.avg,
+      {t: `${fmt(r.best[1])} (R${r.best[0]})`, v: r.best[1]}, {t: `${fmt(r.worst[1])} (R${r.worst[0]})`, v: r.worst[1]}, r.stdev,
+      {t: r.allplay_pct + "%", v: r.allplay_pct}, {html: r.luck == null ? "" : `<span class="${r.luck > 0 ? "pos" : r.luck < 0 ? "neg" : ""}">${r.luck > 0 ? "+" : ""}${r.luck}</span>`, v: r.luck ?? 0},
+      r.top_scorer_rounds, r.wooden_spoon_rounds, r.over_66]})), {left: [0]}));
+  s.append(c);
+  const h = document.createElement("div"); h.className = "card"; h.style.marginTop = "12px";
+  const cell = v => { if (v == null) return `<td></td>`; const a = Math.max(-1, Math.min(1, v / 10));
+    return `<td title="${v.toFixed(1)} vs avg" style="background:${a >= 0 ? `rgba(21,128,61,${a * .55})` : `rgba(185,28,28,${-a * .55})`};text-align:center">${(r => r > 0 ? "+" + r : r === 0 ? "0" : r)(Math.round(v))}</td>`; };
+  h.innerHTML = `<h3>Heat map: points above or below the round average</h3><div class="scroll"><table><thead><tr><th class="l">Team</th>${rounds.map(r => `<th style="text-align:center">${r}</th>`).join("")}</tr></thead><tbody>${
+    Object.keys(pt).sort((a, b) => pt[b].total - pt[a].total).map(k => `<tr class="${k === ME ? "me" : ""}"><td class="l team">${esc(pt[k].team)}</td>${rounds.map((r, i) => cell(D.scores[r][k] != null ? D.scores[r][k] - avgByRound[i] : null)).join("")}</tr>`).join("")}</tbody></table></div>`;
+  s.append(h);
+})();
+
+// ---------- Raw data explorer: everything downloaded, rendered as tables where possible
+(function raw() {
+  const s = $("#data");
+  s.innerHTML = `<p class="muted">Everything the sync downloaded, for poking around and for spotting data the other tabs don't use yet.</p>`;
+  const render = v => {
+    if (Array.isArray(v) && v.length && v.every(x => x && typeof x === "object" && !Array.isArray(x))) {
+      const keys = [...new Set(v.flatMap(Object.keys))].slice(0, 30);
+      const simple = x => x == null ? "" : typeof x === "object" ? JSON.stringify(x).slice(0, 80) : x;
+      return htmlTable(keys, v.slice(0, 500).map(x => ({cells: keys.map(k => ({t: simple(x[k])}))})), {left: keys.map((_, i) => i)});
+    }
+    const p = document.createElement("pre"); p.textContent = JSON.stringify(v, null, 1).slice(0, 60000); return p;
+  };
+  const block = (title, v) => {
+    const d = document.createElement("details");
+    d.innerHTML = `<summary>${esc(title)}</summary>`;
+    d.ontoggle = () => { if (d.open && d.children.length === 1) {
+      const lists = [];
+      (function walk(x, path) { if (Array.isArray(x) && x.length && x.every(y => y && typeof y === "object" && !Array.isArray(y))) lists.push([path, x]);
+        else if (x && typeof x === "object") for (const [k, y] of Object.entries(x)) walk(y, path ? path + "." + k : k); })(v, "");
+      if (lists.length) for (const [p, l] of lists.slice(0, 12)) { const h = document.createElement("div"); h.className = "muted"; h.style.margin = "10px 0 4px"; h.textContent = p || "(root)"; d.append(h, render(l)); }
+      else d.append(render(v));
+    } };
+    s.append(d);
+  };
+  for (const [k, v] of Object.entries(D.raw?.api || {})) block(`API · ${k}`, v);
+  for (const [k, v] of Object.entries(D.raw?.embedded || {})) block(`Page data · ${k}`, v);
+  for (const [k, v] of Object.entries(D.raw?.lineups || {})) block(`Line-up · round ${k}`, v);
+  for (const [k, ts] of Object.entries(D.raw?.tables || {})) ts.forEach((t, i) => block(`Page table · ${k} #${i + 1}${t.title ? " · " + t.title : ""}`,
+    t.rows.map(r => Object.fromEntries(r.map((c, j) => [t.headers[j] || `col${j + 1}`, c])))));
+})();
+
+let start = "overview"; try { start = localStorage.getItem("fanta-tab") || start; } catch (e) {}
+show(TABS.some(t => t[0] === start) ? start : "overview");
+</script>
+</body>
+</html>
