@@ -10,8 +10,8 @@ Standard library only. Credentials come from the environment
 never written to disk.
 
     python3 fanta.py leagues                 # list the leagues on your account
-    python3 fanta.py sync --league ALIAS     # download everything into data/ALIAS/
-    python3 fanta.py standings               # print the table
+    python3 fanta.py sync                    # download every league into data/<alias>/
+    python3 fanta.py standings --league X    # print the table (X = part of the league name)
     python3 fanta.py squad [TEAM]            # print a squad (yours by default)
     python3 fanta.py results [TEAM]          # round-by-round scores
     python3 fanta.py stats                   # league trivia and records
@@ -306,6 +306,7 @@ def get_credentials(args):
 
 
 def pick_league(client, wanted):
+    """The league matching `wanted` (alias, name or id), or None when no league was asked for."""
     leagues = client.leagues()
     if not leagues:
         raise FantaError("This account is not in any league.")
@@ -315,10 +316,7 @@ def pick_league(client, wanted):
                 return lg
         raise FantaError(f"League '{wanted}' not found. Your leagues: " +
                          ", ".join(str(l.get("alias")) for l in leagues))
-    if len(leagues) == 1:
-        return leagues[0]
-    raise FantaError("You are in several leagues; choose one with --league. Options: " +
-                     ", ".join(str(l.get("alias")) for l in leagues))
+    return None  # no preference: every league
 
 
 def sync(args):
@@ -327,6 +325,15 @@ def sync(args):
     print("Logging in…")
     client.login(user, pwd)
     league = pick_league(client, args.league or os.environ.get("FANTA_LEAGUE"))
+    leagues = [league] if league else client.leagues()
+    if not league and len(leagues) > 1:
+        print(f"You are in {len(leagues)} leagues: " + ", ".join(str(l.get("nome") or l.get("alias")) for l in leagues))
+    for lg in leagues:
+        sync_league(client, lg, args)
+        print()
+
+
+def sync_league(client, league, args):
     alias = league.get("alias")
     print(f"League: {league.get('nome') or alias} ({alias})")
 
@@ -402,7 +409,6 @@ def sync(args):
     dest = DATA_DIR / alias
     dest.mkdir(parents=True, exist_ok=True)
     (dest / "raw.json").write_text(json.dumps(out, ensure_ascii=False, indent=1))
-    (DATA_DIR / "last_league.txt").write_text(alias)
     m = out["model"]
     print(f"\nSaved to {dest / 'raw.json'}")
     print(f"  {len(m['teams'])} teams, {len(m['standings'])} standings rows, {len(m['squads'])} squads, "
@@ -682,14 +688,32 @@ def compute_stats(model):
 # CLI output
 # --------------------------------------------------------------------------- #
 
-def load_model(args):
-    alias = args.league or os.environ.get("FANTA_LEAGUE")
-    if not alias and (DATA_DIR / "last_league.txt").exists():
-        alias = (DATA_DIR / "last_league.txt").read_text().strip()
-    path = DATA_DIR / (alias or "") / "raw.json"
-    if not alias or not path.exists():
-        raise FantaError("No data yet: run `python3 fanta.py sync --league ALIAS` first.")
-    raw = json.loads(path.read_text())
+def synced_leagues():
+    """{alias: raw.json path} for every league downloaded so far."""
+    return {p.parent.name: p for p in sorted(DATA_DIR.glob("*/raw.json"))} if DATA_DIR.exists() else {}
+
+
+def load_model(args, alias=None):
+    found = synced_leagues()
+    if not found:
+        raise FantaError("No data yet: run `python3 fanta.py sync` first.")
+    wanted = alias or args.league or os.environ.get("FANTA_LEAGUE")
+    if wanted:
+        def label(a):
+            try:
+                return a + " " + str(json.loads(found[a].read_text())["league"].get("nome") or "")
+            except (ValueError, KeyError):
+                return a
+        matches = [a for a in found if wanted.lower() in label(a).lower()]
+        if not matches:
+            raise FantaError(f"No downloaded league matches '{wanted}'. Downloaded: {', '.join(found)}")
+        alias = matches[0]
+    elif len(found) == 1:
+        alias = next(iter(found))
+    else:
+        raise FantaError("You have several leagues; add --league NAME (part of the name is enough). "
+                         f"Downloaded: {', '.join(found)}")
+    raw = json.loads(found[alias].read_text())
     raw["model"] = build_model(raw)  # rebuild so parser fixes apply to old downloads
     return raw
 
@@ -784,20 +808,27 @@ def cmd_stats(args):
 
 
 def cmd_dashboard(args):
-    raw = load_model(args)
+    aliases = [args.league] if args.league else list(synced_leagues())
+    if not aliases:
+        raise FantaError("No data yet: run `python3 fanta.py sync` first.")
+    models = [dashboard_model(load_model(args, a)) for a in aliases]
+    blob = json.dumps(models, ensure_ascii=False).replace("</", "<\\/")
+    page = TEMPLATE.read_text().replace("/*__DATA__*/null", blob)
+    out = Path(args.out) if args.out else DATA_DIR / "dashboard.html"
+    out.write_text(page)
+    print(f"Dashboard with {len(models)} league(s) written to {out}")
+    if not args.no_open:
+        import webbrowser
+        webbrowser.open(out.resolve().as_uri())
+
+
+def dashboard_model(raw):
     model = raw["model"]
     model["stats"] = compute_stats(model)
     model["stats"]["records"] = [list(r) for r in model["stats"]["records"]]
     model["raw"] = {"api": raw.get("api", {}), "embedded": raw.get("embedded", {}), "lineups": raw.get("lineups", {}),
                     "tables": {k: v["tables"] for k, v in raw.get("pages", {}).items()}}
-    blob = json.dumps(model, ensure_ascii=False).replace("</", "<\\/")
-    page = TEMPLATE.read_text().replace("/*__DATA__*/null", blob)
-    out = Path(args.out) if args.out else DATA_DIR / model["league"]["alias"] / "dashboard.html"
-    out.write_text(page)
-    print(f"Dashboard written to {out}")
-    if not args.no_open:
-        import webbrowser
-        webbrowser.open(out.resolve().as_uri())
+    return model
 
 
 def main():
@@ -813,7 +844,7 @@ def main():
 
     s = add("leagues", cmd_leagues, "list the leagues on your account")
     s.add_argument("--username")
-    s = add("sync", sync, "download your league's data")
+    s = add("sync", sync, "download your leagues' data (all of them unless --league is given)")
     s.add_argument("--username")
     s.add_argument("--lineups", type=int, default=38, help="how many recent rounds of your line-ups to fetch (default all)")
     add("standings", cmd_standings, "league table")

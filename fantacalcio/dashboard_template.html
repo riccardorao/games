@@ -73,7 +73,9 @@ pre { white-space: pre-wrap; word-break: break-word; font-size: 12px; max-height
 <main id="main"></main>
 
 <script>
-const D = /*__DATA__*/null;
+const ALL = /*__DATA__*/null;
+const LEAGUE_IX = Math.max(0, ALL.findIndex(m => "#" + m.league.alias === location.hash));
+const D = ALL[LEAGUE_IX];
 const $ = (s, el = document) => el.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fmt = v => v == null || v === "" ? "" : typeof v === "number" ? (Number.isInteger(v) ? v : v.toFixed(1)) : v;
@@ -89,6 +91,13 @@ document.getElementById("theme").onclick = () => {
 };
 
 $("#title").textContent = D.league.name || D.league.alias;
+if (ALL.length > 1) {
+  const sel = document.createElement("select");
+  sel.setAttribute("aria-label", "League"); sel.style.marginTop = "8px";
+  sel.innerHTML = ALL.map((m, i) => `<option value="${esc(m.league.alias)}" ${i === LEAGUE_IX ? "selected" : ""}>${esc(m.league.name || m.league.alias)}</option>`).join("");
+  sel.onchange = () => { location.hash = sel.value; location.reload(); };
+  $("#subtitle").after(sel);
+}
 $("#subtitle").textContent = [D.league.type, D.league.current_turn ? `round ${D.league.current_turn}` : "", `data from ${D.fetched_at}`].filter(Boolean).join(" · ");
 
 const TABS = [["overview", "My team"], ["standings", "Standings"], ["squads", "Squads"], ["results", "Results"], ["stats", "Stats"], ["data", "Raw data"]];

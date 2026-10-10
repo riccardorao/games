@@ -7,31 +7,37 @@ terminal or as a self-contained HTML dashboard.
 Python 3.8+ only, no packages to install. It uses the same (unofficial, undocumented) web API the
 Leghe site uses, so if Fantacalcio changes something it may need adjusting.
 
-## Setup
+## Quick start (on your own computer)
 
-Your credentials are read from the environment, or asked for when missing. They are only sent to
-leghe.fantacalcio.it and are never saved.
+1. Download this folder (or clone the repository) and open a terminal in `fantacalcio/`.
+2. Run `python3 fanta.py sync`. It asks for your Leghe Fantacalcio username (or email) and password,
+   then downloads **every league you are in**. Nothing to configure, nothing saved.
+3. Run `python3 fanta.py dashboard`. It opens one page with a menu at the top to switch league.
+
+Your password is only sent to leghe.fantacalcio.it and is never written to disk.
+
+### Optional: skip typing the credentials every time
 
 ```sh
 export FANTA_USERNAME="your-username-or-email"
-export FANTA_PASSWORD="your-password"      # or leave unset to be prompted
-export FANTA_LEAGUE="your-league-alias"     # the part after leghe.fantacalcio.it/ ; optional if you're in one league
+export FANTA_PASSWORD="your-password"
 ```
 
 ## Use
 
 ```sh
-python3 fanta.py leagues          # the leagues on your account and their aliases
-python3 fanta.py sync             # download everything into data/<alias>/raw.json
-python3 fanta.py standings        # the table (your team marked ▶)
-python3 fanta.py squad            # your squad by role and cost; `squad longo` for another team
-python3 fanta.py results          # your score every round, rank in the round, opponent and result
-python3 fanta.py stats            # records and trivia
-python3 fanta.py dashboard        # writes data/<alias>/dashboard.html and opens it
+python3 fanta.py leagues                    # your leagues and their short names
+python3 fanta.py sync                       # download all your leagues (or: sync --league NAME for one)
+python3 fanta.py dashboard                  # data/dashboard.html, with a league switcher
+python3 fanta.py standings --league NAME    # the table (your team marked ▶)
+python3 fanta.py squad --league NAME        # your squad by role and cost; add a team name for another squad
+python3 fanta.py results --league NAME      # your score every round, rank in the round, opponent and result
+python3 fanta.py stats --league NAME        # records and trivia
 ```
 
-Run `sync` again whenever you want fresh data; the other commands read the last download and work offline.
-`-v` before the command logs every request.
+`NAME` can be any part of the league's name or short name (e.g. `--league amici`); with only one
+league you can leave it out. Run `sync` again whenever you want fresh data; the other commands read
+the last download and work offline. `-v` before the command logs every request.
 
 ## What you get
 
