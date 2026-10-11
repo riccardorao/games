@@ -145,20 +145,24 @@ const date = s => { const d = new Date(String(s).replace(" ", "T")); return isNa
 const time = s => { const d = new Date(String(s).replace(" ", "T")); return isNaN(d) ? "" : d.toLocaleTimeString("en-GB", {hour: "2-digit", minute: "2-digit"}); };
 const sw = document.getElementById("switch"), main = document.getElementById("leagues");
 
-// events in words, never in colour alone: "Goal ×2 · Assist · Yellow card"
+// events in words, never in colour alone: "Goal ×2 · Assist · Yellow card". The in/out flags are the
+// fantasy substitutions (a starter without a vote replaced from the bench), not the real ones; while a
+// round is live a starter whose club has not played yet is provisionally out, so he is "yet to play".
 const EV = [["goal", "Goal"], ["pen_goal", "Penalty goal"], ["assist", "Assist"], ["own_goal", "Own goal"], ["pen_missed", "Penalty missed"],
   ["pen_saved", "Penalty saved"], ["conceded", "Conceded"], ["clean_sheet", "Clean sheet"], ["yellow", "Yellow card"], ["red", "Red card"]];
-const events = p => [...EV.filter(([k]) => p.events?.[k]).map(([k, w]) => w + (p.events[k] > 1 ? " ×" + p.events[k] : "")),
-  p.on ? "Came on" : "", p.off ? "Went off" : "", p.sv ? "No vote" : ""].filter(Boolean).join(" · ");
+const waiting = (p, live) => live && p.vote == null && !p.sv;
+const events = (p, live) => [...EV.filter(([k]) => p.events?.[k]).map(([k, w]) => w + (p.events[k] > 1 ? " ×" + p.events[k] : "")),
+  waiting(p, live) ? "Yet to play" : p.off ? "No vote · replaced" : p.sv ? "No vote" : "",
+  p.on && !live ? "Came in" : ""].filter(Boolean).join(" · ");
 
-function lineup(t, me) {
+function lineup(t, me, live) {
   const xi = t.players.filter(p => p.starter), on = t.players.filter(p => !p.starter && p.on);
-  const row = p => `<li class="${p.off ? "off" : ""}"><span class="ro ${p.line}" title="${esc(p.role)}">${esc(p.role || "?")}</span>
-    <span class="who"><span class="nm">${esc(p.name)}</span><span class="ev">${esc([p.club, events(p)].filter(Boolean).join(" · "))}</span></span>
+  const row = p => `<li class="${p.off && !waiting(p, live) ? "off" : ""}"><span class="ro ${p.line}" title="${esc(p.role)}">${esc(p.role || "?")}</span>
+    <span class="who"><span class="nm">${esc(p.name)}</span><span class="ev">${esc([p.club, events(p, live)].filter(Boolean).join(" · "))}</span></span>
     <span class="v">${p.vote == null ? "–" : n(p.vote)}</span><span class="fv">${p.fv == null ? "–" : n(p.fv)}</span></li>`;
   return `<div class="xi"><h4>${esc(t.team)}${me ? " ★" : ""} <small>${esc(t.formation.split("").join("-"))}</small></h4>
     <div class="cols-h" aria-hidden="true"><span></span><span>Player</span><span>Vote</span><span>FV</span></div>
-    <ol>${xi.map(row).join("")}</ol>${on.length ? `<div class="sub-h">Came on</div><ol>${on.map(row).join("")}</ol>` : ""}</div>`;
+    <ol>${xi.map(row).join("")}</ol>${on.length ? `<div class="sub-h">${live ? "Coming in, so far" : "Came in"}</div><ol>${on.map(row).join("")}</ol>` : ""}</div>`;
 }
 
 function roundPanel(L) {
@@ -175,10 +179,10 @@ function roundPanel(L) {
       <div class="goals">${goals(mine)}<small>${R.live ? "so far" : "goals"}</small></div>
       <div class="side away ${isMe(mine.away) ? "me" : ""}"><span class="tm">${esc(mine.away.team)}</span><span class="tot">${n(mine.away.total)}</span></div>
     </div>
-    <div class="xis">${lineup(mine.home, isMe(mine.home))}${lineup(mine.away, isMe(mine.away))}</div>` : ""}
+    <div class="xis">${lineup(mine.home, isMe(mine.home), R.live)}${lineup(mine.away, isMe(mine.away), R.live)}</div>` : ""}
     ${others.length ? `<div class="others"><h4>${mine ? "The other matches" : "The matches"}</h4>${others.map((m, i) => `
       <details data-key="${esc(m.home.id + "-" + m.away.id)}"><summary><span>${esc(m.home.team)} <b>${n(m.home.total)}</b></span><span class="mid">${goals(m)}</span><span class="aw"><b>${n(m.away.total)}</b> ${esc(m.away.team)}</span></summary>
-      <div class="xis">${lineup(m.home)}${lineup(m.away)}</div></details>`).join("")}</div>` : ""}
+      <div class="xis">${lineup(m.home, false, R.live)}${lineup(m.away, false, R.live)}</div></details>`).join("")}</div>` : ""}
     <div class="round-key">Vote: the player's mark. FV: fantasy vote, the mark with bonus and malus, which makes the team's total.${R.live ? " Live totals are provisional until Leghe calculates the round." : ""}</div>
   </div>`;
 }
