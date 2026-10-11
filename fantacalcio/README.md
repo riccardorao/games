@@ -29,7 +29,7 @@ export FANTA_PASSWORD="your-password"
 python3 fanta.py leagues                    # your leagues and their short names
 python3 fanta.py sync                       # download all your leagues (or: sync --league NAME for one)
 python3 fanta.py dashboard                  # data/dashboard.html, with a league switcher
-python3 fanta.py share                      # data/share.html: just the standings and your squad, to share
+python3 fanta.py share                      # data/share.html: the leaderboard and the round, to share
 python3 fanta.py standings --league NAME    # the table (your team marked ▶)
 python3 fanta.py squad --league NAME        # your squad by role and cost; add a team name for another squad
 python3 fanta.py results --league NAME      # your score every round, rank in the round, opponent and result
@@ -41,6 +41,11 @@ league you can leave it out. Run `sync` again whenever you want fresh data; the 
 the last download and work offline. `-v` before the command logs every request.
 
 ## What you get
+
+**The share page** (`share`): for each league, the leaderboard, then the round: **live** while it is
+being played (both line-ups of your match with every player's vote and fantasy vote so far, the other
+matches one tap away; the page that fetches its data refreshes every minute), otherwise the **last
+result** with the same detail.
 
 The dashboard has a menu for the league and, where a league has more than one (e.g. a cup), the competition.
 
@@ -65,5 +70,9 @@ and forwards for sorting). Player figures are Serie A season statistics as Fanta
 After logging in (`PUT /api/v1/v1_utente/login`), `sync` reads, for each league, the standings page of
 every competition (`<alias>/classifica?id=<competition>`, which embeds the league info, teams, table and
 full calendar with results), the squads page (`<alias>/rose`) and each team's player statistics
-(`servizi/V1_LegheStatistiche/Statistiche`). Everything is read-only. Account tokens and your email are
+(`servizi/V1_LegheStatistiche/Statistiche`). For the round it asks the API the newer Leghe app uses
+(`apileague.fantacalcio.it`), with the league's own token from the login: the main competition's calendar
+(`onboarding/v1/league/competition/calendar/<competition>`) and, for each match of the round, both line-ups
+with every vote, fantasy vote and event (`gaming/v1/teamLineup/<competition>/<round>/<Serie A round>/<home>/<away>`,
+plus `/1` for the live state while the round is played). Everything is read-only. Account and league tokens and your email are
 dropped before anything is saved; `data/` holds your leagues' data and is git-ignored.
