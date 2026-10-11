@@ -173,7 +173,7 @@ function roundPanel(L) {
   const goals = m => m.goals ? m.goals.join("–") : "–";
   return `<div class="panel round" data-round="${R.round}">
     <div class="round-head"><h3>${R.live ? "Round " + R.round + ", live" : "Round " + R.round + " result"}</h3>
-      ${R.live ? `<span class="live">Live</span><small class="round-key" style="margin:0">updated ${esc(time(R.fetched_at))}, every minute</small>` : `<small class="round-key" style="margin:0">Serie A round ${esc(R.serie_a_round)}</small>`}</div>
+      ${R.live ? `<span class="live">Live</span><small class="round-key" style="margin:0">${esc(time(R.fetched_at))}</small>` : `<small class="round-key" style="margin:0">Serie A round ${esc(R.serie_a_round)}</small>`}</div>
     ${mine ? `<div class="score">
       <div class="side ${isMe(mine.home) ? "me" : ""}"><span class="tm">${esc(mine.home.team)}</span><span class="tot">${n(mine.home.total)}</span></div>
       <div class="goals">${goals(mine)}<small>${R.live ? "so far" : "goals"}</small></div>
@@ -183,7 +183,6 @@ function roundPanel(L) {
     ${others.length ? `<div class="others"><h4>${mine ? "The other matches" : "The matches"}</h4>${others.map((m, i) => `
       <details data-key="${esc(m.home.id + "-" + m.away.id)}"><summary><span>${esc(m.home.team)} <b>${n(m.home.total)}</b></span><span class="mid">${goals(m)}</span><span class="aw"><b>${n(m.away.total)}</b> ${esc(m.away.team)}</span></summary>
       <div class="xis">${lineup(m.home, false, R.live)}${lineup(m.away, false, R.live)}</div></details>`).join("")}</div>` : ""}
-    <div class="round-key">Vote: the player's mark. FV: fantasy vote, the mark with bonus and malus, which makes the team's total.${R.live ? " Live totals are provisional until Leghe calculates the round." : ""}</div>
   </div>`;
 }
 
@@ -222,7 +221,6 @@ function render(data) {
             <td class="wide">${n(s.gf)}–${n(s.ga)}</td><td class="pts">${n(s.pts)}</td>
             <td class="fp"><span class="bar"><i style="--w:${(100 * (s.fp || 0) / maxFp).toFixed(1)}%"></i>${n(s.fp)}</span></td></tr>`).join("")}</tbody>
         </table></div>
-        <div class="key">Pts: league points (3 for a win, 1 for a draw). FP: fantasy points scored in total, the usual tie-breaker.</div>
       </div>
       ${roundPanel(L)}`;
     main.append(sec);
