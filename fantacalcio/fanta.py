@@ -36,6 +36,9 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 BASE_URL = "https://leghe.fantacalcio.it/"
+# The API the newer Leghe app reads line-ups and live scores from. It wants the league's own token, which
+# the login returns in each league of the account (leghe[].jwt); it is used in memory and never saved.
+LEAGUE_API = "https://apileague.fantacalcio.it/"
 # Public key the Leghe web app sends with every API call (it is embedded in
 # every page as `authAppKey`); refreshed from the home page when it changes.
 DEFAULT_APP_KEY = "ICiELOObd5DF5uJEATi77CRvHiiRuMU0"
@@ -123,6 +126,22 @@ class Client:
 
     def leagues(self):
         return (self.user or {}).get("leghe") or []
+
+    def league_api(self, league, path):
+        """GET on the league API (LEAGUE_API) with the league's token from the login."""
+        token = league.get("jwt")
+        if not token:
+            raise FantaError(f"no token for {league.get('alias')} in the login answer")
+        url = LEAGUE_API + path
+        self._log("GET", url)
+        status, text, _ = self._open(url, headers={"app_key": self.app_key, "Authorization": "Bearer " + token,
+                                                   "Content-Type": "application/json"})
+        if status != 200:
+            raise FantaError(f"{path}: HTTP {status}")
+        try:
+            return json.loads(text)
+        except ValueError:
+            raise FantaError(f"Unexpected non-JSON reply from {path}")
 
 
 def decode_b64_json(s):
@@ -314,7 +333,9 @@ def sync(args):
         print()
 
 
-def sync_league(client, league, args):
+def sync_league(client, league, args, stats=True):
+    """Download one league into data/<alias>/raw.json. stats=False skips the per-team player statistics
+    (eight calls), for a caller that only needs the table and the round."""
     alias = league.get("alias")
     print(f"League: {league.get('nome') or alias} ({alias})")
     out = {"fetched_at": time.strftime("%Y-%m-%d %H:%M"), "league": strip_secrets(league),
@@ -348,20 +369,109 @@ def sync_league(client, league, args):
     out["rosters"] = extract_rosters(text) if text else []
     print(f"  squads: {len(out['rosters'])}")
 
+    # the round to show: the one being played, or else the last one calculated (main competition)
+    main = next((c for c in comps if KIND_NAMES.get(c["kind"]) == "League"), comps[0] if comps else None)
+    if main:
+        try:
+            out["matchday"] = sync_matchday(client, league, main["id"], int(num(out["li"].get("currentTurn")) or 0))
+            md = out["matchday"]
+            if md:
+                print(f"  round {md['round']}{' (live)' if md['live'] else ''}: {len(md['matches'])} matches with line-ups")
+        except FantaError as e:
+            out["errors"].append(f"matchday: {e}")
+            print(f"  round: not available ({e})")
+
     league_id = league.get("id")
-    stats = {}
-    for t in out["teams"]:
+    player_stats = {}
+    for t in out["teams"] if stats else []:
         res = client.api("GET", "servizi/V1_LegheStatistiche/Statistiche",
                          params={"alias_lega": alias, "id_lega": league_id, "id_squadra": t["id"]})
         if payload_data(res):
-            stats[str(t["id"])] = payload_data(res)
-    out["player_stats"] = stats
-    print(f"  player stats for {len(stats)} squads")
+            player_stats[str(t["id"])] = payload_data(res)
+    out["player_stats"] = player_stats
+    if stats:
+        print(f"  player stats for {len(player_stats)} squads")
 
     dest = DATA_DIR / alias
     dest.mkdir(parents=True, exist_ok=True)
     (dest / "raw.json").write_text(json.dumps(strip_secrets(out), ensure_ascii=False, indent=1))
     print(f"  saved to {dest / 'raw.json'}")
+
+
+# --------------------------------------------------------------------------- #
+# The round: live scoring while it is played, otherwise the last result
+# --------------------------------------------------------------------------- #
+
+def sync_matchday(client, league, comp_id, serie_a_round):
+    """The round worth showing, with both line-ups of every match.
+
+    Live if the first round not yet calculated belongs to the Serie A round being played (or already
+    played but not calculated) and its votes have started to come in; otherwise the last calculated
+    round. None before the first round. Read from the league API: the competition's calendar, then one
+    call per match (`/1` asks for the live state, which Leghe refreshes during the games)."""
+    cal = client.league_api(league, f"onboarding/v1/league/competition/calendar/{comp_id}") or []
+    rounds = sorted((r for r in cal if r.get("matchDay")), key=lambda r: r["matchDay"])
+
+    def matches(r, live):
+        return [client.league_api(league, f"gaming/v1/teamLineup/{comp_id}/{r['matchDay']}/{r['championshipMatchDay']}/"
+                                          f"{m['tIdH']}/{m['tIdA']}" + ("/1" if live else ""))
+                for m in r.get("matches") or [] if m.get("tIdH") and m.get("tIdA")]
+
+    def started(ms):
+        return any(p.get("scr") not in (None, 55, 56) for m in ms for side in ("home", "away")
+                   for p in ((m.get(side) or {}).get("starts") or []) + ((m.get(side) or {}).get("bench") or []))
+
+    pending = next((r for r in rounds if not r.get("calculated")), None)
+    if pending and serie_a_round and pending.get("championshipMatchDay", 99) <= serie_a_round:
+        ms = matches(pending, True)
+        if started(ms):
+            return {"round": pending["matchDay"], "serie_a_round": pending.get("championshipMatchDay"), "live": True,
+                    "fetched_at": time.strftime("%Y-%m-%d %H:%M"), "matches": [tidy_match(m) for m in ms]}
+    done = [r for r in rounds if r.get("calculated")]
+    if not done:
+        return None
+    last = done[-1]
+    return {"round": last["matchDay"], "serie_a_round": last.get("championshipMatchDay"), "live": False,
+            "fetched_at": time.strftime("%Y-%m-%d %H:%M"), "matches": [tidy_match(m) for m in matches(last, False)]}
+
+
+# a player's event counters (`b`, ';'-separated), by position, as the Leghe app reads them
+EVENTS = {0: "yellow", 1: "red", 2: "goal", 3: "conceded", 6: "pen_saved", 7: "pen_missed", 8: "pen_goal",
+          9: "own_goal", 10: "winner", 11: "equaliser", 12: "clean_sheet"}
+ASSISTS = (4, 5, 13, 14, 15)
+
+
+def tidy_match(m):
+    """One match of the league API, kept to what the page shows (no account ids, no timestamps)."""
+    def counters(b):
+        vals = b if isinstance(b, list) else str(b or "").split(";")
+        out = {}
+        for i, v in enumerate(vals):
+            k = int(num(v) or 0)
+            if not k:
+                continue
+            if i in ASSISTS:
+                out["assist"] = out.get("assist", 0) + k
+            elif i in EVENTS:
+                out[EVENTS[i]] = k
+        return out
+
+    def player(p, starter):
+        vote, fv = num(p.get("scr")), num(p.get("cscr"))
+        return {"id": str(p.get("pid")), "starter": starter,
+                "vote": vote if vote is not None and vote < 50 else None,   # 55: no vote (s.v.), 56: did not play
+                "fv": fv if fv is not None and fv < 50 and vote is not None and vote < 50 else None,
+                "sv": vote == 55, "on": p.get("ptype") == "E", "off": p.get("ptype") == "U",
+                "events": counters(p.get("b"))}
+
+    def side(t):
+        t = t or {}
+        return {"id": str(t.get("tid")), "total": num(t.get("tot")), "formation": t.get("mdl") or "",
+                "players": [player(p, True) for p in t.get("starts") or []] + [player(p, False) for p in t.get("bench") or []]}
+
+    goals = re.match(r"\s*(\d+)\s*-\s*(\d+)", m.get("res") or "")
+    return {"calculated": bool(m.get("cal")), "home": side(m.get("home")), "away": side(m.get("away")),
+            "goals": [int(goals.group(1)), int(goals.group(2))] if goals else None}
 
 
 # --------------------------------------------------------------------------- #
@@ -455,7 +565,7 @@ def build_model(raw):
             # shortcuts to the main competition, used by the CLI
             "standings": main["standings"] if main else [], "scores": main["scores"] if main else {},
             "rounds": main["rounds"] if main else [],
-            "squads": squads, "fetched_at": raw.get("fetched_at")}
+            "squads": squads, "fetched_at": raw.get("fetched_at"), "matchday": raw.get("matchday")}
 
 
 # --------------------------------------------------------------------------- #
@@ -717,8 +827,31 @@ def cmd_dashboard(args):
         webbrowser.open(out.resolve().as_uri())
 
 
+def share_matchday(m):
+    """The round for the share page: team and player names in place of ids, my match marked."""
+    md = m.get("matchday")
+    if not md:
+        return None
+    who = {p["id"]: p for s in m["squads"] for p in s["players"]}
+
+    def side(t):
+        def player(p):
+            q = who.get(p["id"], {})
+            role = (q.get("role") or "").split(";")[0]
+            return {**{k: p[k] for k in ("starter", "vote", "fv", "sv", "on", "off", "events")},
+                    "name": q.get("name") or "–", "club": q.get("club") or "", "role": role, "line": line_of(role)}
+        return {"id": t["id"], "team": m["teams"].get(t["id"], {}).get("name", t["id"]), "total": t["total"],
+                "formation": t["formation"], "players": [player(p) for p in t["players"]]}
+
+    matches = [{"home": side(x["home"]), "away": side(x["away"]), "goals": x["goals"], "calculated": x["calculated"]}
+               for x in md["matches"]]
+    mine = next((i for i, x in enumerate(matches) if m["my_team"] in (x["home"]["id"], x["away"]["id"])), None)
+    return {"round": md["round"], "serie_a_round": md.get("serie_a_round"), "live": md["live"],
+            "fetched_at": md.get("fetched_at"), "mine": mine, "matches": matches}
+
+
 def cmd_share(args):
-    """A read-only page with just the standings and your squad, for sharing."""
+    """A read-only page with the standings and the round (live, or the last result) with its line-ups."""
     aliases = args.league or list(synced_leagues())
     leagues = []
     found = synced_leagues()
@@ -737,10 +870,8 @@ def cmd_share(args):
             "my_team": m["my_team"], "fetched_at": m["fetched_at"],
             "standings": [{k: s[k] for k in ("id", "pos", "team", "played", "w", "d", "l", "gf", "ga", "pts", "fp")}
                           | {"form": form.get(s["id"], "")} for s in sorted(main["standings"], key=lambda s: s["pos"])],
-            "squad": {"team": squad["team"], "credits_left": squad["credits_left"],
-                      "players": [{"role": p["role"], "line": line_of(p["role"]), "name": p["name"], "club": p["club"],
-                                   "paid": p["paid"], "fanta": p.get("fanta"), "apps": p.get("apps"),
-                                   "goals": p.get("goals"), "assists": p.get("assists")} for p in squad["players"]]},
+            "squad": {"team": squad["team"], "credits_left": squad["credits_left"]},
+            "matchday": share_matchday(m),
         })
     if not leagues:
         raise FantaError("Nothing to share yet: no league has both standings and your squad.")
