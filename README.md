@@ -58,3 +58,16 @@ conferma di download di claude.ai; aperto come file locale è un normale downloa
 
 **Personalizzazione:** in cima allo `<script>` ci sono `MAX_PER_ITEM`, `AREAS` (aree, voci, domanda e
 sei risposte, in italiano e inglese), le soglie `T` e i testi dell'interfaccia in `STR`.
+
+## riccardorao.com: what the website takes from here
+
+The website does not keep a copy of these games: at every deploy it fetches this repository's `main` and builds from it
+(`tools/build/import-app.js` in the website's repository). So this is the one place to change them.
+
+| On the site | Source here |
+|---|---|
+| Halfway | `halfway/index.html` |
+| Spades Scorer | `picche/index.html` |
+| Fantacalcio | `fantacalcio/share_template.html` (the page) and `fantacalcio/fanta.py` (the code that runs on Vercel and logs in to Leghe Fantacalcio) |
+
+A push to `main` asks Vercel to build the site again (`.github/workflows/redeploy-site.yml`).
